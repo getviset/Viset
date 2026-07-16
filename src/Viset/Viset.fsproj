@@ -12,6 +12,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Domain.fs" />
+    <Compile Include="Cli.fs" />
+    <Compile Include="Matrix.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
