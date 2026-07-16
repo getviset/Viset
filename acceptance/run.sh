@@ -171,7 +171,7 @@ VISET_BROWSER="$browser" VISET_EXAMPLE_PORT="$medium_port" VISET_EXAMPLE_PYTHON=
 assert_port_closed "$medium_port"
 medium_port=$(free_port)
 VISET_BROWSER="$browser" VISET_EXAMPLE_PORT="$medium_port" VISET_EXAMPLE_PYTHON="$python" \
-  "$binary" capture "$root/examples/medium/activity.lua" --output "$medium_output"
+  "$binary" capture "$root/examples/medium/scroll.lua" --output "$medium_output"
 assert_port_closed "$medium_port"
 "$python" "$root/acceptance/verify-output.py" \
   "$medium_output" \
@@ -181,7 +181,7 @@ assert_port_closed "$medium_port"
   screenshots/desktop-dark.png \
   screenshots/phone-light.png \
   screenshots/phone-dark.png \
-  animations/desktop-light-activity.webp \
-  animations/desktop-dark-activity.webp
+  animations/desktop-light-scroll.webp \
+  animations/desktop-dark-scroll.webp
 
 printf 'fixture output: %s\n' "$output"

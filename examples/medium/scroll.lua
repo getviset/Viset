@@ -2,7 +2,7 @@
 # viset
 version = 1
 output_root = "output"
-output = "animations/desktop-{theme}-activity.webp"
+output = "animations/desktop-{theme}-scroll.webp"
 device = "desktop"
 frame = "builtin:laptop"
 frames_per_second = 30
@@ -47,22 +47,18 @@ local succeeded, failure = pcall(function()
   viset.page.navigate(url)
   viset.page.wait_for("window.dashboard !== undefined", "10s")
   viset.page.evaluate(string.format(
-    "(async()=>{window.dashboard.render(%s,%s,0);await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));return true})()",
+    "(async()=>{window.dashboard.render(%s,%s,0);window.dashboard.scroll(0);await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));return true})()",
     quoted_theme,
     quoted_device
   ))
 
   local recording = viset.record()
   recording:start()
-  recording:during("900ms", function()
+  recording:during("2400ms", function()
     viset.page.animate({
-      duration = "900ms",
-      easing = "in_out_sine",
-      update = string.format(
-        "frame=>window.dashboard.render(%s,%s,frame.progress)",
-        quoted_theme,
-        quoted_device
-      ),
+      duration = "2400ms",
+      easing = "linear",
+      update = "frame=>window.dashboard.scroll(frame.linear_progress)",
     })
   end)
   recording:stop()
