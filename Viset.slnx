@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/Viset/Viset.fsproj" />
+  <Project Path="src/Viset.Serialization/Viset.Serialization.csproj" />
+</Solution>
