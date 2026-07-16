@@ -11,4 +11,5 @@ namespace Viset.Serialization;
     MaxDepth = 64
 )]
 [TomlSerializable(typeof(MatrixTomlModel))]
+[TomlSerializable(typeof(BrowserLockTomlModel))]
 internal partial class TomlModelContext : TomlSerializerContext;

@@ -17,6 +17,8 @@
     <Compile Include="Matrix.fs" />
     <Compile Include="Cdp.fs" />
     <Compile Include="BrowserSession.fs" />
+    <Compile Include="BrowserResolution.fs" />
+    <Compile Include="BrowserInstall.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

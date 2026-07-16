@@ -2,6 +2,7 @@ namespace Viset
 
 open System
 open System.Globalization
+open System.Threading
 
 module Program =
     let private writeErrors errors =
@@ -25,6 +26,24 @@ module Program =
 
             Console.Out.WriteLine(String.Concat(kind, ": ", capture.OutputRelativePath)))
 
+    let private installBrowser () =
+        match BrowserInstall.locateBrowserLock AppContext.BaseDirectory Environment.CurrentDirectory with
+        | Error message ->
+            writeErrors [ message ]
+            3
+        | Ok lockPath ->
+            match
+                BrowserInstall.installAsync lockPath CancellationToken.None
+                |> fun work -> work.GetAwaiter().GetResult()
+            with
+            | Error message ->
+                writeErrors [ message ]
+                3
+            | Ok browser ->
+                Console.Out.WriteLine(String.Concat("installed browser: ", browser.ExecutablePath))
+                Console.Out.WriteLine(String.Concat("version: ", browser.Version))
+                0
+
     [<EntryPoint>]
     let main arguments =
         match Cli.parse Environment.CurrentDirectory arguments with
@@ -37,9 +56,7 @@ module Program =
         | Ok Version ->
             Console.Out.WriteLine Cli.versionText
             0
-        | Ok BrowserInstall ->
-            Console.Error.WriteLine("error: browser install is not available until browser support is implemented.")
-            3
+        | Ok BrowserInstall -> installBrowser ()
         | Ok(Capture request) ->
             match Matrix.plan request with
             | Error errors ->
