@@ -30,7 +30,19 @@ module Scaffold =
           ViewportWidth = 1280
           ViewportHeight = 720 }
 
-    let private generatedFileNames = [ "capture.lua"; "README.md"; ".gitignore" ]
+    let private generatedFileNames =
+        [ "capture.lua"
+          "README.md"
+          ".gitignore"
+          ".luarc.json"
+          Path.Combine(".viset", "viset.d.lua")
+          Path.Combine(".viset", "nvim", "queries", "lua", "injections.scm") ]
+
+    let private generatedDirectoryNames =
+        [ ".viset"
+          Path.Combine(".viset", "nvim")
+          Path.Combine(".viset", "nvim", "queries")
+          Path.Combine(".viset", "nvim", "queries", "lua") ]
 
     let private entryExists path =
         if File.Exists path || Directory.Exists path then
@@ -56,6 +68,13 @@ module Scaffold =
             Error(String.Concat("Initialization target must not be a link: ", request.TargetDirectory))
         elif File.Exists request.TargetDirectory then
             Error(String.Concat("Initialization target is a file: ", request.TargetDirectory))
+        elif
+            generatedDirectoryNames
+            |> List.map (fun path -> Path.Combine(request.TargetDirectory, path))
+            |> List.tryFind (fun path -> File.Exists path || isLink path)
+            |> Option.isSome
+        then
+            Error "Scaffold editor-support directories must not be files or links."
         elif request.Force then
             request.TargetDirectory
             |> generatedPaths
@@ -203,7 +222,6 @@ module Scaffold =
                "# viset"
                "version = 1"
                String.Concat("output = \"", escapeTomlString settings.OutputPath, "\"")
-               "device = \"desktop\""
                "browser_arguments = []"
                ""
                "[devices.desktop]"
@@ -219,8 +237,12 @@ module Scaffold =
                String.Concat("url = \"", escapeTomlString settings.PageUrl, "\"")
                "]]"
                ""
-               "viset.page.navigate(viset.context.data.url)"
-               "viset.page.wait_for(\"document.readyState === 'complete'\", \"10s\")"
+               "local url = viset.context.data.url"
+               "---@cast url string"
+               "viset.page.navigate(url)"
+               "viset.page.wait_for(viset.javascript [=["
+               "  document.readyState === \"complete\""
+               "]=], \"10s\")"
                "viset.snapshot()"
                "" |]
         )
@@ -241,6 +263,14 @@ module Scaffold =
                String.Concat("![Generated Viset capture](", settings.OutputPath, ")")
                ""
                "Capture files are trusted local Lua code and run with Lua's standard libraries."
+               ""
+               "## Editor support"
+               ""
+               "`.luarc.json` loads `.viset/viset.d.lua` for Viset API completion and diagnostics in Lua Language Server."
+               ""
+               "For optional Neovim Tree-sitter highlighting of the TOML header and `viset.javascript` regions, add `.viset/nvim` to `runtimepath` and install the Lua, TOML, and JavaScript parsers."
+               ""
+               "VS Code uses the LuaLS definitions but requires a separate compatible extension for embedded-language highlighting; it cannot consume the Tree-sitter query directly."
                "" |]
         )
 
@@ -255,6 +285,11 @@ module Scaffold =
 
     let private writeFile (path: string) (content: string) =
         deleteLink path
+
+        Path.GetDirectoryName path
+        |> Option.ofObj
+        |> Option.iter (fun directory -> Directory.CreateDirectory directory |> ignore)
+
         File.WriteAllText(path, content, UTF8Encoding(false))
 
     let run request =
@@ -276,6 +311,18 @@ module Scaffold =
                     writeFile (Path.Combine(request.TargetDirectory, "capture.lua")) (capture values)
                     writeFile (Path.Combine(request.TargetDirectory, "README.md")) (readme values)
                     writeFile (Path.Combine(request.TargetDirectory, ".gitignore")) (gitignore values)
+
+                    writeFile
+                        (Path.Combine(request.TargetDirectory, ".luarc.json"))
+                        EditorSupport.LuaLanguageServerConfiguration
+
+                    writeFile
+                        (Path.Combine(request.TargetDirectory, ".viset", "viset.d.lua"))
+                        EditorSupport.LuaDefinitions
+
+                    writeFile
+                        (Path.Combine(request.TargetDirectory, ".viset", "nvim", "queries", "lua", "injections.scm"))
+                        EditorSupport.NeovimTreeSitterInjections
 
                     Ok
                         { DirectoryPath = request.TargetDirectory

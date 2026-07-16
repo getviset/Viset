@@ -619,34 +619,5 @@
     </div>
 
     <div class="touch-indicator" aria-hidden="true"></div>
-    <script>
-      const root = document.documentElement;
-      const indicator = document.querySelector(".touch-indicator");
-
-      window.blokeBot = {
-        render(theme, device) {
-          root.dataset.theme = theme;
-          root.dataset.device = device;
-          window.scrollTo(0, 0);
-          this.touch(false);
-        },
-        gesture(startRatio, endRatio, progress) {
-          const maximum = Math.max(0, root.scrollHeight - window.innerHeight);
-          const ratio = startRatio + (endRatio - startRatio) * progress;
-          window.scrollTo(0, Math.round(maximum * ratio));
-
-          if (root.dataset.device === "phone") {
-            const x = window.innerWidth * 0.78;
-            const y = window.innerHeight * (0.78 + (0.42 - 0.78) * progress);
-            indicator.style.left = `${Math.round(x)}px`;
-            indicator.style.top = `${Math.round(y)}px`;
-            indicator.style.opacity = "1";
-          }
-        },
-        touch(visible) {
-          indicator.style.opacity = visible && root.dataset.device === "phone" ? "1" : "0";
-        },
-      };
-    </script>
   </body>
 </html>

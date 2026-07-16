@@ -3,7 +3,6 @@
 version = 1
 output_root = "output"
 output = "screenshots/home.png"
-device = "desktop"
 browser_arguments = []
 
 [devices.desktop]

@@ -25,7 +25,6 @@ width = 390
 height = 844
 
 [matrix]
-device = ["laptop", "phone"]
 theme = ["light", "dark"]
 ]]
 
@@ -48,21 +47,21 @@ local server = viset.process.start({
 local succeeded, failure = pcall(function()
   local theme = viset.context.axes.theme
   local device = viset.context.device
-  local render = string.format(
-    "(async()=>{window.blokeBot.render(%q,%q);await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));return true})()",
-    theme,
-    device.name
-  )
+  local render = viset.javascript [=[
+    async ({ theme, device }) => {
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.dataset.device = device;
+      window.scrollTo(0, 0);
+      document.querySelector(".touch-indicator").style.opacity = "0";
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      return true;
+    }
+  ]=]
 
   viset.http.wait({ url = url, timeout = "10s" })
   viset.page.navigate(url)
-  viset.page.wait_for("window.blokeBot !== undefined", "10s")
-  viset.page.evaluate(render)
-
-  if device.touch then
-    viset.emulation.touch(24, 24)
-  end
-
+  viset.page.wait_for("document.readyState === 'complete'", "10s")
+  viset.page.evaluate(render, { theme = theme, device = device.name })
   viset.snapshot()
 end)
 

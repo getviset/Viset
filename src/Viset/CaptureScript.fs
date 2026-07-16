@@ -173,7 +173,6 @@ module CaptureScript =
             |> Seq.map (fun entry -> entry.Key, entry.Value)
             |> List.ofSeq
             |> traverse (fun _ (name, model) -> parseDevice frameSource name model)
-            |> Result.map Map.ofList
 
     let private parseAxes (matrix: TomlTable) =
         matrix
@@ -182,6 +181,8 @@ module CaptureScript =
         |> traverse (fun _ (axisName, axisValue) ->
             if String.IsNullOrWhiteSpace axisName then
                 error "matrix contains an empty axis name."
+            elif String.Equals(axisName, "device", StringComparison.Ordinal) then
+                error "matrix.device is redundant; declared devices expand automatically in declaration order."
             else
                 match axisValue with
                 | :? TomlArray as values when values.Count > 0 ->
@@ -234,7 +235,7 @@ module CaptureScript =
                         else
                             match bindings.TryGetValue placeholder with
                             | false, _ ->
-                                error (concat [| "output requires missing matrix value '"; placeholder; "'." |])
+                                error (concat [| "output requires missing capture value '"; placeholder; "'." |])
                             | true, value ->
                                 match scalarText placeholder value with
                                 | Error errors -> Error errors
@@ -424,118 +425,78 @@ module CaptureScript =
                                     match parseAxes model.Matrix with
                                     | Error errors -> Error errors
                                     | Ok axes ->
-                                        let hasDeviceAxis = axes |> List.exists (fun (name, _) -> name = "device")
+                                        match parseTomlTable "data" model.Data with
+                                        | Error errors -> Error errors
+                                        | Ok data ->
+                                            let outputRootResult =
+                                                match request.OutputPath with
+                                                | Some outputPath -> Ok outputPath
+                                                | None when String.IsNullOrWhiteSpace model.OutputRoot ->
+                                                    Ok scriptDirectory
+                                                | None -> resolveFrom scriptDirectory "output_root" model.OutputRoot
 
-                                        let fixedDevice =
-                                            if String.IsNullOrWhiteSpace model.Device then
-                                                None
-                                            else
-                                                Some model.Device
-
-                                        if fixedDevice.IsSome && hasDeviceAxis then
-                                            error "device and matrix.device are mutually exclusive."
-                                        elif fixedDevice.IsNone && not hasDeviceAxis then
-                                            error "device is required unless matrix.device supplies the device axis."
-                                        else
-                                            match parseTomlTable "data" model.Data with
+                                            match outputRootResult with
                                             | Error errors -> Error errors
-                                            | Ok data ->
-                                                let outputRootResult =
-                                                    match request.OutputPath with
-                                                    | Some outputPath -> Ok outputPath
-                                                    | None when String.IsNullOrWhiteSpace model.OutputRoot ->
-                                                        Ok scriptDirectory
-                                                    | None -> resolveFrom scriptDirectory "output_root" model.OutputRoot
+                                            | Ok outputRoot ->
+                                                let pathComparer =
+                                                    if OperatingSystem.IsWindows() then
+                                                        StringComparer.OrdinalIgnoreCase
+                                                    else
+                                                        StringComparer.Ordinal
 
-                                                match outputRootResult with
-                                                | Error errors -> Error errors
-                                                | Ok outputRoot ->
-                                                    let pathComparer =
-                                                        if OperatingSystem.IsWindows() then
-                                                            StringComparer.OrdinalIgnoreCase
-                                                        else
-                                                            StringComparer.Ordinal
+                                                let outputPaths = HashSet<string>(pathComparer)
 
-                                                    let outputPaths = HashSet<string>(pathComparer)
+                                                let planCase (deviceName, device) matrixValues =
+                                                    let placeholders =
+                                                        ("device", TomlValue.String deviceName) :: matrixValues
 
-                                                    let planCase matrixValues =
-                                                        let deviceNameResult =
-                                                            match fixedDevice with
-                                                            | Some name -> Ok name
-                                                            | None ->
-                                                                match
-                                                                    matrixValues
-                                                                    |> List.tryFind (fun (name, _) -> name = "device")
-                                                                with
-                                                                | Some(_, TomlValue.String name) -> Ok name
-                                                                | Some _ ->
-                                                                    error "matrix.device values must be strings."
-                                                                | None -> error "matrix.device is required."
-
-                                                        match deviceNameResult with
+                                                    match renderOutput outputTemplate placeholders with
+                                                    | Error errors -> Error errors
+                                                    | Ok rendered ->
+                                                        match validateOutputPath rendered with
                                                         | Error errors -> Error errors
-                                                        | Ok deviceName ->
-                                                            match Map.tryFind deviceName devices with
-                                                            | None ->
+                                                        | Ok relativePath ->
+                                                            let absolutePath =
+                                                                Path.GetFullPath(
+                                                                    relativePath.Replace(
+                                                                        '/',
+                                                                        Path.DirectorySeparatorChar
+                                                                    ),
+                                                                    outputRoot
+                                                                )
+
+                                                            if not (outputPaths.Add absolutePath) then
                                                                 error (
                                                                     String.Concat(
-                                                                        "Capture references unknown device '",
-                                                                        deviceName,
-                                                                        "'."
+                                                                        "Expanded output path is duplicated: ",
+                                                                        relativePath
                                                                     )
                                                                 )
-                                                            | Some device ->
-                                                                let placeholders =
-                                                                    if hasDeviceAxis then
-                                                                        matrixValues
-                                                                    else
-                                                                        ("device", TomlValue.String deviceName)
-                                                                        :: matrixValues
+                                                            else
+                                                                Ok
+                                                                    { Format = format
+                                                                      OutputRelativePath = relativePath
+                                                                      OutputPath = absolutePath
+                                                                      Device = device
+                                                                      Axes = matrixValues
+                                                                      Data = data }
 
-                                                                match renderOutput outputTemplate placeholders with
-                                                                | Error errors -> Error errors
-                                                                | Ok rendered ->
-                                                                    match validateOutputPath rendered with
-                                                                    | Error errors -> Error errors
-                                                                    | Ok relativePath ->
-                                                                        let absolutePath =
-                                                                            Path.GetFullPath(
-                                                                                relativePath.Replace(
-                                                                                    '/',
-                                                                                    Path.DirectorySeparatorChar
-                                                                                ),
-                                                                                outputRoot
-                                                                            )
+                                                let matrixValues = expandAxes axes
 
-                                                                        if not (outputPaths.Add absolutePath) then
-                                                                            error (
-                                                                                String.Concat(
-                                                                                    "Expanded output path is duplicated: ",
-                                                                                    relativePath
-                                                                                )
-                                                                            )
-                                                                        else
-                                                                            Ok
-                                                                                { Format = format
-                                                                                  OutputRelativePath = relativePath
-                                                                                  OutputPath = absolutePath
-                                                                                  Device = device
-                                                                                  Axes = matrixValues
-                                                                                  Data = data }
-
-                                                    axes
-                                                    |> expandAxes
-                                                    |> traverse (fun _ values -> planCase values)
-                                                    |> Result.map (fun captures ->
-                                                        { ScriptPath = request.ScriptPath
-                                                          ScriptDirectory = scriptDirectory
-                                                          OutputPath = outputRoot
-                                                          FrameSource = frameSource
-                                                          BrowserPath = request.BrowserPath
-                                                          BrowserArguments = browserArguments
-                                                          FramesPerSecond = fps
-                                                          Captures = captures
-                                                          Force = request.Force })
+                                                [ for device in devices do
+                                                      for values in matrixValues do
+                                                          yield device, values ]
+                                                |> traverse (fun _ (device, values) -> planCase device values)
+                                                |> Result.map (fun captures ->
+                                                    { ScriptPath = request.ScriptPath
+                                                      ScriptDirectory = scriptDirectory
+                                                      OutputPath = outputRoot
+                                                      FrameSource = frameSource
+                                                      BrowserPath = request.BrowserPath
+                                                      BrowserArguments = browserArguments
+                                                      FramesPerSecond = fps
+                                                      Captures = captures
+                                                      Force = request.Force })
 
     let plan (request: CaptureRequest) =
         if not (File.Exists request.ScriptPath) then

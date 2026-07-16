@@ -39,6 +39,54 @@ fi
 [[ "$("$binary" --version)" == "viset 0.1.0" ]]
 "$binary" --help | grep -q '^  viset capture CAPTURE.lua '
 
+cat > "$work/unknown-property.lua" <<'LUA'
+--[[
+# viset
+version = 1
+output = "capture.png"
+mystery_option = true
+
+[devices.desktop]
+
+[devices.desktop.viewport]
+width = 320
+height = 240
+]]
+
+viset.snapshot()
+LUA
+
+if "$binary" capture "$work/unknown-property.lua" > "$work/unknown-property.log" 2>&1; then
+  printf 'capture with an unknown TOML property unexpectedly succeeded\n' >&2
+  exit 1
+fi
+grep -Fq "Unknown TOML property 'capture.mystery_option'." "$work/unknown-property.log"
+
+cat > "$work/redundant-device-axis.lua" <<'LUA'
+--[[
+# viset
+version = 1
+output = "{device}.png"
+
+[devices.desktop]
+
+[devices.desktop.viewport]
+width = 320
+height = 240
+
+[matrix]
+device = ["desktop"]
+]]
+
+viset.snapshot()
+LUA
+
+if "$binary" capture "$work/redundant-device-axis.lua" > "$work/redundant-device-axis.log" 2>&1; then
+  printf 'capture with matrix.device unexpectedly succeeded\n' >&2
+  exit 1
+fi
+grep -Fq 'matrix.device is redundant' "$work/redundant-device-axis.log"
+
 browser=${VISET_BROWSER:-}
 if [[ -z "$browser" ]]; then
   browser=$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)
@@ -136,7 +184,14 @@ init_project="$work/init-project"
 "$binary" init "$init_project"
 [[ -f "$init_project/capture.lua" ]]
 [[ -f "$init_project/README.md" ]]
+[[ -f "$init_project/.luarc.json" ]]
+[[ -f "$init_project/.viset/viset.d.lua" ]]
+[[ -f "$init_project/.viset/nvim/queries/lua/injections.scm" ]]
 grep -q '^/output/$' "$init_project/.gitignore"
+grep -Fq '"runtime.version": "Lua 5.2"' "$init_project/.luarc.json"
+grep -Fq -- '---@class VisetApi' "$init_project/.viset/viset.d.lua"
+grep -Fq 'viset.javascript' "$init_project/.viset/nvim/queries/lua/injections.scm"
+grep -Fq 'injection.language "toml"' "$init_project/.viset/nvim/queries/lua/injections.scm"
 VISET_BROWSER="$browser" "$binary" capture "$init_project/capture.lua"
 [[ -f "$init_project/output/example.png" ]]
 grep -q 'viset capture capture.lua' "$init_project/README.md"

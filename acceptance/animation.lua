@@ -2,7 +2,6 @@
 # viset
 version = 1
 output = "animations/motion.webp"
-device = "fixture"
 frame = "frame.html"
 frames_per_second = 60
 browser_arguments = []
@@ -45,7 +44,13 @@ end
 viset.http.wait({ url = url, timeout = "10s" })
 viset.page.navigate(url)
 viset.page.wait_for("window.fixture !== undefined", "10s")
-viset.page.evaluate("window.fixture.setView('motion', 0); true")
+local set_motion = viset.javascript [=[
+  ({ progress }) => {
+    window.fixture.setView("motion", progress);
+    return true;
+  }
+]=]
+viset.page.evaluate(set_motion, { progress = 0 })
 
 local recording = viset.record()
 recording:start()
@@ -54,13 +59,15 @@ recording:during("200ms", function()
     viset.page.animate({
       duration = "160ms",
       easing = "in_sine",
-      update = "frame=>window.fixture.setView('motion', frame.progress * 0.45)",
+      update = viset.javascript [=[
+        frame => window.fixture.setView("motion", frame.progress * 0.45)
+      ]=],
     })
   end)
 end)
 recording:stop()
 
-viset.page.evaluate("window.fixture.setView('motion', 0.75); true")
+viset.page.evaluate(set_motion, { progress = 0.75 })
 viset.sleep("1s")
 
 recording:start()
@@ -68,7 +75,9 @@ recording:during("200ms", function()
   viset.page.animate({
     duration = "160ms",
     easing = "out_sine",
-    update = "frame=>window.fixture.setView('motion', 0.55 + frame.progress * 0.45)",
+    update = viset.javascript [=[
+      frame => window.fixture.setView("motion", 0.55 + frame.progress * 0.45)
+    ]=],
   })
 end)
 recording:stop()

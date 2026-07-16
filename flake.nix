@@ -21,8 +21,10 @@
       devShells.${system}.default = pkgs.mkShellNoCC {
         packages = [
           dotnetPkgs.dotnet-sdk_10
+          pkgs.lua-language-server
           pkgs.nixfmt
           pkgs.python3
+          pkgs.tree-sitter
         ];
       };
     };

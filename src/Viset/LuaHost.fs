@@ -212,6 +212,68 @@ module private LuaHostInternals =
         | CdpEvaluationValue.String text -> LuaValue text
         | CdpEvaluationValue.Json json -> jsonValue json
 
+    let javascriptArguments (arguments: LuaTable) =
+        use stream = new MemoryStream()
+        use writer = new Utf8JsonWriter(stream)
+
+        let rec writeValue depth (value: LuaValue) =
+            if depth > 64 then
+                invalidArg "arguments" "JavaScript arguments must not exceed 64 nested tables."
+
+            match value.Type with
+            | LuaValueType.Nil -> writer.WriteNullValue()
+            | LuaValueType.Boolean -> writer.WriteBooleanValue(value.Read<bool>())
+            | LuaValueType.String -> writer.WriteStringValue(value.Read<string>())
+            | LuaValueType.Number ->
+                let number = value.Read<double>()
+
+                if not (Double.IsFinite number) then
+                    invalidArg "arguments" "JavaScript arguments must not contain non-finite numbers."
+
+                writer.WriteNumberValue number
+            | LuaValueType.Table -> writeTable (depth + 1) (value.Read<LuaTable>())
+            | unsupported ->
+                invalidArg
+                    "arguments"
+                    (String.Concat(
+                        "JavaScript arguments cannot contain Lua ",
+                        unsupported.ToString().ToLowerInvariant(),
+                        " values."
+                    ))
+
+        and writeTable depth (table: LuaTable) =
+            if table.ArrayLength > 0 && table.HashMapCount > 0 then
+                invalidArg "arguments" "JavaScript argument tables must not mix array and object entries."
+            elif table.ArrayLength > 0 then
+                writer.WriteStartArray()
+
+                for index in 1 .. table.ArrayLength do
+                    writeValue depth table[LuaValue(double index)]
+
+                writer.WriteEndArray()
+            else
+                writer.WriteStartObject()
+
+                for item in table do
+                    if item.Key.Type <> LuaValueType.String then
+                        invalidArg "arguments" "JavaScript argument object keys must be strings."
+
+                    writer.WritePropertyName(item.Key.Read<string>())
+                    writeValue depth item.Value
+
+                writer.WriteEndObject()
+
+        writeTable 0 arguments
+        writer.Flush()
+        let json = Encoding.UTF8.GetString(stream.ToArray())
+
+        use literalStream = new MemoryStream()
+        use literalWriter = new Utf8JsonWriter(literalStream)
+        literalWriter.WriteStringValue json
+        literalWriter.Flush()
+
+        String.Concat("JSON.parse(", Encoding.UTF8.GetString(literalStream.ToArray()), ")")
+
     let dimensionsTable dimensions =
         let table = LuaTable()
         setValue table "width" (LuaValue(double dimensions.Width))
@@ -282,6 +344,14 @@ local recording_active = viset.__recording_active
 
 function viset.sleep(duration)
   sleep_ms(duration_ms(duration))
+end
+
+function viset.javascript(source)
+  if type(source) ~= "string" then
+    error("viset.javascript requires a string", 2)
+  end
+
+  return source
 end
 
 function viset.record()
@@ -616,7 +686,23 @@ viset.__recording_active = nil
                     LuaHostInternals.hostFunction "viset.page.evaluate" (fun context cancellationToken ->
                         task {
                             let script = context.GetArgument<string>(0)
-                            let! result = activeCase.Session.Page.EvaluateAsync(script, cancellationToken)
+
+                            let expression =
+                                if context.HasArgument 1 then
+                                    let arguments = context.GetArgument<LuaTable>(1)
+                                    let serialized = LuaHostInternals.javascriptArguments arguments
+
+                                    String.Concat(
+                                        "(async()=>{const __visetFunction=(",
+                                        script,
+                                        ");if(typeof __visetFunction!=='function')throw new TypeError('JavaScript with arguments must evaluate to a function');return await __visetFunction(",
+                                        serialized,
+                                        ");})()"
+                                    )
+                                else
+                                    script
+
+                            let! result = activeCase.Session.Page.EvaluateAsync(expression, cancellationToken)
 
                             match result with
                             | Ok value -> return context.Return(LuaHostInternals.evaluationValue value)

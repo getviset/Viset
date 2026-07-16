@@ -2,7 +2,6 @@
 # viset
 version = 1
 output = "screenshots/{view}.png"
-device = "fixture"
 frame = "frame.html"
 browser_arguments = []
 
@@ -43,7 +42,12 @@ local server = viset.process.start({
 viset.http.wait({ url = url, timeout = "10s" })
 viset.page.navigate(url)
 viset.page.wait_for("window.fixture !== undefined", "10s")
-viset.page.evaluate(string.format("window.fixture.setView(%q, 0); true", viset.context.axes.view))
+viset.page.evaluate(viset.javascript [=[
+  ({ view }) => {
+    window.fixture.setView(view, 0);
+    return true;
+  }
+]=], { view = viset.context.axes.view })
 viset.emulation.touch(20, 20)
 viset.snapshot()
 viset.process.stop(server)

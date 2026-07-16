@@ -10,8 +10,36 @@ public static class CaptureTomlModels
     {
         ArgumentNullException.ThrowIfNull(source);
 
-        return TomlSerializer.Deserialize(source, TomlModelContext.Default.CaptureTomlModel)
+        var model =
+            TomlSerializer.Deserialize(source, TomlModelContext.Default.CaptureTomlModel)
             ?? throw new InvalidOperationException("Tomlyn returned no capture v1 model.");
+
+        RejectUnmapped(model.Unmapped, "capture");
+
+        foreach (var (name, device) in model.Devices)
+        {
+            var devicePath = $"devices.{name}";
+            RejectUnmapped(device.Unmapped, devicePath);
+            RejectUnmapped(device.Viewport.Unmapped, $"{devicePath}.viewport");
+
+            if (device.Frame is not null)
+            {
+                RejectUnmapped(device.Frame.Unmapped, $"{devicePath}.frame");
+            }
+        }
+
+        return model;
+    }
+
+    private static void RejectUnmapped(TomlTable values, string path)
+    {
+        if (values.Count == 0)
+        {
+            return;
+        }
+
+        var name = values.Keys.First();
+        throw new InvalidOperationException($"Unknown TOML property '{path}.{name}'.");
     }
 }
 
@@ -25,8 +53,6 @@ public sealed class CaptureTomlModel
     [TomlRequired]
     public string Output { get; set; } = null!;
 
-    public string Device { get; set; } = string.Empty;
-
     public string Frame { get; set; } = string.Empty;
 
     public long? FramesPerSecond { get; set; }
@@ -39,6 +65,9 @@ public sealed class CaptureTomlModel
     public TomlTable Matrix { get; set; } = [];
 
     public TomlTable Data { get; set; } = [];
+
+    [TomlExtensionData]
+    public TomlTable Unmapped { get; set; } = [];
 }
 
 public sealed class DeviceTomlModel
@@ -53,6 +82,9 @@ public sealed class DeviceTomlModel
     public DimensionsTomlModel Viewport { get; set; } = null!;
 
     public DimensionsTomlModel? Frame { get; set; }
+
+    [TomlExtensionData]
+    public TomlTable Unmapped { get; set; } = [];
 }
 
 public sealed class DimensionsTomlModel
@@ -62,4 +94,7 @@ public sealed class DimensionsTomlModel
 
     [TomlRequired]
     public long? Height { get; set; }
+
+    [TomlExtensionData]
+    public TomlTable Unmapped { get; set; } = [];
 }
