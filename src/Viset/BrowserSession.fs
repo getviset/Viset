@@ -37,6 +37,9 @@ type BrowserSessionOptions
         BrowserSessionOptions(executablePath, browserArguments, TimeSpan.FromSeconds 10.0, TimeSpan.FromSeconds 10.0)
 
 module private BrowserSessionInternals =
+    let private diagnosticReadTimeout = TimeSpan.FromMilliseconds 500.0
+    let private processExitTimeout = TimeSpan.FromSeconds 5.0
+
     let private conflictingArguments =
         [| "--remote-debugging-port"; "--remote-debugging-pipe"; "--user-data-dir" |]
 
@@ -79,17 +82,31 @@ module private BrowserSessionInternals =
         startInfo.ArgumentList.Add "about:blank"
         startInfo
 
-    let private readProcessDiagnostics (standardError: Task<string>) (standardOutput: Task<string>) =
+    let readProcessDiagnosticsAsync (standardError: Task<string>) (standardOutput: Task<string>) =
         task {
-            let! errorText = standardError
-            let! outputText = standardOutput
+            try
+                let! diagnostics = Task.WhenAll([| standardError; standardOutput |]).WaitAsync diagnosticReadTimeout
 
-            if not (String.IsNullOrWhiteSpace errorText) then
-                return errorText.Trim()
-            elif not (String.IsNullOrWhiteSpace outputText) then
-                return outputText.Trim()
-            else
-                return "The browser produced no diagnostic output."
+                let errorText = diagnostics[0]
+                let outputText = diagnostics[1]
+
+                if not (String.IsNullOrWhiteSpace errorText) then
+                    return Ok(errorText.Trim())
+                elif not (String.IsNullOrWhiteSpace outputText) then
+                    return Ok(outputText.Trim())
+                else
+                    return Ok "The browser produced no diagnostic output."
+            with
+            | :? TimeoutException ->
+                return
+                    Error(
+                        String.Concat(
+                            "Browser diagnostic streams did not close within ",
+                            diagnosticReadTimeout.TotalMilliseconds.ToString("0", CultureInfo.InvariantCulture),
+                            " ms."
+                        )
+                    )
+            | error -> return Error(String.Concat("Failed to read browser diagnostics: ", error.Message))
         }
 
     let private invariantInt (value: int) =
@@ -116,7 +133,12 @@ module private BrowserSessionInternals =
 
                 while port.IsNone do
                     if browserProcess.HasExited then
-                        let! diagnostics = readProcessDiagnostics standardError standardOutput
+                        let! diagnosticsResult = readProcessDiagnosticsAsync standardError standardOutput
+
+                        let diagnostics =
+                            match diagnosticsResult with
+                            | Ok value -> value
+                            | Error diagnosticError -> diagnosticError
 
                         raise (
                             InvalidOperationException(
@@ -229,11 +251,18 @@ module private BrowserSessionInternals =
                 if not browserProcess.HasExited then
                     browserProcess.Kill true
 
-                use waitCancellation = new CancellationTokenSource(TimeSpan.FromSeconds 5.0)
+                use waitCancellation = new CancellationTokenSource(processExitTimeout)
                 do! browserProcess.WaitForExitAsync waitCancellation.Token
-                return None
+                return true, None
             with error ->
+                let processExited =
+                    try
+                        browserProcess.HasExited
+                    with _ ->
+                        false
+
                 return
+                    processExited,
                     Some(
                         String.Concat(
                             "Failed to terminate browser process ",
@@ -269,17 +298,22 @@ type BrowserSession
                 with error ->
                     failures.Add(String.Concat("Failed to close CDP: ", error.Message))
 
-                let! processFailure = BrowserSessionInternals.cleanupProcessAsync browserProcess
+                let! processExited, processFailure = BrowserSessionInternals.cleanupProcessAsync browserProcess
                 processFailure |> Option.iter failures.Add
 
-                try
-                    let! _ = standardOutput
-                    let! _ = standardError
-                    ()
-                with error ->
-                    failures.Add(String.Concat("Failed to read browser diagnostics: ", error.Message))
+                if processExited then
+                    let! diagnosticsResult =
+                        BrowserSessionInternals.readProcessDiagnosticsAsync standardError standardOutput
 
-                browserProcess.Dispose()
+                    match diagnosticsResult with
+                    | Ok _ -> ()
+                    | Error diagnosticError -> failures.Add diagnosticError
+
+                try
+                    browserProcess.Dispose()
+                with error ->
+                    failures.Add(String.Concat("Failed to dispose browser process: ", error.Message))
+
                 let! profileFailure = BrowserSessionInternals.deleteProfileAsync profilePath
                 profileFailure |> Option.iter failures.Add
 
@@ -407,9 +441,21 @@ type BrowserSession
 
                 match browserProcess with
                 | Some started ->
-                    let! processFailure = BrowserSessionInternals.cleanupProcessAsync started
+                    let! processExited, processFailure = BrowserSessionInternals.cleanupProcessAsync started
                     processFailure |> Option.iter failures.Add
-                    started.Dispose()
+
+                    if processExited then
+                        let! diagnosticsResult =
+                            BrowserSessionInternals.readProcessDiagnosticsAsync standardError standardOutput
+
+                        match diagnosticsResult with
+                        | Ok _ -> ()
+                        | Error diagnosticError -> failures.Add diagnosticError
+
+                    try
+                        started.Dispose()
+                    with cleanupError ->
+                        failures.Add(String.Concat("Failed to dispose browser process: ", cleanupError.Message))
                 | None -> ()
 
                 let! profileFailure = BrowserSessionInternals.deleteProfileAsync profilePath
