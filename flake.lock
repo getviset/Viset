@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "dotnet-nixpkgs": {
+      "locked": {
+        "lastModified": 1781096795,
+        "narHash": "sha256-PF3fZvy9cXeOrJY5RyV6MHLXn+YTRSy0hLfDdgw7TRY=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "381da955cb03aaa991c7ce15961d3fe50351f895",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "381da955cb03aaa991c7ce15961d3fe50351f895",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1784011430,
@@ -18,6 +34,7 @@
     },
     "root": {
       "inputs": {
+        "dotnet-nixpkgs": "dotnet-nixpkgs",
         "nixpkgs": "nixpkgs"
       }
     }
