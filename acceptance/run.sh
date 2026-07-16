@@ -175,13 +175,20 @@ VISET_BROWSER="$browser" VISET_EXAMPLE_PORT="$medium_port" VISET_EXAMPLE_PYTHON=
 assert_port_closed "$medium_port"
 "$python" "$root/acceptance/verify-output.py" \
   "$medium_output" \
+  --fps 40 \
   --media-size screenshots/desktop-light.png=1088x720 \
   --media-size screenshots/phone-light.png=924x1624 \
+  --media-size animations/desktop-light-scroll.webp=1088x720 \
+  --media-size animations/desktop-dark-scroll.webp=1088x720 \
+  --media-size animations/phone-light-scroll.webp=924x1624 \
+  --media-size animations/phone-dark-scroll.webp=924x1624 \
   screenshots/desktop-light.png \
   screenshots/desktop-dark.png \
   screenshots/phone-light.png \
   screenshots/phone-dark.png \
   animations/desktop-light-scroll.webp \
-  animations/desktop-dark-scroll.webp
+  animations/desktop-dark-scroll.webp \
+  animations/phone-light-scroll.webp \
+  animations/phone-dark-scroll.webp
 
 printf 'fixture output: %s\n' "$output"

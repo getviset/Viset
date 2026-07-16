@@ -211,6 +211,36 @@
         content: "";
       }
 
+      .touch-indicator {
+        position: fixed;
+        z-index: 20;
+        top: 76%;
+        left: 78%;
+        width: 46px;
+        height: 46px;
+        border: 3px solid rgb(255 255 255 / 92%);
+        border-radius: 50%;
+        opacity: 0;
+        background: rgb(92 103 232 / 28%);
+        box-shadow:
+          0 0 0 2px rgb(92 103 232 / 82%),
+          0 8px 24px rgb(16 21 34 / 34%);
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+      }
+
+      .touch-indicator::after {
+        position: absolute;
+        inset: 13px;
+        border-radius: 50%;
+        background: rgb(255 255 255 / 88%);
+        content: "";
+      }
+
+      :root[data-device="phone"] .touch-indicator {
+        opacity: 1;
+      }
+
       .bars {
         display: flex;
         height: 190px;
@@ -351,21 +381,27 @@
         </section>
       </section>
     </main>
+    <div class="touch-indicator" aria-hidden="true"></div>
     <script>
       window.dashboard = {
         render(theme, device, progress) {
           document.documentElement.dataset.theme = theme;
+          document.documentElement.dataset.device = device;
           document.querySelector("#device").textContent = device;
           document.querySelectorAll(".bar").forEach((bar, index) => {
             const wave = Math.sin(progress * Math.PI + index * 0.45) * 0.08;
             bar.style.transform = `scaleY(${0.72 + progress * 0.2 + wave})`;
           });
         },
-        scroll(progress) {
+        scroll(progress, cycles) {
           const content = document.querySelector(".content");
-          const excursion = (1 - Math.cos(progress * Math.PI * 2)) / 2;
+          const excursion = (1 - Math.cos(progress * Math.PI * 2 * cycles)) / 2;
           const maximum = content.scrollHeight - content.clientHeight;
           content.scrollTop = maximum * excursion;
+
+          const indicator = document.querySelector(".touch-indicator");
+          indicator.style.top = `${76 - excursion * 48}%`;
+          indicator.style.transform = `translate(-50%, -50%) scale(${0.92 + excursion * 0.08})`;
         },
       };
     </script>
