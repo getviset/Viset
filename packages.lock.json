@@ -2,6 +2,12 @@
   "version": 2,
   "dependencies": {
     "net10.0": {
+      "FSharp.Core": {
+        "type": "Direct",
+        "requested": "[10.1.300, )",
+        "resolved": "10.1.300",
+        "contentHash": "MJlzK1KXzywIspOq/9AXQIz/7143lX4HWskZaQDvbKSVIvh9mbcYQZvG0li9g0M2ZJRVVAQJ0BO6KT04G9jVPw=="
+      },
       "LuaCSharp": {
         "type": "Direct",
         "requested": "[0.5.5, )",
@@ -23,15 +29,15 @@
       },
       "Microsoft.DotNet.ILCompiler": {
         "type": "Direct",
-        "requested": "[10.0.9, )",
-        "resolved": "10.0.9",
-        "contentHash": "cq8NLSG0RbpBpHeWtbDTMTIwF3Bj0OLSm8eZbyK4+ifpmcaD4FzZlpEYFUDZF2+ix5tLT96+tBUbFnksEFPi+Q=="
+        "requested": "[10.0.8, )",
+        "resolved": "10.0.8",
+        "contentHash": "gmVrCiVBoT5RV/7SOqhx/an5Iw5Pm1LYIruBzOTeKQ6n1nV6Mh/9QUC9CtN/GkOuRo7M7PCbGtH4BfsQ0veFdQ=="
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
-        "requested": "[10.0.9, )",
-        "resolved": "10.0.9",
-        "contentHash": "nhee4D9Vziyu0q+r5nJn8dazjNxsDLkyNmnip2HSq0MuQuqTKHzLxCfzrBgpyJ+dvGXLhtpZImVnAnU2EFsVbQ=="
+        "requested": "[10.0.8, )",
+        "resolved": "10.0.8",
+        "contentHash": "q+CtSHM68UBuD3fasQNYxF1VublYQT265uG9r6dDOAK9huJ9rpEqsVUngFMh368F5HFN3N9lrYmvVxn+iOu4lg=="
       },
       "LuaCSharp.Annotations": {
         "type": "Transitive",

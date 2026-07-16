@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FSharp.Core" />
     <ProjectReference Include="../Viset.Serialization/Viset.Serialization.csproj" />
     <PackageReference Include="LuaCSharp" />
     <PackageReference Include="Magick.NET-Q8-AnyCPU" />
