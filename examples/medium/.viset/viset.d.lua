@@ -1,20 +1,4 @@
-namespace Viset
-
-module EditorSupport =
-    [<Literal>]
-    let LuaLanguageServerConfiguration =
-        """{
-  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
-  "runtime.version": "Lua 5.2",
-  "workspace.library": [
-    ".viset/viset.d.lua"
-  ]
-}
-"""
-
-    [<Literal>]
-    let LuaDefinitions =
-        """---@meta _
+---@meta _
 
 ---@alias VisetDuration number|string
 ---@alias VisetTomlValue boolean|number|string|VisetTomlValue[]|table<string, VisetTomlValue>
@@ -111,25 +95,3 @@ module EditorSupport =
 ---@type VisetApi
 ---@diagnostic disable-next-line: missing-fields
 viset = {}
-"""
-
-    [<Literal>]
-    let NeovimTreeSitterInjections =
-        """; extends
-
-((comment
-  content: (comment_content) @injection.content)
- (#contains? @injection.content "# viset")
- (#set! injection.language "toml"))
-
-((function_call
-  name: (dot_index_expression
-    table: (identifier) @_viset
-    field: (identifier) @_javascript)
-  arguments: (arguments
-    (string
-      content: (string_content) @injection.content)))
- (#eq? @_viset "viset")
- (#eq? @_javascript "javascript")
- (#set! injection.language "javascript"))
-"""
