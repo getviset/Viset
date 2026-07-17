@@ -6,7 +6,7 @@
         "type": "Direct",
         "requested": "[10.1.301, )",
         "resolved": "10.1.301",
-        "contentHash": "PMmvYahMRtdhVc7t5tO/H5eKlErZtvpaPrBfOp7OVduF3uYQ6bUWRzzqf462jtQl+1J8Z0JbCAtZPcV2EGWAhw=="
+        "contentHash": "excLf2zM/qUB3WhRUfI0xvOOaPwcRAEdYT/BXe9eiTKySnWVuIKMQTf5+6ETy5nsb1dpLp1s2j2yAM/XcRgFMg=="
       },
       "Imazen.WebP.NativeRuntime.All": {
         "type": "Direct",
@@ -46,13 +46,13 @@
         "type": "Direct",
         "requested": "[10.0.9, )",
         "resolved": "10.0.9",
-        "contentHash": "lFD47xkDgZjasIj/iIOyiNvg18+Hdvwy5eE5K/Mxr96PD7eL/XknIJbpK7rQGiWRhh29zU1WXnkQaVj5gzPXFg=="
+        "contentHash": "4y+VsQOcs4EiTSINdCpCWi/aLRbIbGTxSezQXd8uGVhzbDRm1FNVTZDyCUQixE0+g9UFusvfxVcF68YYz7RzxA=="
       },
       "Microsoft.NET.ILLink.Tasks": {
         "type": "Direct",
         "requested": "[10.0.9, )",
         "resolved": "10.0.9",
-        "contentHash": "Jrd1nlwSQvxofLIFqbjR4eNiSxiyRCzXmSuNaoK5qm4/iKQX+Ja9TbMnjsEVuEzHUi17SXzNxspwUoby0UqUIA=="
+        "contentHash": "4Iw41e2h7I4t70SJcX2GCmbyKJIlA273Cfm9RJMM050/3VBejGAG1KcthP5Z2L6SQcbfbf6BhNWO26+ZG+GzMg=="
       },
       "Imazen.WebP.NativeRuntime.linux-arm64": {
         "type": "Transitive",
@@ -127,6 +127,15 @@
           "Magick.NET.Core": "14.15.0"
         }
       },
+      "Microsoft.DotNet.ILCompiler": {
+        "type": "Direct",
+        "requested": "[10.0.9, )",
+        "resolved": "10.0.9",
+        "contentHash": "4y+VsQOcs4EiTSINdCpCWi/aLRbIbGTxSezQXd8uGVhzbDRm1FNVTZDyCUQixE0+g9UFusvfxVcF68YYz7RzxA==",
+        "dependencies": {
+          "runtime.linux-arm64.Microsoft.DotNet.ILCompiler": "10.0.9"
+        }
+      },
       "Imazen.WebP.NativeRuntime.linux-arm64": {
         "type": "Transitive",
         "resolved": "1.6.1",
@@ -161,6 +170,11 @@
         "type": "Transitive",
         "resolved": "1.6.1",
         "contentHash": "Iz/qUdTjvpSTkXsMBIjm84w6+befIBqDTDkWPSMBgZf6lm9uXKqKGzAYjx3a0A5AttVp8F5BU8kNyMxztfofag=="
+      },
+      "runtime.linux-arm64.Microsoft.DotNet.ILCompiler": {
+        "type": "Transitive",
+        "resolved": "10.0.9",
+        "contentHash": "vWHjdp8AigWtntyPFjOeXYIWkFxWb8C+9+U0YTYFbS1hNsRBVeajaM+4FaVQ1rSAf+13BhA49iCnzIPdxfb/sg=="
       }
     },
     "net10.0/linux-x64": {
@@ -173,6 +187,15 @@
           "Magick.NET.Core": "14.15.0"
         }
       },
+      "Microsoft.DotNet.ILCompiler": {
+        "type": "Direct",
+        "requested": "[10.0.9, )",
+        "resolved": "10.0.9",
+        "contentHash": "4y+VsQOcs4EiTSINdCpCWi/aLRbIbGTxSezQXd8uGVhzbDRm1FNVTZDyCUQixE0+g9UFusvfxVcF68YYz7RzxA==",
+        "dependencies": {
+          "runtime.linux-x64.Microsoft.DotNet.ILCompiler": "10.0.9"
+        }
+      },
       "Imazen.WebP.NativeRuntime.linux-arm64": {
         "type": "Transitive",
         "resolved": "1.6.1",
@@ -207,6 +230,11 @@
         "type": "Transitive",
         "resolved": "1.6.1",
         "contentHash": "Iz/qUdTjvpSTkXsMBIjm84w6+befIBqDTDkWPSMBgZf6lm9uXKqKGzAYjx3a0A5AttVp8F5BU8kNyMxztfofag=="
+      },
+      "runtime.linux-x64.Microsoft.DotNet.ILCompiler": {
+        "type": "Transitive",
+        "resolved": "10.0.9",
+        "contentHash": "45CVefG8S0eUKUJ4LBWOi8FOAgMJOP6exW9l5M9OjvQaGR7jvkokBK50XaZCsO66uLxABcuzvncV8A3YiJLUgw=="
       }
     },
     "net10.0/osx-arm64": {
@@ -219,6 +247,15 @@
           "Magick.NET.Core": "14.15.0"
         }
       },
+      "Microsoft.DotNet.ILCompiler": {
+        "type": "Direct",
+        "requested": "[10.0.9, )",
+        "resolved": "10.0.9",
+        "contentHash": "4y+VsQOcs4EiTSINdCpCWi/aLRbIbGTxSezQXd8uGVhzbDRm1FNVTZDyCUQixE0+g9UFusvfxVcF68YYz7RzxA==",
+        "dependencies": {
+          "runtime.osx-arm64.Microsoft.DotNet.ILCompiler": "10.0.9"
+        }
+      },
       "Imazen.WebP.NativeRuntime.linux-arm64": {
         "type": "Transitive",
         "resolved": "1.6.1",
@@ -253,6 +290,11 @@
         "type": "Transitive",
         "resolved": "1.6.1",
         "contentHash": "Iz/qUdTjvpSTkXsMBIjm84w6+befIBqDTDkWPSMBgZf6lm9uXKqKGzAYjx3a0A5AttVp8F5BU8kNyMxztfofag=="
+      },
+      "runtime.osx-arm64.Microsoft.DotNet.ILCompiler": {
+        "type": "Transitive",
+        "resolved": "10.0.9",
+        "contentHash": "iBYS9b/8OjTjD/5J9ljvme5AlWAY8+stxjdHXwwxD6ONMQezxqnqIJSl9+7z88PTBHzuyhtkIYPoXA/LzXX9oA=="
       }
     },
     "net10.0/win-arm64": {
@@ -265,50 +307,13 @@
           "Magick.NET.Core": "14.15.0"
         }
       },
-      "Imazen.WebP.NativeRuntime.linux-arm64": {
-        "type": "Transitive",
-        "resolved": "1.6.1",
-        "contentHash": "FDnxenIsIukfoxVYDqdVJrv+wH8UT2LJjUFYUfn0Dl0g5CrIc6ky5gKlnnn2g44q0Tu6LM2VLQel1DX1yY3wIQ=="
-      },
-      "Imazen.WebP.NativeRuntime.linux-x64": {
-        "type": "Transitive",
-        "resolved": "1.6.1",
-        "contentHash": "g6dgg2KHAJD75JAjctFb57d+PRczizX5iCWWJX8pMroxU0GGM+LfQNOOTJnZHtFiRBJ3IBuKglCUKygCzTEQzw=="
-      },
-      "Imazen.WebP.NativeRuntime.osx-arm64": {
-        "type": "Transitive",
-        "resolved": "1.6.1",
-        "contentHash": "jM+p/6Yt7JMOp/annM7RgBYVAvi4NuaId3ez+opCAp/KfbHnqejkwJZvZyRva8nkEBswsk8LU+ptYklvOa0+7Q=="
-      },
-      "Imazen.WebP.NativeRuntime.osx-x64": {
-        "type": "Transitive",
-        "resolved": "1.6.1",
-        "contentHash": "sSzU91me+psXKIiiJ7aTOrA2MhbMae7T1oXbXdTvdeqbles15PBLqKTu9boKgZowOP7NGS8QI+RdewSTSSUHFQ=="
-      },
-      "Imazen.WebP.NativeRuntime.win-arm64": {
-        "type": "Transitive",
-        "resolved": "1.6.1",
-        "contentHash": "1YGYYXBP2uF73pHN+gm0Ika0+4aZbFCmmp7hBEt7Of8cnvFEp5v7qkwz9L4qoF5zaqOZykkDpt6HFw2/ZuZOpg=="
-      },
-      "Imazen.WebP.NativeRuntime.win-x64": {
-        "type": "Transitive",
-        "resolved": "1.6.1",
-        "contentHash": "xNAC283neZQZRvO7qBV2JsMddN25IcOMqijH6W9w0r/5+S9aqQyLUNQwYWFPJ2YADOYhaAsDlXG9Kq2K1oxSnA=="
-      },
-      "Imazen.WebP.NativeRuntime.win-x86": {
-        "type": "Transitive",
-        "resolved": "1.6.1",
-        "contentHash": "Iz/qUdTjvpSTkXsMBIjm84w6+befIBqDTDkWPSMBgZf6lm9uXKqKGzAYjx3a0A5AttVp8F5BU8kNyMxztfofag=="
-      }
-    },
-    "net10.0/win-x64": {
-      "Magick.NET-Q8-AnyCPU": {
+      "Microsoft.DotNet.ILCompiler": {
         "type": "Direct",
-        "requested": "[14.15.0, )",
-        "resolved": "14.15.0",
-        "contentHash": "GYcT4dC2Dxgq/FN/PwVY+PHJEuZc5ZfQm0bj0BmvmSRXPjPPJzdOV8tbcMyNUQtHcRnsp6E/mJ5Tf62I8in3bg==",
+        "requested": "[10.0.9, )",
+        "resolved": "10.0.9",
+        "contentHash": "4y+VsQOcs4EiTSINdCpCWi/aLRbIbGTxSezQXd8uGVhzbDRm1FNVTZDyCUQixE0+g9UFusvfxVcF68YYz7RzxA==",
         "dependencies": {
-          "Magick.NET.Core": "14.15.0"
+          "runtime.win-arm64.Microsoft.DotNet.ILCompiler": "10.0.9"
         }
       },
       "Imazen.WebP.NativeRuntime.linux-arm64": {
@@ -345,6 +350,71 @@
         "type": "Transitive",
         "resolved": "1.6.1",
         "contentHash": "Iz/qUdTjvpSTkXsMBIjm84w6+befIBqDTDkWPSMBgZf6lm9uXKqKGzAYjx3a0A5AttVp8F5BU8kNyMxztfofag=="
+      },
+      "runtime.win-arm64.Microsoft.DotNet.ILCompiler": {
+        "type": "Transitive",
+        "resolved": "10.0.9",
+        "contentHash": "izp7qOY/jJ7NDIDGiBcSyfNwglAPGWeW3F2Q9HxlLKvh65lZVSri+rol7mSjsFd6LQ5UNGhCeKZQkKoacTKSbw=="
+      }
+    },
+    "net10.0/win-x64": {
+      "Magick.NET-Q8-AnyCPU": {
+        "type": "Direct",
+        "requested": "[14.15.0, )",
+        "resolved": "14.15.0",
+        "contentHash": "GYcT4dC2Dxgq/FN/PwVY+PHJEuZc5ZfQm0bj0BmvmSRXPjPPJzdOV8tbcMyNUQtHcRnsp6E/mJ5Tf62I8in3bg==",
+        "dependencies": {
+          "Magick.NET.Core": "14.15.0"
+        }
+      },
+      "Microsoft.DotNet.ILCompiler": {
+        "type": "Direct",
+        "requested": "[10.0.9, )",
+        "resolved": "10.0.9",
+        "contentHash": "4y+VsQOcs4EiTSINdCpCWi/aLRbIbGTxSezQXd8uGVhzbDRm1FNVTZDyCUQixE0+g9UFusvfxVcF68YYz7RzxA==",
+        "dependencies": {
+          "runtime.win-x64.Microsoft.DotNet.ILCompiler": "10.0.9"
+        }
+      },
+      "Imazen.WebP.NativeRuntime.linux-arm64": {
+        "type": "Transitive",
+        "resolved": "1.6.1",
+        "contentHash": "FDnxenIsIukfoxVYDqdVJrv+wH8UT2LJjUFYUfn0Dl0g5CrIc6ky5gKlnnn2g44q0Tu6LM2VLQel1DX1yY3wIQ=="
+      },
+      "Imazen.WebP.NativeRuntime.linux-x64": {
+        "type": "Transitive",
+        "resolved": "1.6.1",
+        "contentHash": "g6dgg2KHAJD75JAjctFb57d+PRczizX5iCWWJX8pMroxU0GGM+LfQNOOTJnZHtFiRBJ3IBuKglCUKygCzTEQzw=="
+      },
+      "Imazen.WebP.NativeRuntime.osx-arm64": {
+        "type": "Transitive",
+        "resolved": "1.6.1",
+        "contentHash": "jM+p/6Yt7JMOp/annM7RgBYVAvi4NuaId3ez+opCAp/KfbHnqejkwJZvZyRva8nkEBswsk8LU+ptYklvOa0+7Q=="
+      },
+      "Imazen.WebP.NativeRuntime.osx-x64": {
+        "type": "Transitive",
+        "resolved": "1.6.1",
+        "contentHash": "sSzU91me+psXKIiiJ7aTOrA2MhbMae7T1oXbXdTvdeqbles15PBLqKTu9boKgZowOP7NGS8QI+RdewSTSSUHFQ=="
+      },
+      "Imazen.WebP.NativeRuntime.win-arm64": {
+        "type": "Transitive",
+        "resolved": "1.6.1",
+        "contentHash": "1YGYYXBP2uF73pHN+gm0Ika0+4aZbFCmmp7hBEt7Of8cnvFEp5v7qkwz9L4qoF5zaqOZykkDpt6HFw2/ZuZOpg=="
+      },
+      "Imazen.WebP.NativeRuntime.win-x64": {
+        "type": "Transitive",
+        "resolved": "1.6.1",
+        "contentHash": "xNAC283neZQZRvO7qBV2JsMddN25IcOMqijH6W9w0r/5+S9aqQyLUNQwYWFPJ2YADOYhaAsDlXG9Kq2K1oxSnA=="
+      },
+      "Imazen.WebP.NativeRuntime.win-x86": {
+        "type": "Transitive",
+        "resolved": "1.6.1",
+        "contentHash": "Iz/qUdTjvpSTkXsMBIjm84w6+befIBqDTDkWPSMBgZf6lm9uXKqKGzAYjx3a0A5AttVp8F5BU8kNyMxztfofag=="
+      },
+      "runtime.win-x64.Microsoft.DotNet.ILCompiler": {
+        "type": "Transitive",
+        "resolved": "10.0.9",
+        "contentHash": "UEY5D3CvpctP5tcewYlnFS8JNReAEFTfAs//ZN733Oq9BXbTSZBCmBWnCs8JKgduHHa3u4oJ9ehfrZzV1xOFNA=="
       }
     }
   }

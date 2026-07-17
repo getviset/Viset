@@ -11,6 +11,7 @@
     <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
     <TomlynIsReflectionEnabledByDefault>false</TomlynIsReflectionEnabledByDefault>
     <RuntimeFrameworkVersion>10.0.9</RuntimeFrameworkVersion>
+    <DisableImplicitLibraryPacksFolder>true</DisableImplicitLibraryPacksFolder>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <RestoreLockedMode>true</RestoreLockedMode>
     <NuGetLockFilePath Condition="'$(MSBuildProjectName)' == 'Viset'"
