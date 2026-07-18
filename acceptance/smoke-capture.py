@@ -32,7 +32,7 @@ parser.add_argument("binary", type=pathlib.Path)
 parser.add_argument("--browser-argument", action="append", default=[])
 arguments = parser.parse_args()
 
-with tempfile.TemporaryDirectory(prefix="viset-smoke-") as temporary:
+with tempfile.TemporaryDirectory(prefix=".viset-smoke-", dir=pathlib.Path.cwd()) as temporary:
     root = pathlib.Path(temporary)
     script = root / "capture.lua"
     output = root / "output"
