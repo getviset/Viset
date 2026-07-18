@@ -68,6 +68,7 @@
           );
         in
         pkgs.buildDotnetModule {
+          __structuredAttrs = true;
           pname = "viset";
           version = "0.1.0";
 
@@ -125,7 +126,7 @@
           makeWrapperArgs = [
             "--set-default"
             "VISET_BROWSER"
-            (lib.escapeShellArg browser.executable)
+            browser.executable
           ];
 
           meta = {
