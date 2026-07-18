@@ -54,9 +54,11 @@ parser.add_argument("root", type=pathlib.Path)
 parser.add_argument("expected_paths", nargs="+")
 parser.add_argument("--max-animation-duration-ms", type=int)
 parser.add_argument("--expected-animation-duration-ms", type=int)
+parser.add_argument("--min-animation-frames", type=int, default=1)
 parser.add_argument("--max-animation-frames", type=int)
 parser.add_argument("--media-size", action="append", default=[])
 arguments = parser.parse_args()
+assert arguments.min_animation_frames >= 1
 
 root = arguments.root.resolve()
 expected_paths = sorted(arguments.expected_paths)
@@ -89,7 +91,7 @@ for relative_path in expected_paths:
     canvas, frames = animation_frames(payload)
     if relative_path in expected_sizes:
         assert canvas == expected_sizes.pop(relative_path)
-    assert len(frames) >= 1
+    assert len(frames) >= arguments.min_animation_frames
     assert all(frame["duration"] > 0 for frame in frames)
     duration = sum(frame["duration"] for frame in frames)
     if arguments.max_animation_duration_ms is not None:

@@ -252,6 +252,7 @@ grep -Eq 'webp_metrics: .* pipeline=live .* spilled=[1-9][0-9]* ' "$work/live-sp
   "$output" \
   --expected-animation-duration-ms 400 \
   --max-animation-duration-ms 800 \
+  --min-animation-frames 2 \
   --media-size screenshots/red.png=400x300 \
   --media-size screenshots/blue.png=400x300 \
   screenshots/red.png \
@@ -261,6 +262,7 @@ grep -Eq 'webp_metrics: .* pipeline=live .* spilled=[1-9][0-9]* ' "$work/live-sp
 "$python" "$root/acceptance/verify-output.py" \
   "$anim_output" \
   --expected-animation-duration-ms 400 \
+  --min-animation-frames 2 \
   --media-size animations/motion-libwebp-anim.webp=400x300 \
   animations/motion-libwebp-anim.webp
 
@@ -268,6 +270,7 @@ grep -Eq 'webp_metrics: .* pipeline=live .* spilled=[1-9][0-9]* ' "$work/live-sp
   "$ffmpeg_output" \
   --expected-animation-duration-ms 400 \
   --max-animation-duration-ms 800 \
+  --min-animation-frames 2 \
   --media-size animations/motion.webp=400x300 \
   animations/motion.webp
 
