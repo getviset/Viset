@@ -66,7 +66,7 @@ jobs:
 
       - name: Stage portable payload
         run: >-
-          python eng/publish/stage.py
+          python scripts/publish/stage.py
           --rid "${{ matrix.rid }}"
           --publish-directory "src/Viset/bin/Release/net10.0/${{ matrix.rid }}/publish"
           --destination "artifacts/${{ matrix.rid }}"
@@ -81,7 +81,7 @@ jobs:
           if [[ "${{ matrix.portable_linux }}" == "true" ]]; then
             arguments+=(--require-portable-linux)
           fi
-          python eng/publish/qualify.py "${arguments[@]}"
+          python scripts/publish/qualify.py "${arguments[@]}"
 
       - name: Capture smoke
         if: matrix.capture_smoke
