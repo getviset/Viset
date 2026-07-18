@@ -68,6 +68,7 @@
           );
         in
         pkgs.buildDotnetModule {
+          __structuredAttrs = true;
           pname = "viset";
           version = "0.1.0";
 
@@ -112,7 +113,7 @@
           ];
 
           nativeBuildInputs = [ pkgs.clang ];
-          buildInputs = [ pkgs.zlib ];
+          buildInputs = [ pkgs.zlib ] ++ lib.optional pkgs.stdenv.hostPlatform.isDarwin pkgs.darwin.ICU;
           runtimeDeps = [ pkgs.openssl ];
 
           postInstall = ''

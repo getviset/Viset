@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import pathlib
 import subprocess
 import tempfile
@@ -11,6 +12,7 @@ CAPTURE = """--[[
 # viset
 version = 1
 output = "smoke.png"
+browser_arguments = [__BROWSER_ARGUMENTS__]
 
 [devices.desktop]
 
@@ -27,13 +29,15 @@ viset.snapshot()
 
 parser = argparse.ArgumentParser()
 parser.add_argument("binary", type=pathlib.Path)
+parser.add_argument("--browser-argument", action="append", default=[])
 arguments = parser.parse_args()
 
-with tempfile.TemporaryDirectory(prefix="viset-smoke-") as temporary:
+with tempfile.TemporaryDirectory(prefix=".viset-smoke-", dir=pathlib.Path.cwd()) as temporary:
     root = pathlib.Path(temporary)
     script = root / "capture.lua"
     output = root / "output"
-    script.write_text(CAPTURE, encoding="utf-8")
+    browser_arguments = ", ".join(json.dumps(argument) for argument in arguments.browser_argument)
+    script.write_text(CAPTURE.replace("__BROWSER_ARGUMENTS__", browser_arguments), encoding="utf-8")
 
     subprocess.run(
         [str(arguments.binary.resolve()), "capture", str(script), "--output", str(output)],
