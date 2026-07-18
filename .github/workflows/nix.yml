@@ -53,12 +53,17 @@ jobs:
           nix build ".#packages.${{ matrix.system }}.default" --print-build-logs
           test "$(./result/bin/viset --version)" = "viset 0.1.0"
           test "$(nix run ".#apps.${{ matrix.system }}.default" -- --version)" = "viset 0.1.0"
-          python3 acceptance/smoke-capture.py ./result/bin/viset
+          browser_arguments=()
+          if [[ "${{ matrix.system }}" == *-linux ]]; then
+            browser_arguments+=(--browser-argument=--no-sandbox)
+          fi
+          env -u VISET_BROWSER python3 acceptance/smoke-capture.py \
+            ./result/bin/viset "${browser_arguments[@]}"
 
       - name: Exercise development shell and formatter
         shell: bash
         run: |
           set -euo pipefail
-          nix develop ".#devShells.${{ matrix.system }}.default" \
+          env -u VISET_BROWSER nix develop ".#devShells.${{ matrix.system }}.default" \
             --command bash acceptance/verify-dev-shell.sh
           nix fmt -- --check flake.nix

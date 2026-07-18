@@ -112,7 +112,7 @@
           ];
 
           nativeBuildInputs = [ pkgs.clang ];
-          buildInputs = [ pkgs.zlib ];
+          buildInputs = [ pkgs.zlib ] ++ lib.optional pkgs.stdenv.hostPlatform.isDarwin pkgs.darwin.ICU;
           runtimeDeps = [ pkgs.openssl ];
 
           postInstall = ''
