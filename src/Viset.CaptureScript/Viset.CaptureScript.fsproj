@@ -7,6 +7,13 @@
 
   <ItemGroup>
     <Compile Include="CaptureRequest.fs" />
+    <Compile Include="CaptureScript.Primitives.fs" />
+    <Compile Include="CaptureHeader.fs" />
+    <Compile Include="TomlValueParser.fs" />
+    <Compile Include="CaptureDeviceParser.fs" />
+    <Compile Include="CaptureOutputTemplate.fs" />
+    <Compile Include="WebPOptionsParser.fs" />
+    <Compile Include="CapturePlanner.fs" />
     <Compile Include="CaptureScript.fs" />
   </ItemGroup>
 
@@ -19,5 +26,4 @@
     <ProjectReference Include="..\Viset.Core\Viset.Core.fsproj" />
     <ProjectReference Include="..\Viset.Serialization\Viset.Serialization.csproj" />
   </ItemGroup>
-
 </Project>
