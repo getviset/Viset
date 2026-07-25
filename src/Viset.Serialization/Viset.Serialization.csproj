@@ -5,6 +5,8 @@
     <RootNamespace>Viset.Serialization</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <IsAotCompatible>true</IsAotCompatible>
+    <!-- Tomlyn emits an unreachable fallback after handling extension data in init-only models. -->
+    <NoWarn>$(NoWarn);CS0162</NoWarn>
     <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
     <RestoreLockedMode>false</RestoreLockedMode>
   </PropertyGroup>

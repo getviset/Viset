@@ -168,7 +168,7 @@ module internal BrowserProcess =
 
                 while endpoint.IsNone do
                     let! json = httpClient.GetStringAsync(targetListUri, timeoutCancellation.Token)
-                    let targets = CdpJsonModels.DeserializeTargets json
+                    let targets = CdpJson.DeserializeTargets json
 
                     endpoint <-
                         targets

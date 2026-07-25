@@ -20,7 +20,7 @@ module CaptureScript =
                 let source = File.ReadAllText request.ScriptPath
 
                 CaptureHeader.extract source
-                |> Result.map CaptureTomlModels.Deserialize
+                |> Result.map CaptureToml.Deserialize
                 |> Result.bind (CapturePlanner.create request scriptDirectory)
             with errorValue ->
                 error (String.Concat("Capture TOML could not be parsed: ", errorValue.Message))

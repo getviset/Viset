@@ -76,7 +76,7 @@ type internal CdpTransport private (socket: ClientWebSocket, commandTimeout: Tim
 
                             complete <- result.EndOfMessage
 
-                        let incoming = CdpJsonModels.DeserializeIncoming(message.ToArray())
+                        let incoming = CdpJson.DeserializeIncoming(message.ToArray())
 
                         if incoming.Id.HasValue then
                             match pending.TryRemove incoming.Id.Value with
@@ -150,7 +150,7 @@ type internal CdpTransport private (socket: ClientWebSocket, commandTimeout: Tim
     member this.SendEmptyAsync(methodName: string, cancellationToken: CancellationToken) =
         this.SendCommandAsync(
             methodName,
-            (fun id -> CdpJsonModels.SerializeCommand(id, methodName, CdpEmptyParameters())),
+            (fun id -> CdpJson.SerializeCommand(id, methodName, CdpEmptyParameters())),
             cancellationToken
         )
 

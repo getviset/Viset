@@ -1,46 +1,31 @@
-using Tomlyn;
 using Tomlyn.Serialization;
 
 namespace Viset.Serialization;
 
-public static class BrowserLockTomlModels
+public sealed record BrowserLockTomlModel(
+    [property: TomlRequired] long? Version,
+    [property: TomlRequired] string Publisher,
+    [property: TomlRequired] string BrowserVersion,
+    [property: TomlRequired] string Revision,
+    [property: TomlRequired] Dictionary<string, BrowserLockPlatformTomlModel> Platforms
+)
 {
-    public static BrowserLockTomlModel Deserialize(string source)
-    {
-        ArgumentNullException.ThrowIfNull(source);
-
-        return TomlSerializer.Deserialize(source, TomlModelContext.Default.BrowserLockTomlModel)
-            ?? throw new InvalidOperationException("Tomlyn returned no browser lock model.");
-    }
+    public BrowserLockTomlModel()
+        : this(
+            Version: null,
+            Publisher: null!,
+            BrowserVersion: null!,
+            Revision: null!,
+            Platforms: new(StringComparer.Ordinal)
+        ) { }
 }
 
-public sealed class BrowserLockTomlModel
+public sealed record BrowserLockPlatformTomlModel(
+    [property: TomlRequired] string Url,
+    [property: TomlRequired] string Sha256,
+    [property: TomlRequired] string Executable
+)
 {
-    [TomlRequired]
-    public long? Version { get; set; }
-
-    [TomlRequired]
-    public string Publisher { get; set; } = null!;
-
-    [TomlRequired]
-    public string BrowserVersion { get; set; } = null!;
-
-    [TomlRequired]
-    public string Revision { get; set; } = null!;
-
-    [TomlRequired]
-    public Dictionary<string, BrowserLockPlatformTomlModel> Platforms { get; set; } =
-        new(StringComparer.Ordinal);
-}
-
-public sealed class BrowserLockPlatformTomlModel
-{
-    [TomlRequired]
-    public string Url { get; set; } = null!;
-
-    [TomlRequired]
-    public string Sha256 { get; set; } = null!;
-
-    [TomlRequired]
-    public string Executable { get; set; } = null!;
+    public BrowserLockPlatformTomlModel()
+        : this(Url: null!, Sha256: null!, Executable: null!) { }
 }

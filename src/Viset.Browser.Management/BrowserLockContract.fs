@@ -138,7 +138,7 @@ module internal BrowserLockContract =
                 Error(String.Concat("browser-lock.toml was not found: ", lockPath))
             else
                 let fullPath = Path.GetFullPath lockPath
-                let model = File.ReadAllText fullPath |> BrowserLockTomlModels.Deserialize
+                let model = File.ReadAllText fullPath |> BrowserLockToml.Deserialize
 
                 if model.Version <> Nullable 1L then
                     raise (InvalidDataException "browser-lock.toml version must be 1.")
