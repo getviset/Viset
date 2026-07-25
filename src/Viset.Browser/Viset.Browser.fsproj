@@ -6,7 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Cdp.fs" />
+    <Compile Include="CdpTypes.fs" />
+    <Compile Include="CdpTransport.fs" />
+    <Compile Include="CdpClient.fs" />
+    <Compile Include="BrowserSessionTypes.fs" />
+    <Compile Include="BrowserProcess.fs" />
     <Compile Include="BrowserSession.fs" />
   </ItemGroup>
 
@@ -18,5 +22,4 @@
     <ProjectReference Include="..\Viset.Core\Viset.Core.fsproj" />
     <ProjectReference Include="..\Viset.Serialization\Viset.Serialization.csproj" />
   </ItemGroup>
-
 </Project>
