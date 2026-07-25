@@ -6,6 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="BrowserTypes.fs" />
+    <Compile Include="BrowserRuntime.fs" />
+    <Compile Include="BrowserLockContract.fs" />
+    <Compile Include="BrowserCache.fs" />
+    <Compile Include="BrowserValidation.fs" />
+    <Compile Include="BrowserDiscovery.fs" />
+    <Compile Include="BrowserDownload.fs" />
+    <Compile Include="BrowserArchive.fs" />
+    <Compile Include="BrowserInstaller.fs" />
     <Compile Include="BrowserResolution.fs" />
     <Compile Include="BrowserInstall.fs" />
   </ItemGroup>
@@ -18,5 +27,4 @@
     <ProjectReference Include="..\Viset.Core\Viset.Core.fsproj" />
     <ProjectReference Include="..\Viset.Serialization\Viset.Serialization.csproj" />
   </ItemGroup>
-
 </Project>
