@@ -13,11 +13,42 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Commands.fs" />
+    <Compile Include="Command.fs" />
     <Compile Include="Cli.fs" />
     <Compile Include="EditorSupport.fs" />
+    <Compile Include="EmbeddedText.fs" />
+    <Compile Include="ScaffoldAssets.fs" />
+    <Compile Include="ScaffoldFileSystem.fs" />
+    <Compile Include="ScaffoldValidation.fs" />
+    <Compile Include="ScaffoldInput.fs" />
+    <Compile Include="ScaffoldContent.fs" />
     <Compile Include="Scaffold.fs" />
+    <Compile Include="CliOutput.fs" />
+    <Compile Include="Commands.fs" />
     <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource
+      Include="../assets/Scaffold/default.html"
+      LogicalName="Viset.Scaffold.DefaultPage.html"
+    />
+    <EmbeddedResource
+      Include="../assets/Scaffold/capture.lua"
+      LogicalName="Viset.Scaffold.Capture.lua"
+    />
+    <EmbeddedResource
+      Include="../assets/Scaffold/README.md"
+      LogicalName="Viset.Scaffold.Readme.md"
+    />
+    <EmbeddedResource
+      Include="../assets/.luarc.json"
+      LogicalName="Viset.EditorSupport.luarc.json"
+    />
+    <EmbeddedResource
+      Include="../assets/.viset/viset.d.lua"
+      LogicalName="Viset.EditorSupport.viset.d.lua"
+    />
   </ItemGroup>
 
   <ItemGroup>
