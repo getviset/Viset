@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Viset</RootNamespace>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Frame.fs" />
+    <Compile Include="Capture.fs" />
+    <Compile Include="ScreencastFrameSource.fs" />
+    <Compile Include="RecordingPipeline.fs" />
+    <Compile Include="SpooledFramePipeline.fs" />
+    <Compile Include="LiveFramePipeline.fs" />
+    <Compile Include="RecordingState.fs" />
+    <Compile Include="RecordingTimeline.fs" />
+    <Compile Include="Recording.fs" />
+    <Compile Include="Output.fs" />
+    <Compile Include="LuaHost.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" />
+    <PackageReference Include="LuaCSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Viset.Core\Viset.Core.fsproj" />
+    <ProjectReference Include="..\Viset.Browser\Viset.Browser.fsproj" />
+    <ProjectReference Include="..\Viset.WebP\Viset.WebP.fsproj" />
+  </ItemGroup>
+
+</Project>

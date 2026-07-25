@@ -55,7 +55,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          dotnet publish src/Viset/Viset.fsproj \
+          dotnet publish src/Viset.Cli/Viset.Cli.fsproj \
             --configuration Release \
             --runtime "${{ matrix.rid }}" \
             --no-restore \
@@ -67,20 +67,20 @@ jobs:
       - name: Check Native AOT executable
         shell: bash
         run: |
-          binary="src/Viset/bin/Release/net10.0/${{ matrix.rid }}/publish/${{ matrix.executable }}"
+          binary="src/Viset.Cli/bin/Release/net10.0/${{ matrix.rid }}/publish/${{ matrix.executable }}"
           test "$("$binary" --version)" = "viset 0.1.0"
           "$binary" --help | grep -Fq "viset capture CAPTURE.lua"
 
       - name: Check Native AOT sidecars
         run: >-
           python .config/verify-native-sidecars.py
-          "src/Viset/bin/Release/net10.0/${{ matrix.rid }}/publish/${{ matrix.executable }}"
+          "src/Viset.Cli/bin/Release/net10.0/${{ matrix.rid }}/publish/${{ matrix.executable }}"
 
       - name: Capture smoke
         if: matrix.capture_smoke
         shell: bash
         run: |
-          VISET_END_TO_END_BINARY="$PWD/src/Viset/bin/Release/net10.0/${{ matrix.rid }}/publish/${{ matrix.executable }}" \
+          VISET_END_TO_END_BINARY="$PWD/src/Viset.Cli/bin/Release/net10.0/${{ matrix.rid }}/publish/${{ matrix.executable }}" \
           VISET_END_TO_END_BROWSER_ARGUMENTS=--no-sandbox \
             dotnet test tests/Viset.EndToEnd/Viset.EndToEnd.fsproj \
               --configuration Release \

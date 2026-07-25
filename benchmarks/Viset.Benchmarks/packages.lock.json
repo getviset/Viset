@@ -96,16 +96,6 @@
         "resolved": "1.6.1",
         "contentHash": "Iz/qUdTjvpSTkXsMBIjm84w6+befIBqDTDkWPSMBgZf6lm9uXKqKGzAYjx3a0A5AttVp8F5BU8kNyMxztfofag=="
       },
-      "LuaCSharp.Annotations": {
-        "type": "Transitive",
-        "resolved": "0.5.5",
-        "contentHash": "5VcwcTNGCY5YXLz2BRko5/Z0YGd6MZqNsnnfPOsGHHpAtqWPFbD0vtOZR4jUqaQLtQUvl2+WRfmIOhp6L2S0rw=="
-      },
-      "LuaCSharp.SourceGenerator": {
-        "type": "Transitive",
-        "resolved": "0.5.5",
-        "contentHash": "2xHKGc1bYXTsmSzZCNmKkuAU6A+1azulNiPY/ICKBSHIgEPMNRQ7JS6PvAClrHe6bk8SKcC/fbba6igtDzDaAw=="
-      },
       "Magick.NET.Core": {
         "type": "Transitive",
         "resolved": "14.15.0",
@@ -237,20 +227,41 @@
         "resolved": "4.7.0",
         "contentHash": "VybpaOQQhqE6siHppMktjfGBw1GCwvCqiufqmP8F1nj7fTUNtW35LOEt3UZTEsECfo+ELAl/9o9nJx3U91i7vA=="
       },
-      "viset": {
+      "viset.browser": {
         "type": "Project",
         "dependencies": {
           "FSharp.Core": "[10.1.301, )",
-          "Imazen.WebP.NativeRuntime.All": "[1.6.1, )",
-          "LuaCSharp": "[0.5.5, )",
-          "StbImageSharp": "[2.30.15, )",
+          "Viset.Core": "[1.0.0, )",
           "Viset.Serialization": "[1.0.0, )"
+        }
+      },
+      "viset.browser.management": {
+        "type": "Project",
+        "dependencies": {
+          "FSharp.Core": "[10.1.301, )",
+          "Viset.Core": "[1.0.0, )",
+          "Viset.Serialization": "[1.0.0, )"
+        }
+      },
+      "viset.core": {
+        "type": "Project",
+        "dependencies": {
+          "FSharp.Core": "[10.1.301, )"
         }
       },
       "viset.serialization": {
         "type": "Project",
         "dependencies": {
           "Tomlyn": "[2.10.1, )"
+        }
+      },
+      "viset.webp": {
+        "type": "Project",
+        "dependencies": {
+          "FSharp.Core": "[10.1.301, )",
+          "Imazen.WebP.NativeRuntime.All": "[1.6.1, )",
+          "StbImageSharp": "[2.30.15, )",
+          "Viset.Core": "[1.0.0, )"
         }
       },
       "FSharp.Core": {
@@ -272,16 +283,6 @@
           "Imazen.WebP.NativeRuntime.win-arm64": "1.6.1",
           "Imazen.WebP.NativeRuntime.win-x64": "1.6.1",
           "Imazen.WebP.NativeRuntime.win-x86": "1.6.1"
-        }
-      },
-      "LuaCSharp": {
-        "type": "CentralTransitive",
-        "requested": "[0.5.5, )",
-        "resolved": "0.5.5",
-        "contentHash": "IL44DCbMtEafyiy8DzHFd/f+1pXuDUVFJMCJPAu8vQHNfO3ADSoWSOKMg9Py1za/ZE1K0gs0jll1viInoN+19Q==",
-        "dependencies": {
-          "LuaCSharp.Annotations": "0.5.5",
-          "LuaCSharp.SourceGenerator": "0.5.5"
         }
       },
       "Tomlyn": {

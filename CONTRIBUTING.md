@@ -35,11 +35,11 @@ dotnet test tests/Viset.Tests/Viset.Tests.fsproj \
 Publish the current target, then run the end-to-end CLI and browser/media suite:
 
 ```sh
-dotnet publish src/Viset/Viset.fsproj \
+dotnet publish src/Viset.Cli/Viset.Cli.fsproj \
   --configuration Release \
   --runtime linux-x64 \
   --no-restore
-VISET_END_TO_END_BINARY="$PWD/src/Viset/bin/Release/net10.0/linux-x64/publish/viset" \
+VISET_END_TO_END_BINARY="$PWD/src/Viset.Cli/bin/Release/net10.0/linux-x64/publish/viset" \
   dotnet test tests/Viset.EndToEnd/Viset.EndToEnd.fsproj \
     --configuration Release \
     --no-restore
@@ -70,7 +70,7 @@ The portability workflow publishes Native AOT on each matching runner. For a
 current-system Linux check:
 
 ```sh
-dotnet publish src/Viset/Viset.fsproj \
+dotnet publish src/Viset.Cli/Viset.Cli.fsproj \
   --configuration Release \
   --runtime linux-x64 \
   --no-restore

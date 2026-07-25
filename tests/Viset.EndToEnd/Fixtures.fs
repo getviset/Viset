@@ -23,6 +23,10 @@ type TemporaryDirectory(path: string) =
             | :? UnauthorizedAccessException -> ()
 
 module Fixtures =
+    type private CommandTarget =
+        { Executable: string
+          PrefixArguments: string list }
+
     let private findRepositoryRoot startPath =
         let rec search directory =
             if File.Exists(Path.Combine(directory, "Viset.slnx")) then
@@ -64,13 +68,59 @@ module Fixtures =
                 names
                 |> List.tryPick (fun name ->
                     let candidate = Path.Combine(directory, name)
-                    if File.Exists candidate then Some candidate else None))
 
-    let binaryPath =
+                    if File.Exists candidate then
+                        Some(Path.GetFullPath candidate)
+                    else
+                        None))
+
+    let private configurationFromTestOutput () =
+        let rec search (directory: DirectoryInfo) =
+            match directory.Parent |> Option.ofObj with
+            | None -> None
+            | Some parent when String.Equals(parent.Name, "bin", StringComparison.OrdinalIgnoreCase) ->
+                Some directory.Name
+            | Some parent -> search parent
+
+        DirectoryInfo(AppContext.BaseDirectory.TrimEnd Path.DirectorySeparatorChar)
+        |> search
+        |> Option.defaultValue "Debug"
+
+    let private cliProject =
+        Path.Combine(repositoryRoot, "src", "Viset.Cli", "Viset.Cli.fsproj")
+
+    let private visetCommand =
         match Environment.GetEnvironmentVariable "VISET_END_TO_END_BINARY" |> Option.ofObj with
-        | Some value when not (String.IsNullOrWhiteSpace value) -> Path.GetFullPath value
+        | Some value when not (String.IsNullOrWhiteSpace value) ->
+            { Executable = Path.GetFullPath value
+              PrefixArguments = [] }
+
         | _ ->
-            Path.Combine(repositoryRoot, "src", "Viset", "bin", "Release", "net10.0", "linux-x64", "publish", "viset")
+            let dotnet =
+                executableFromPath
+                    [ if OperatingSystem.IsWindows() then
+                          "dotnet.exe"
+                      else
+                          "dotnet" ]
+                |> Option.defaultWith (fun () -> invalidOp "Unable to locate the dotnet executable on PATH.")
+
+            { Executable = dotnet
+              PrefixArguments =
+                [ "run"
+                  "--project"
+                  cliProject
+                  "--configuration"
+                  configurationFromTestOutput ()
+                  "--no-build"
+                  "--" ] }
+
+    // Preserved for existing tests that call:
+    //
+    //     run binaryPath [ ... ]
+    //
+    // `run` recognises this executable and prepends the dotnet-run arguments
+    // when no explicit packaged binary was supplied.
+    let binaryPath = visetCommand.Executable
 
     let browserPath =
         match Environment.GetEnvironmentVariable "VISET_BROWSER" |> Option.ofObj with
@@ -106,8 +156,10 @@ module Fixtures =
     let browserExecutable (directory: TemporaryDirectory) =
         match browserArguments with
         | [] -> browserPath
-        | arguments when OperatingSystem.IsWindows() ->
+
+        | _ when OperatingSystem.IsWindows() ->
             invalidOp "VISET_END_TO_END_BROWSER_ARGUMENTS is supported only on Unix runners."
+
         | arguments ->
             let wrapper = Path.Combine(directory.Path, ".viset-browser")
 
@@ -133,9 +185,22 @@ module Fixtures =
             wrapper
 
     let assertBinaryExists () =
-        if not (File.Exists binaryPath) then
-            invalidOp
-                $"End-to-end binary does not exist: {binaryPath}. Publish it first or set VISET_END_TO_END_BINARY."
+        match visetCommand.PrefixArguments with
+        | [] when not (File.Exists visetCommand.Executable) ->
+            invalidOp $"End-to-end binary does not exist: {visetCommand.Executable}."
+
+        | _ when not (File.Exists cliProject) -> invalidOp $"Viset CLI project does not exist: {cliProject}."
+
+        | _ when not (File.Exists visetCommand.Executable) ->
+            invalidOp $"dotnet executable does not exist: {visetCommand.Executable}."
+
+        | _ -> ()
+
+    let private commandArguments executable arguments =
+        if String.Equals(executable, binaryPath, StringComparison.Ordinal) then
+            visetCommand.PrefixArguments @ arguments
+        else
+            arguments
 
     let run
         (executable: string)
@@ -154,7 +219,7 @@ module Fixtures =
 
         startInfo.WorkingDirectory <- workingDirectory
 
-        for argument in arguments do
+        for argument in commandArguments executable arguments do
             startInfo.ArgumentList.Add argument
 
         for key, value in environment do
@@ -166,10 +231,12 @@ module Fixtures =
             invalidOp $"Unable to start {executable}."
 
         let standardOutput = child.StandardOutput.ReadToEndAsync()
+
         let standardError = child.StandardError.ReadToEndAsync()
 
         if not (child.WaitForExit(int timeout.TotalMilliseconds)) then
             child.Kill true
+
             invalidOp $"Timed out after {timeout} while running {executable}."
 
         { ExitCode = child.ExitCode
@@ -195,7 +262,7 @@ module Fixtures =
 
         startInfo.WorkingDirectory <- workingDirectory
 
-        for argument in arguments do
+        for argument in commandArguments executable arguments do
             startInfo.ArgumentList.Add argument
 
         for key, value in environment do
@@ -208,11 +275,14 @@ module Fixtures =
 
         child.StandardInput.Write input
         child.StandardInput.Close()
+
         let standardOutput = child.StandardOutput.ReadToEndAsync()
+
         let standardError = child.StandardError.ReadToEndAsync()
 
         if not (child.WaitForExit(int timeout.TotalMilliseconds)) then
             child.Kill true
+
             invalidOp $"Timed out after {timeout} while running {executable}."
 
         { ExitCode = child.ExitCode
@@ -224,8 +294,11 @@ module Fixtures =
 
     let freePort () =
         use listener = new TcpListener(IPAddress.Loopback, 0)
+
         listener.Start()
+
         let port = (listener.LocalEndpoint :?> IPEndPoint).Port
+
         listener.Stop()
         port
 
@@ -234,6 +307,7 @@ module Fixtures =
 
         try
             let connection = client.ConnectAsync(IPAddress.Loopback, port)
+
             connection.Wait 250 && client.Connected
         with
         | :? AggregateException
@@ -241,17 +315,23 @@ module Fixtures =
 
     let writeScript (directory: TemporaryDirectory) (name: string) (content: string) =
         let path = Path.Combine(directory.Path, name)
+
         File.WriteAllText(path, content)
+
         path
 
     let runCapture (directory: TemporaryDirectory) script outputPath arguments environment =
         assertBinaryExists ()
+
         let port = freePort ()
 
         let variables =
             [ "VISET_BROWSER", browserExecutable directory
+
               "VISET_PYTHON", pythonPath
+
               "VISET_FIXTURE_PORT", string port
+
               "VISET_FIXTURE_ROOT", fixtureRoot ]
             @ environment
 

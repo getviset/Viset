@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Viset</RootNamespace>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="MediaTypes.fs" />
+    <Compile Include="WebPNative.fs" />
+    <Compile Include="ImageDecoder.fs" />
+    <Compile Include="WebPEncoding.fs" />
+    <Compile Include="WebPContainer.fs" />
+    <Compile Include="FrameCoalescing.fs" />
+    <Compile Include="LibWebPFullEncoder.fs" />
+    <Compile Include="LibWebPAnimEncoder.fs" />
+    <Compile Include="FfmpegWebPEncoder.fs" />
+    <Compile Include="Media.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" />
+    <PackageReference Include="Imazen.WebP.NativeRuntime.All" />
+    <PackageReference Include="StbImageSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Viset.Core\Viset.Core.fsproj" />
+  </ItemGroup>
+
+</Project>

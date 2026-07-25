@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>viset</AssemblyName>
+    <RootNamespace>Viset</RootNamespace>
+    <PublishAot>true</PublishAot>
+    <PublishTrimmed>true</PublishTrimmed>
+    <IsAotCompatible>true</IsAotCompatible>
+    <OptimizationPreference>Size</OptimizationPreference>
+    <StripSymbols>true</StripSymbols>
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);IL2104;IL3053</WarningsNotAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Commands.fs" />
+    <Compile Include="Cli.fs" />
+    <Compile Include="EditorSupport.fs" />
+    <Compile Include="Scaffold.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Viset.Core\Viset.Core.fsproj" />
+    <ProjectReference Include="..\Viset.CaptureScript\Viset.CaptureScript.fsproj" />
+    <ProjectReference Include="..\Viset.Browser.Management\Viset.Browser.Management.fsproj" />
+    <ProjectReference Include="..\Viset.Capture\Viset.Capture.fsproj" />
+  </ItemGroup>
+</Project>

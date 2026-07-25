@@ -9,9 +9,13 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Viset\Viset.fsproj" />
-  </ItemGroup>
+
+<ItemGroup>
+  <ProjectReference Include="..\..\src\Viset.Core\Viset.Core.fsproj" />
+  <ProjectReference Include="..\..\src\Viset.Browser\Viset.Browser.fsproj" />
+  <ProjectReference Include="..\..\src\Viset.Browser.Management\Viset.Browser.Management.fsproj" />
+  <ProjectReference Include="..\..\src\Viset.WebP\Viset.WebP.fsproj" />
+</ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" />

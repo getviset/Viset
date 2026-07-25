@@ -81,12 +81,18 @@
               ./global.json
               ./nuget.config
               ./packages.lock.json
-              ./src/Viset
+              ./src/Viset.Browser
+              ./src/Viset.Browser.Management
+              ./src/Viset.Capture
+              ./src/Viset.CaptureScript
+              ./src/Viset.Cli
+              ./src/Viset.Core
               ./src/Viset.Serialization
+              ./src/Viset.WebP
             ];
           };
 
-          projectFile = "src/Viset/Viset.fsproj";
+          projectFile = "src/Viset.Cli/Viset.Cli.fsproj";
           nugetDeps = nugetDependencies;
           dotnet-sdk = sdk;
           selfContainedBuild = true;
@@ -95,7 +101,7 @@
           configurePhase = ''
             runHook preConfigure
             # Nix normalizes NuGet archives; nix/deps.json is the fixed-output build lock.
-            dotnet restore src/Viset/Viset.fsproj \
+            dotnet restore src/Viset.Cli/Viset.Cli.fsproj \
               -p:ContinuousIntegrationBuild=true \
               -p:Deterministic=true \
               -p:NuGetAudit=false \

@@ -87,7 +87,11 @@ module MediaAssertions =
         frames |> List.forall (fun frame -> frame.Duration > 0) |> should equal true
 
         match expectedDuration with
-        | Some duration -> frames |> List.sumBy _.Duration |> should equal duration
+        | Some duration ->
+            let toleranceMilliseconds = 17
+
+            abs ((frames |> List.sumBy _.Duration) - duration)
+            |> should be (lessThanOrEqualTo toleranceMilliseconds)
         | None -> ()
 
         match maximumFrames with

@@ -8,31 +8,6 @@
         "resolved": "10.1.301",
         "contentHash": "excLf2zM/qUB3WhRUfI0xvOOaPwcRAEdYT/BXe9eiTKySnWVuIKMQTf5+6ETy5nsb1dpLp1s2j2yAM/XcRgFMg=="
       },
-      "Imazen.WebP.NativeRuntime.All": {
-        "type": "Direct",
-        "requested": "[1.6.1, )",
-        "resolved": "1.6.1",
-        "contentHash": "uwUBDum58VRhjlheE3XAw35dp5sdClblIhSrzmjD6sB67HumMM8qFB0foVZE1zOw4XUjyRniWRp8/GeKCSEM+Q==",
-        "dependencies": {
-          "Imazen.WebP.NativeRuntime.linux-arm64": "1.6.1",
-          "Imazen.WebP.NativeRuntime.linux-x64": "1.6.1",
-          "Imazen.WebP.NativeRuntime.osx-arm64": "1.6.1",
-          "Imazen.WebP.NativeRuntime.osx-x64": "1.6.1",
-          "Imazen.WebP.NativeRuntime.win-arm64": "1.6.1",
-          "Imazen.WebP.NativeRuntime.win-x64": "1.6.1",
-          "Imazen.WebP.NativeRuntime.win-x86": "1.6.1"
-        }
-      },
-      "LuaCSharp": {
-        "type": "Direct",
-        "requested": "[0.5.5, )",
-        "resolved": "0.5.5",
-        "contentHash": "IL44DCbMtEafyiy8DzHFd/f+1pXuDUVFJMCJPAu8vQHNfO3ADSoWSOKMg9Py1za/ZE1K0gs0jll1viInoN+19Q==",
-        "dependencies": {
-          "LuaCSharp.Annotations": "0.5.5",
-          "LuaCSharp.SourceGenerator": "0.5.5"
-        }
-      },
       "Microsoft.DotNet.ILCompiler": {
         "type": "Direct",
         "requested": "[10.0.9, )",
@@ -44,12 +19,6 @@
         "requested": "[10.0.9, )",
         "resolved": "10.0.9",
         "contentHash": "4Iw41e2h7I4t70SJcX2GCmbyKJIlA273Cfm9RJMM050/3VBejGAG1KcthP5Z2L6SQcbfbf6BhNWO26+ZG+GzMg=="
-      },
-      "StbImageSharp": {
-        "type": "Direct",
-        "requested": "[2.30.15, )",
-        "resolved": "2.30.15",
-        "contentHash": "7QqbupVhz2kcFUPTgMw4iHR9rYDHGundzzee19Mwmd1typ2Lnv8EVJcLJxlkeBM2+4ex0NwsMtdbGSJctp1XCQ=="
       },
       "Imazen.WebP.NativeRuntime.linux-arm64": {
         "type": "Transitive",
@@ -96,11 +65,92 @@
         "resolved": "0.5.5",
         "contentHash": "2xHKGc1bYXTsmSzZCNmKkuAU6A+1azulNiPY/ICKBSHIgEPMNRQ7JS6PvAClrHe6bk8SKcC/fbba6igtDzDaAw=="
       },
+      "viset.browser": {
+        "type": "Project",
+        "dependencies": {
+          "FSharp.Core": "[10.1.301, )",
+          "Viset.Core": "[1.0.0, )",
+          "Viset.Serialization": "[1.0.0, )"
+        }
+      },
+      "viset.browser.management": {
+        "type": "Project",
+        "dependencies": {
+          "FSharp.Core": "[10.1.301, )",
+          "Viset.Core": "[1.0.0, )",
+          "Viset.Serialization": "[1.0.0, )"
+        }
+      },
+      "viset.capture": {
+        "type": "Project",
+        "dependencies": {
+          "FSharp.Core": "[10.1.301, )",
+          "LuaCSharp": "[0.5.5, )",
+          "Viset.Browser": "[1.0.0, )",
+          "Viset.Core": "[1.0.0, )",
+          "Viset.WebP": "[1.0.0, )"
+        }
+      },
+      "viset.capturescript": {
+        "type": "Project",
+        "dependencies": {
+          "FSharp.Core": "[10.1.301, )",
+          "Tomlyn": "[2.10.1, )",
+          "Viset.Core": "[1.0.0, )",
+          "Viset.Serialization": "[1.0.0, )"
+        }
+      },
+      "viset.core": {
+        "type": "Project",
+        "dependencies": {
+          "FSharp.Core": "[10.1.301, )"
+        }
+      },
       "viset.serialization": {
         "type": "Project",
         "dependencies": {
           "Tomlyn": "[2.10.1, )"
         }
+      },
+      "viset.webp": {
+        "type": "Project",
+        "dependencies": {
+          "FSharp.Core": "[10.1.301, )",
+          "Imazen.WebP.NativeRuntime.All": "[1.6.1, )",
+          "StbImageSharp": "[2.30.15, )",
+          "Viset.Core": "[1.0.0, )"
+        }
+      },
+      "Imazen.WebP.NativeRuntime.All": {
+        "type": "CentralTransitive",
+        "requested": "[1.6.1, )",
+        "resolved": "1.6.1",
+        "contentHash": "uwUBDum58VRhjlheE3XAw35dp5sdClblIhSrzmjD6sB67HumMM8qFB0foVZE1zOw4XUjyRniWRp8/GeKCSEM+Q==",
+        "dependencies": {
+          "Imazen.WebP.NativeRuntime.linux-arm64": "1.6.1",
+          "Imazen.WebP.NativeRuntime.linux-x64": "1.6.1",
+          "Imazen.WebP.NativeRuntime.osx-arm64": "1.6.1",
+          "Imazen.WebP.NativeRuntime.osx-x64": "1.6.1",
+          "Imazen.WebP.NativeRuntime.win-arm64": "1.6.1",
+          "Imazen.WebP.NativeRuntime.win-x64": "1.6.1",
+          "Imazen.WebP.NativeRuntime.win-x86": "1.6.1"
+        }
+      },
+      "LuaCSharp": {
+        "type": "CentralTransitive",
+        "requested": "[0.5.5, )",
+        "resolved": "0.5.5",
+        "contentHash": "IL44DCbMtEafyiy8DzHFd/f+1pXuDUVFJMCJPAu8vQHNfO3ADSoWSOKMg9Py1za/ZE1K0gs0jll1viInoN+19Q==",
+        "dependencies": {
+          "LuaCSharp.Annotations": "0.5.5",
+          "LuaCSharp.SourceGenerator": "0.5.5"
+        }
+      },
+      "StbImageSharp": {
+        "type": "CentralTransitive",
+        "requested": "[2.30.15, )",
+        "resolved": "2.30.15",
+        "contentHash": "7QqbupVhz2kcFUPTgMw4iHR9rYDHGundzzee19Mwmd1typ2Lnv8EVJcLJxlkeBM2+4ex0NwsMtdbGSJctp1XCQ=="
       },
       "Tomlyn": {
         "type": "CentralTransitive",

@@ -21,7 +21,10 @@
     <PackageReference Include="NUnit3TestAdapter" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Viset\Viset.fsproj" />
-  </ItemGroup>
+
+<ItemGroup>
+  <ProjectReference Include="..\..\src\Viset.Core\Viset.Core.fsproj" />
+  <ProjectReference Include="..\..\src\Viset.WebP\Viset.WebP.fsproj" />
+  <ProjectReference Include="..\..\src\Viset.Capture\Viset.Capture.fsproj" />
+</ItemGroup>
 </Project>

@@ -1,5 +1,14 @@
 <Solution>
-  <Project Path="src/Viset/Viset.fsproj" />
+  <Folder Name="/src/">
+    <Project Path="src/Viset.Core/Viset.Core.fsproj" />
+    <Project Path="src/Viset.CaptureScript/Viset.CaptureScript.fsproj" />
+    <Project Path="src/Viset.Browser/Viset.Browser.fsproj" />
+    <Project Path="src/Viset.Browser.Management/Viset.Browser.Management.fsproj" />
+    <Project Path="src/Viset.WebP/Viset.WebP.fsproj" />
+    <Project Path="src/Viset.Capture/Viset.Capture.fsproj" />
+    <Project Path="src/Viset.Cli/Viset.Cli.fsproj" />
+    <Project Path="src/Viset.Serialization/Viset.Serialization.csproj" />
+  </Folder>
   <Folder Name="/benchmarks/">
     <Project Path="benchmarks/Viset.Benchmarks/Viset.Benchmarks.fsproj" />
   </Folder>
@@ -7,5 +16,4 @@
     <Project Path="tests/Viset.EndToEnd/Viset.EndToEnd.fsproj" />
     <Project Path="tests/Viset.Tests/Viset.Tests.fsproj" />
   </Folder>
-  <Project Path="src/Viset.Serialization/Viset.Serialization.csproj" />
 </Solution>
