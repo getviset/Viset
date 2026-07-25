@@ -69,6 +69,7 @@ type CaptureSession
     member this.CapturePngAsync(cancellationToken: CancellationToken) =
         task {
             let! raw = this.CaptureRawPngAsync cancellationToken
+
             let! framed = this.PrepareFrameAsync({ Format = PngImage; Bytes = raw }, cancellationToken)
 
             return framed.Bytes

@@ -8,7 +8,7 @@ open System.Threading.Tasks
 
 type internal LiveFramePipeline(session: CaptureSession) =
     let root =
-        Path.Combine(Path.GetTempPath(), String.Concat("viset-live-recording-", Guid.NewGuid().ToString("N")))
+        Path.Combine(Path.GetTempPath(), String.Concat("viset-live-recording-", Guid.NewGuid().ToString "N"))
 
     let options = UnboundedChannelOptions(SingleReader = true, SingleWriter = true)
     let queue = Channel.CreateUnbounded<int> options
@@ -129,7 +129,7 @@ type internal LiveFramePipeline(session: CaptureSession) =
                 return index
             }
 
-        member _.CompleteAsync(cancellationToken) =
+        member _.CompleteAsync cancellationToken =
             task {
                 if not completed then
                     completed <- true

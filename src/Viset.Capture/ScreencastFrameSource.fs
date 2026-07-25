@@ -24,7 +24,7 @@ type internal ScreencastFrameSource(session: CaptureSession, source: WebPSource)
     let mutable droppedFrames = 0
 
     let createFrameChannel () =
-        let options = BoundedChannelOptions(1)
+        let options = BoundedChannelOptions 1
         options.SingleReader <- true
         options.SingleWriter <- true
         options.FullMode <- BoundedChannelFullMode.Wait
@@ -35,8 +35,11 @@ type internal ScreencastFrameSource(session: CaptureSession, source: WebPSource)
             task {
                 try
                     let acquisition = Stopwatch.StartNew()
+
                     let! frame = session.Page.ReadScreencastFrameAsync cancellationToken
+
                     do! session.Page.AcknowledgeScreencastFrameAsync(frame.SessionId, cancellationToken)
+
                     acquisition.Stop()
 
                     let sourceFrame =
@@ -129,7 +132,7 @@ type internal ScreencastFrameSource(session: CaptureSession, source: WebPSource)
         }
 
     interface IContinuousFrameSource with
-        member _.StartAsync(cancellationToken) =
+        member _.StartAsync cancellationToken =
             task {
                 if active then
                     invalidOp "The screencast source is already started."
@@ -140,6 +143,7 @@ type internal ScreencastFrameSource(session: CaptureSession, source: WebPSource)
 
                 try
                     do! session.Page.StartScreencastAsync(source, cancellationToken)
+
                     segmentCancellation <- Some cancellation
                     segmentFrames <- Some frames
                     pumpTask <- Some(pumpAsync frames cancellation.Token)
@@ -150,7 +154,7 @@ type internal ScreencastFrameSource(session: CaptureSession, source: WebPSource)
                     return raise error
             }
 
-        member _.CaptureAsync(cancellationToken) =
+        member _.CaptureAsync cancellationToken =
             task {
                 if not active then
                     invalidOp "The screencast source must be started before capturing a frame."
@@ -167,6 +171,6 @@ type internal ScreencastFrameSource(session: CaptureSession, source: WebPSource)
                     | None -> return raise error
             }
 
-        member _.StopAsync(cancellationToken) = stopAsync cancellationToken
+        member _.StopAsync cancellationToken = stopAsync cancellationToken
 
         member _.DroppedFrames = Volatile.Read(&droppedFrames)

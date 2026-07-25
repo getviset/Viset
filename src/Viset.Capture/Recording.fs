@@ -73,6 +73,7 @@ type RecordingController
                                 (int (Math.Floor(stopwatch.Elapsed.TotalMilliseconds / interval.TotalMilliseconds)))
 
                         timeline <- RecordingTimeline.capture timelineOffset elapsedSlots frameIndex timeline
+
                         return! run (elapsedSlots + 1)
                 with :? OperationCanceledException when delayCancellation.IsCancellationRequested ->
                     ()

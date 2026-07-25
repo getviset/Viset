@@ -7,17 +7,45 @@
 
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="Frame.fs" />
-    <Compile Include="Capture.fs" />
+    <Compile Include="FrameBootstrap.fs" />
+    <Compile Include="FrameServer.fs" />
+    <Compile Include="FrameRenderer.fs" />
+    <Compile Include="CaptureSession.fs" />
     <Compile Include="ScreencastFrameSource.fs" />
-    <Compile Include="RecordingPipeline.fs" />
+    <Compile Include="RecordingContracts.fs" />
+    <Compile Include="RecordingStorage.fs" />
     <Compile Include="SpooledFramePipeline.fs" />
     <Compile Include="LiveFramePipeline.fs" />
     <Compile Include="RecordingState.fs" />
     <Compile Include="RecordingTimeline.fs" />
     <Compile Include="Recording.fs" />
+    <Compile Include="OutputTypes.fs" />
+    <Compile Include="OutputSafety.fs" />
+    <Compile Include="OutputWriter.fs" />
     <Compile Include="Output.fs" />
+    <Compile Include="LuaModuleLoader.fs" />
+    <Compile Include="LuaActiveCase.fs" />
+    <Compile Include="LuaTableHelpers.fs" />
+    <Compile Include="LuaValueConversion.fs" />
+    <Compile Include="LuaJavascriptArguments.fs" />
+    <Compile Include="LuaJavascript.fs" />
+    <Compile Include="LuaProcess.fs" />
+    <Compile Include="LuaProcessBindings.fs" />
+    <Compile Include="LuaHttpBindings.fs" />
+    <Compile Include="LuaPageBindings.fs" />
+    <Compile Include="LuaCaptureBindings.fs" />
+    <Compile Include="LuaEnvironment.fs" />
+    <Compile Include="LuaBootstrap.fs" />
     <Compile Include="LuaHost.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="../assets/EvaluateRunner.js" LogicalName="Viset.EvaluateRunner.js" />
+    <EmbeddedResource
+      Include="../assets/AnimationRunner.js"
+      LogicalName="Viset.AnimationRunner.js"
+    />
+    <EmbeddedResource Include="../assets/LuaBootstrap.lua" LogicalName="Viset.LuaBootstrap.lua" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,5 +58,4 @@
     <ProjectReference Include="..\Viset.Browser\Viset.Browser.fsproj" />
     <ProjectReference Include="..\Viset.WebP\Viset.WebP.fsproj" />
   </ItemGroup>
-
 </Project>
