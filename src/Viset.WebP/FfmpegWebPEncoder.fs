@@ -26,7 +26,7 @@ module internal FfmpegWebPEncoder =
             let total = Stopwatch.StartNew()
             let ticks = WebPEncoding.frameTicksMilliseconds framesPerSecond frameCount
             let! firstFrame = readFrameAsync 0 cancellationToken
-            ImageDecoder.validateImage firstFrame |> ignore
+            ImageValidation.validate firstFrame |> ignore
 
             let outputPath =
                 Path.Combine(Path.GetTempPath(), String.Concat("viset-", Guid.NewGuid().ToString("N"), ".webp"))
@@ -126,9 +126,9 @@ module internal FfmpegWebPEncoder =
                     invalidOp (String.Concat("ffmpeg WebP encoding failed: ", errorText.Trim()))
 
                 let! encodedBytes = File.ReadAllBytesAsync(outputPath, cancellationToken)
-                let container = WebPContainer.parse encodedBytes
+                let container = WebPContainerParser.parse encodedBytes
 
-                WebPContainer.durationPatch WebPEncoding.MaximumFrameDurationMilliseconds (List.sum ticks) container
+                WebPDurationNormalization.plan WebPEncoding.MaximumFrameDurationMilliseconds (List.sum ticks) container
                 |> Option.iter (fun patch ->
                     encodedBytes[patch.Offset] <- byte patch.Duration
                     encodedBytes[patch.Offset + 1] <- byte (patch.Duration >>> 8)
@@ -144,7 +144,7 @@ module internal FfmpegWebPEncoder =
                             { Encoder = options.Encoder
                               Pipeline = options.Pipeline
                               FrameCount = frameCount
-                              EncodedFrameCount = WebPContainer.frameCount container
+                              EncodedFrameCount = WebPContainerInspection.frameCount container
                               SpilledFrameCount = spilledFrameCount
                               WorkerCount = 1
                               DecodeDurations = []

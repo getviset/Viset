@@ -116,9 +116,16 @@
         "type": "Project",
         "dependencies": {
           "FSharp.Core": "[10.1.301, )",
-          "Imazen.WebP.NativeRuntime.All": "[1.6.1, )",
           "StbImageSharp": "[2.30.15, )",
-          "Viset.Core": "[1.0.0, )"
+          "Viset.Core": "[1.0.0, )",
+          "Viset.WebP.Native": "[1.0.0, )"
+        }
+      },
+      "viset.webp.native": {
+        "type": "Project",
+        "dependencies": {
+          "FSharp.Core": "[10.1.301, )",
+          "Imazen.WebP.NativeRuntime.All": "[1.6.1, )"
         }
       },
       "Imazen.WebP.NativeRuntime.All": {

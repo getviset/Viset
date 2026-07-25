@@ -19,13 +19,13 @@ module internal LibWebPFullEncoder =
           DecodeDuration: TimeSpan
           EncodeDuration: TimeSpan }
 
-    let private addFullFrameWithDuration (encoder: WebPNative.FullEncoder) duration bytes =
+    let private addFullFrameWithDuration (encoder: LibWebPFullNative.Encoder) duration bytes =
         let durations =
             duration
             |> FrameCoalescing.splitDuration WebPEncoding.MaximumFrameDurationMilliseconds
 
         durations
-        |> List.iter (fun current -> WebPNative.addFullFrame encoder current bytes)
+        |> List.iter (fun current -> LibWebPFullNative.addFrame encoder current bytes)
 
         durations.Length
 
@@ -46,7 +46,10 @@ module internal LibWebPFullEncoder =
             let! firstSource = readFrameAsync 0 cancellationToken
             let firstDecoded = ImageDecoder.decodeMeasured firstSource
             let firstFrame, _ = firstDecoded
-            let encoder = WebPNative.createFull options firstFrame.Width firstFrame.Height
+            let nativeOptions = WebPNativeOptions.fromOptions options
+
+            let encoder =
+                LibWebPFullNative.create nativeOptions firstFrame.Width firstFrame.Height
 
             try
                 let workerLimit = max 1 (min 4 Environment.ProcessorCount)
@@ -71,13 +74,13 @@ module internal LibWebPFullEncoder =
                                             | Some decoded -> decoded
                                             | None -> ImageDecoder.decodeMeasured work.Source
 
-                                        if WebPNative.fullDimensions encoder <> (frame.Width, frame.Height) then
+                                        if LibWebPFullNative.dimensions encoder <> (frame.Width, frame.Height) then
                                             invalidArg
                                                 (nameof frameCount)
                                                 "Animated WebP frames must have identical dimensions."
 
                                         let encode = Stopwatch.StartNew()
-                                        let bytes = WebPNative.encodeFullFrame encoder frame.Rgba
+                                        let bytes = LibWebPFullNative.encodeFrame encoder frame.Rgba
                                         encode.Stop()
 
                                         { Sequence = work.Sequence
@@ -132,7 +135,7 @@ module internal LibWebPFullEncoder =
                 cancellationToken.ThrowIfCancellationRequested()
 
                 let mux = Stopwatch.StartNew()
-                let bytes = WebPNative.assembleFull encoder
+                let bytes = LibWebPFullNative.assemble encoder
                 mux.Stop()
                 muxDuration <- muxDuration + mux.Elapsed
                 total.Stop()
@@ -153,5 +156,5 @@ module internal LibWebPFullEncoder =
                               MuxDuration = muxDuration
                               TotalDuration = total.Elapsed } }
             finally
-                WebPNative.disposeFull encoder
+                LibWebPFullNative.dispose encoder
         }

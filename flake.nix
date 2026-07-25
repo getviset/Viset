@@ -88,6 +88,7 @@
               ./src/Viset.Cli
               ./src/Viset.Core
               ./src/Viset.Serialization
+              ./src/Viset.WebP.Native
               ./src/Viset.WebP
             ];
           };

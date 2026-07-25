@@ -22,7 +22,10 @@ module internal LibWebPAnimEncoder =
 
             let! firstSource = readFrameAsync 0 cancellationToken
             let firstFrame, firstDecodeDuration = ImageDecoder.decodeMeasured firstSource
-            let encoder = WebPNative.createAnimation options firstFrame.Width firstFrame.Height
+            let nativeOptions = WebPNativeOptions.fromOptions options
+
+            let encoder =
+                LibWebPAnimNative.create nativeOptions firstFrame.Width firstFrame.Height
 
             try
                 let decodeDurations = ResizeArray<TimeSpan>(frameCount)
@@ -41,11 +44,11 @@ module internal LibWebPAnimEncoder =
                                 return ImageDecoder.decodeMeasured source
                             }
 
-                    if WebPNative.animationDimensions encoder <> (frame.Width, frame.Height) then
+                    if LibWebPAnimNative.dimensions encoder <> (frame.Width, frame.Height) then
                         invalidArg (nameof frameCount) "Animated WebP frames must have identical dimensions."
 
                     let encode = Stopwatch.StartNew()
-                    WebPNative.addAnimationFrame encoder timestamp frame.Rgba
+                    LibWebPAnimNative.addFrame encoder timestamp frame.Rgba
                     encode.Stop()
                     decodeDurations.Add decodeDuration
                     encodeDurations.Add encode.Elapsed
@@ -56,8 +59,11 @@ module internal LibWebPAnimEncoder =
                     timestamp <- timestamp + ticks[index]
 
                 let mux = Stopwatch.StartNew()
-                let bytes = WebPNative.assembleAnimation encoder timestamp
-                let encodedFrameCount = bytes |> WebPContainer.parse |> WebPContainer.frameCount
+                let bytes = LibWebPAnimNative.assemble encoder timestamp
+
+                let encodedFrameCount =
+                    bytes |> WebPContainerParser.parse |> WebPContainerInspection.frameCount
+
                 mux.Stop()
                 total.Stop()
 
@@ -77,5 +83,5 @@ module internal LibWebPAnimEncoder =
                               MuxDuration = mux.Elapsed
                               TotalDuration = total.Elapsed } }
             finally
-                WebPNative.disposeAnimation encoder
+                LibWebPAnimNative.dispose encoder
         }

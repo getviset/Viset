@@ -4,6 +4,7 @@
     <Project Path="src/Viset.CaptureScript/Viset.CaptureScript.fsproj" />
     <Project Path="src/Viset.Browser/Viset.Browser.fsproj" />
     <Project Path="src/Viset.Browser.Management/Viset.Browser.Management.fsproj" />
+    <Project Path="src/Viset.WebP.Native/Viset.WebP.Native.fsproj" />
     <Project Path="src/Viset.WebP/Viset.WebP.fsproj" />
     <Project Path="src/Viset.Capture/Viset.Capture.fsproj" />
     <Project Path="src/Viset.Cli/Viset.Cli.fsproj" />

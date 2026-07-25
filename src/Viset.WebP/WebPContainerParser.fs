@@ -3,24 +3,7 @@ namespace Viset
 open System
 open System.Buffers.Binary
 
-type internal WebPChunkKind =
-    | AnimationFrame
-    | StillImage
-    | Other
-
-type internal WebPChunk =
-    { Kind: WebPChunkKind
-      Offset: int
-      DataOffset: int
-      DataSize: int
-      AnimationDuration: int option
-      AnimationDurationOffset: int option }
-
-type internal WebPContainer = private { Chunks: WebPChunk list }
-
-type internal WebPDurationPatch = { Offset: int; Duration: int }
-
-module internal WebPContainer =
+module internal WebPContainerParser =
     let private chunkIs (bytes: byte array) offset a b c d =
         bytes[offset] = a
         && bytes[offset + 1] = b
@@ -96,36 +79,3 @@ module internal WebPContainer =
                 readChunks (int nextOffset64) (chunk :: reversed)
 
         readChunks 12 []
-
-    let frameCount container =
-        let animationFrames =
-            container.Chunks
-            |> List.sumBy (fun chunk -> if chunk.Kind = AnimationFrame then 1 else 0)
-
-        if animationFrames > 0 then
-            animationFrames
-        elif container.Chunks |> List.exists (fun chunk -> chunk.Kind = StillImage) then
-            1
-        else
-            invalidOp "An encoder returned a WebP container without an image frame."
-
-    let durationPatch maximumDuration expectedDuration container =
-        let frames =
-            container.Chunks
-            |> List.choose (fun chunk ->
-                match chunk.Kind, chunk.AnimationDuration, chunk.AnimationDurationOffset with
-                | AnimationFrame, Some duration, Some offset -> Some(duration, offset)
-                | _ -> None)
-
-        match List.tryLast frames with
-        | None -> None
-        | Some(currentDuration, durationOffset) ->
-            let actualDuration = frames |> List.sumBy fst
-            let adjusted = currentDuration + expectedDuration - actualDuration
-
-            if adjusted <= 0 || adjusted > maximumDuration then
-                invalidOp "FFmpeg produced a WebP timeline that Viset could not normalize without losing duration."
-
-            Some
-                { Offset = durationOffset
-                  Duration = adjusted }

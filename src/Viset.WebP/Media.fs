@@ -7,9 +7,9 @@ open System.Threading.Tasks
 module Media =
     let frameTicksMilliseconds = WebPEncoding.frameTicksMilliseconds
 
-    let validateImage = ImageDecoder.validateImage
+    let validateImage = ImageValidation.validate
 
-    let validatePng = ImageDecoder.validatePng
+    let validatePng = ImageValidation.validatePng
 
     let encodeAnimatedWebPAsync
         (options: WebPOptions)

@@ -8,10 +8,14 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
     <Compile Include="MediaTypes.fs" />
-    <Compile Include="WebPNative.fs" />
+    <Compile Include="ImageValidation.fs" />
     <Compile Include="ImageDecoder.fs" />
+    <Compile Include="WebPNativeOptions.fs" />
     <Compile Include="WebPEncoding.fs" />
-    <Compile Include="WebPContainer.fs" />
+    <Compile Include="WebPContainerTypes.fs" />
+    <Compile Include="WebPContainerParser.fs" />
+    <Compile Include="WebPContainerInspection.fs" />
+    <Compile Include="WebPDurationNormalization.fs" />
     <Compile Include="FrameCoalescing.fs" />
     <Compile Include="LibWebPFullEncoder.fs" />
     <Compile Include="LibWebPAnimEncoder.fs" />
@@ -21,12 +25,11 @@
 
   <ItemGroup>
     <PackageReference Include="FSharp.Core" />
-    <PackageReference Include="Imazen.WebP.NativeRuntime.All" />
     <PackageReference Include="StbImageSharp" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Viset.Core\Viset.Core.fsproj" />
+    <ProjectReference Include="..\Viset.WebP.Native\Viset.WebP.Native.fsproj" />
   </ItemGroup>
-
 </Project>
