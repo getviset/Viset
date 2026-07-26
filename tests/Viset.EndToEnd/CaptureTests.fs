@@ -13,7 +13,9 @@ open Viset.EndToEnd.MediaAssertions
 do ()
 
 module CaptureTests =
-    let private requireSuccess result = result.ExitCode |> should equal 0
+    let private requireSuccess result =
+        if result.ExitCode <> 0 then
+            failwith $"Expected exit code 0 but received {result.ExitCode}.\n{output result}"
 
     let private requireFailure expected result =
         result.ExitCode |> should not' (equal 0)
