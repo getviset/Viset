@@ -18,16 +18,17 @@ SIDECARS = {
     "win32": ("libsharpyuv.dll", "libwebp.dll", "libwebpmux.dll"),
 }
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+ROOT = Path(__file__).resolve().parents[2]
 
 
 class NativeSmokeError(RuntimeError):
     pass
 
 
-def browser_available() -> tuple[bool, str]:
+def browser_selection() -> tuple[Path | None, str] | None:
     configured = os.environ.get("VISET_BROWSER")
     if configured is not None and configured.strip():
-        return True, f"VISET_BROWSER={configured}"
+        return None, f"VISET_BROWSER={configured}"
 
     if sys.platform.startswith("linux"):
         names = (
@@ -66,16 +67,26 @@ def browser_available() -> tuple[bool, str]:
                 candidates.append(Path(root, *segments))
         paths = tuple(candidates)
     else:
-        return False, f"unsupported platform {sys.platform}"
+        return None
 
     for name in names:
         discovered = shutil.which(name)
         if discovered:
-            return True, f"system browser {discovered}"
+            browser = Path(discovered).resolve(strict=True)
+            return browser, f"system browser {browser}"
     for path in paths:
         if path.is_file():
-            return True, f"system browser {path}"
-    return False, "no configured or discoverable browser"
+            return path, f"system browser {path}"
+    return None
+
+
+def smoke_workspace() -> Path:
+    workspace = ROOT / ".agent-workspace"
+    workspace.mkdir(exist_ok=True)
+    canonical = workspace.resolve(strict=True)
+    if canonical.parent != ROOT:
+        raise NativeSmokeError(f"native smoke workspace is not within the checkout: {canonical}")
+    return canonical
 
 
 def run(executable: Path, *arguments: str, working_directory: Path | None = None) -> str:
@@ -136,14 +147,17 @@ def smoke(executable: Path, version: str) -> None:
     if "viset capture CAPTURE.lua" not in run(executable, "--help"):
         raise NativeSmokeError("help output does not contain the capture command")
 
-    available, browser = browser_available()
-    if not available:
-        print(f"native-smoke: capture skipped: {browser}")
+    browser = browser_selection()
+    if browser is None:
+        print("native-smoke: capture skipped: no configured or discoverable browser")
         return
-    print(f"native-smoke: capture enabled: {browser}")
+    explicit_browser, browser_description = browser
+    print(f"native-smoke: capture enabled: {browser_description}")
 
-    with tempfile.TemporaryDirectory(prefix="viset-native-smoke-") as temporary:
-        directory = Path(temporary)
+    with tempfile.TemporaryDirectory(
+        prefix="viset-native-smoke-", dir=smoke_workspace()
+    ) as temporary:
+        directory = Path(temporary).resolve(strict=True)
         script = directory / "smoke.lua"
         browser_arguments = 'browser_arguments = ["--no-sandbox"]\n' if platform == "linux" else ""
         script.write_text(
@@ -168,7 +182,10 @@ viset.snapshot()
             newline="\n",
         )
         output = directory / "output"
-        run(executable, "capture", str(script), "--output", str(output), working_directory=directory)
+        capture_arguments = ["capture", str(script), "--output", str(output)]
+        if explicit_browser is not None:
+            capture_arguments.extend(("--browser", str(explicit_browser)))
+        run(executable, *capture_arguments, working_directory=directory)
         capture = output / "smoke.png"
         if not capture.is_file() or not capture.read_bytes().startswith(PNG_SIGNATURE):
             raise NativeSmokeError("minimal capture did not produce a PNG")
