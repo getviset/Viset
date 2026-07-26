@@ -7,6 +7,9 @@ open System.Threading.Channels
 open System.Threading.Tasks
 
 type internal LiveFramePipeline(session: CaptureSession) =
+    [<Literal>]
+    let LiveMemoryFrameLimit = 8
+
     let root =
         Path.Combine(
             Path.GetTempPath(),
@@ -63,13 +66,13 @@ type internal LiveFramePipeline(session: CaptureSession) =
                                 match pendingFrame with
                                 | InMemory frame -> Task.FromResult frame
                                 | OnDisk stored ->
-                                    RecordingPipeline.readAsync stored processorCancellation.Token
+                                    RecordingStorage.readAsync stored processorCancellation.Token
 
                             let! prepared =
                                 session.PrepareFrameAsync(source, processorCancellation.Token)
 
                             let! stored =
-                                RecordingPipeline.writeAsync
+                                RecordingStorage.writeAsync
                                     root
                                     "prepared-"
                                     index
@@ -109,7 +112,7 @@ type internal LiveFramePipeline(session: CaptureSession) =
 
                 let reserveMemory =
                     lock syncRoot (fun () ->
-                        if memoryFrameCount < RecordingPipeline.LiveMemoryFrameLimit then
+                        if memoryFrameCount < LiveMemoryFrameLimit then
                             memoryFrameCount <- memoryFrameCount + 1
                             true
                         else
@@ -121,7 +124,7 @@ type internal LiveFramePipeline(session: CaptureSession) =
                             return InMemory frame
                         else
                             let! stored =
-                                RecordingPipeline.writeAsync
+                                RecordingStorage.writeAsync
                                     root
                                     "overflow-"
                                     index
@@ -164,7 +167,7 @@ type internal LiveFramePipeline(session: CaptureSession) =
             if index < 0 || index >= preparedFrames.Count then
                 invalidArg (nameof index) "Recorded frame index is outside the live pipeline."
 
-            RecordingPipeline.readAsync preparedFrames[index] cancellationToken
+            RecordingStorage.readAsync preparedFrames[index] cancellationToken
 
         member _.Count = nextIndex
         member _.SpilledFrameCount = Volatile.Read(&spilledFrameCount)

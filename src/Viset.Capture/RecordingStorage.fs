@@ -5,10 +5,7 @@ open System.Globalization
 open System.IO
 open System.Threading.Tasks
 
-module internal RecordingPipeline =
-    [<Literal>]
-    let LiveMemoryFrameLimit = 8
-
+module internal RecordingStorage =
     let extension format =
         match format with
         | PngImage -> ".png"

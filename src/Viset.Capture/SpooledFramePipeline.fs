@@ -27,7 +27,7 @@ type internal SpooledFramePipeline(session: CaptureSession) =
                 let index = sourceFrames.Count
 
                 let! stored =
-                    RecordingPipeline.writeAsync root "source-" index frame cancellationToken
+                    RecordingStorage.writeAsync root "source-" index frame cancellationToken
 
                 sourceFrames.Add stored
                 return index
@@ -40,12 +40,12 @@ type internal SpooledFramePipeline(session: CaptureSession) =
 
                     for index in 0 .. sourceFrames.Count - 1 do
                         let! source =
-                            RecordingPipeline.readAsync sourceFrames[index] cancellationToken
+                            RecordingStorage.readAsync sourceFrames[index] cancellationToken
 
                         let! prepared = session.PrepareFrameAsync(source, cancellationToken)
 
                         let! stored =
-                            RecordingPipeline.writeAsync
+                            RecordingStorage.writeAsync
                                 root
                                 "prepared-"
                                 index
@@ -62,7 +62,7 @@ type internal SpooledFramePipeline(session: CaptureSession) =
             if index < 0 || index >= preparedFrames.Count then
                 invalidArg (nameof index) "Recorded frame index is outside the spooled pipeline."
 
-            RecordingPipeline.readAsync preparedFrames[index] cancellationToken
+            RecordingStorage.readAsync preparedFrames[index] cancellationToken
 
         member _.Count = sourceFrames.Count
         member _.SpilledFrameCount = 0
