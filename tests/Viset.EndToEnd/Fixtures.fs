@@ -33,7 +33,9 @@ module Fixtures =
                 directory
             else
                 match Directory.GetParent directory with
-                | null -> invalidOp "Unable to locate the repository root from the end-to-end test runner."
+                | null ->
+                    invalidOp
+                        "Unable to locate the repository root from the end-to-end test runner."
                 | parent -> search parent.FullName
 
         search (Path.GetFullPath startPath)
@@ -45,7 +47,8 @@ module Fixtures =
                 Some(findRepositoryRoot path)
             with :? InvalidOperationException ->
                 None)
-        |> Option.defaultWith (fun () -> invalidOp "Unable to locate the repository root for end-to-end fixtures.")
+        |> Option.defaultWith (fun () ->
+            invalidOp "Unable to locate the repository root for end-to-end fixtures.")
 
     let fixtureRoot = Path.Combine(AppContext.BaseDirectory, "Fixtures")
 
@@ -102,7 +105,8 @@ module Fixtures =
                           "dotnet.exe"
                       else
                           "dotnet" ]
-                |> Option.defaultWith (fun () -> invalidOp "Unable to locate the dotnet executable on PATH.")
+                |> Option.defaultWith (fun () ->
+                    invalidOp "Unable to locate the dotnet executable on PATH.")
 
             { Executable = dotnet
               PrefixArguments =
@@ -136,7 +140,8 @@ module Fixtures =
         | Some value when not (String.IsNullOrWhiteSpace value) -> value
         | _ ->
             executableFromPath [ "python3" ]
-            |> Option.defaultWith (fun () -> invalidOp "python3 is required by the end-to-end fixtures.")
+            |> Option.defaultWith (fun () ->
+                invalidOp "python3 is required by the end-to-end fixtures.")
 
     let browserArguments =
         match
@@ -189,7 +194,8 @@ module Fixtures =
         | [] when not (File.Exists visetCommand.Executable) ->
             invalidOp $"End-to-end binary does not exist: {visetCommand.Executable}."
 
-        | _ when not (File.Exists cliProject) -> invalidOp $"Viset CLI project does not exist: {cliProject}."
+        | _ when not (File.Exists cliProject) ->
+            invalidOp $"Viset CLI project does not exist: {cliProject}."
 
         | _ when not (File.Exists visetCommand.Executable) ->
             invalidOp $"dotnet executable does not exist: {visetCommand.Executable}."

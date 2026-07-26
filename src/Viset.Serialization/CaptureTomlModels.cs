@@ -67,7 +67,14 @@ public sealed record DeviceTomlModel(
 )
 {
     public DeviceTomlModel()
-        : this(Mobile: null, Touch: null, DeviceScale: null, Viewport: null!, Frame: null, Unmapped: []) { }
+        : this(
+            Mobile: null,
+            Touch: null,
+            DeviceScale: null,
+            Viewport: null!,
+            Frame: null,
+            Unmapped: []
+        ) { }
 }
 
 public sealed record DimensionsTomlModel(

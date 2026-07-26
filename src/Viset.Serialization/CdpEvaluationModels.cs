@@ -2,19 +2,33 @@ using System.Text.Json;
 
 namespace Viset.Serialization;
 
-public sealed record CdpEvaluateParameters(string Expression, bool AwaitPromise, bool ReturnByValue, bool UserGesture)
+public sealed record CdpEvaluateParameters(
+    string Expression,
+    bool AwaitPromise,
+    bool ReturnByValue,
+    bool UserGesture
+)
 {
     public CdpEvaluateParameters()
-        : this(Expression: string.Empty, AwaitPromise: true, ReturnByValue: true, UserGesture: true) { }
+        : this(Expression: string.Empty, AwaitPromise: true, ReturnByValue: true, UserGesture: true)
+    { }
 }
 
-public sealed record CdpEvaluateResultModel(CdpRemoteObjectModel Result, CdpExceptionDetailsModel? ExceptionDetails)
+public sealed record CdpEvaluateResultModel(
+    CdpRemoteObjectModel Result,
+    CdpExceptionDetailsModel? ExceptionDetails
+)
 {
     public CdpEvaluateResultModel()
         : this(Result: new(), ExceptionDetails: null) { }
 }
 
-public sealed record CdpRemoteObjectModel(string Type, string? Subtype, JsonElement Value, string? Description)
+public sealed record CdpRemoteObjectModel(
+    string Type,
+    string? Subtype,
+    JsonElement Value,
+    string? Description
+)
 {
     public CdpRemoteObjectModel()
         : this(Type: string.Empty, Subtype: null, Value: default, Description: null) { }

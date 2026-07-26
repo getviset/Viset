@@ -1,6 +1,11 @@
 namespace Viset.Serialization;
 
-public sealed record CdpDeviceMetricsParameters(int Width, int Height, double DeviceScaleFactor, bool Mobile)
+public sealed record CdpDeviceMetricsParameters(
+    int Width,
+    int Height,
+    double DeviceScaleFactor,
+    bool Mobile
+)
 {
     public CdpDeviceMetricsParameters()
         : this(Width: 0, Height: 0, DeviceScaleFactor: 0.0, Mobile: false) { }

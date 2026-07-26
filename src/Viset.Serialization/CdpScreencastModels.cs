@@ -18,7 +18,11 @@ public sealed record CdpScreencastFrameAckParameters(int SessionId)
         : this(SessionId: 0) { }
 }
 
-public sealed record CdpScreencastFrameModel(string Data, CdpScreencastFrameMetadataModel Metadata, int SessionId)
+public sealed record CdpScreencastFrameModel(
+    string Data,
+    CdpScreencastFrameMetadataModel Metadata,
+    int SessionId
+)
 {
     public CdpScreencastFrameModel()
         : this(Data: string.Empty, Metadata: new(), SessionId: 0) { }

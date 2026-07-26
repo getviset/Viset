@@ -8,7 +8,12 @@ public sealed record CdpScreenshotParameters(
 )
 {
     public CdpScreenshotParameters()
-        : this(Format: "png", FromSurface: true, CaptureBeyondViewport: false, OptimizeForSpeed: true) { }
+        : this(
+            Format: "png",
+            FromSurface: true,
+            CaptureBeyondViewport: false,
+            OptimizeForSpeed: true
+        ) { }
 }
 
 public sealed record CdpScreenshotResultModel(string Data)

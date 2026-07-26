@@ -57,7 +57,9 @@ requestAnimationFrame(tick);
         task {
             let root = findRepositoryRoot ()
             let lockPath = Path.Combine(root, "browser-lock.toml")
-            let! resolved = BrowserResolution.resolveAsync None (Some lockPath) CancellationToken.None
+
+            let! resolved =
+                BrowserResolution.resolveAsync None (Some lockPath) CancellationToken.None
 
             let browser =
                 match resolved with
@@ -68,7 +70,15 @@ requestAnimationFrame(tick);
             let! session = BrowserSession.LaunchAsync(options, CancellationToken.None)
 
             try
-                do! session.ConfigureEmulationAsync(Width, Height, 1.0, false, false, CancellationToken.None)
+                do!
+                    session.ConfigureEmulationAsync(
+                        Width,
+                        Height,
+                        1.0,
+                        false,
+                        false,
+                        CancellationToken.None
+                    )
 
                 let uri =
                     Uri(String.Concat("data:text/html;charset=utf-8,", Uri.EscapeDataString html))
@@ -101,7 +111,8 @@ type CaptureBenchmarkConfig() as this =
         let nativeArguments =
             [| MsBuildArgument("/p:RestoreLockedMode=false") :> Argument
                MsBuildArgument("/p:RestorePackagesWithLockFile=false") :> Argument
-               MsBuildArgument("/p:NuGetLockFilePath=BenchmarkDotNet.nativeaot.ignore.lock.json") :> Argument
+               MsBuildArgument("/p:NuGetLockFilePath=BenchmarkDotNet.nativeaot.ignore.lock.json")
+               :> Argument
                MsBuildArgument("/p:SelfContained=true") :> Argument |]
             :> IReadOnlyList<Argument>
 
@@ -297,7 +308,8 @@ type WebPEncodingBenchmarks() =
 
             pixels.ToByteArray(PixelMapping.RGBA)
             |> Option.ofObj
-            |> Option.defaultWith (fun () -> invalidOp "ImageMagick returned no RGBA benchmark data.")
+            |> Option.defaultWith (fun () ->
+                invalidOp "ImageMagick returned no RGBA benchmark data.")
             |> Array.length)
 
     let decodeStb (frames: byte array array) =
@@ -407,11 +419,20 @@ module private Comparison =
                     uniqueFrames <- uniqueFrames + 1
 
                     nextSlot <-
-                        int (Math.Floor(stopwatch.Elapsed.TotalMilliseconds / interval.TotalMilliseconds))
+                        int (
+                            Math.Floor(
+                                stopwatch.Elapsed.TotalMilliseconds / interval.TotalMilliseconds
+                            )
+                        )
                         + 1
 
                 let target =
-                    int (Math.Round(duration.TotalSeconds * double fps, MidpointRounding.AwayFromZero))
+                    int (
+                        Math.Round(
+                            duration.TotalSeconds * double fps,
+                            MidpointRounding.AwayFromZero
+                        )
+                    )
 
                 return result "captureScreenshot" fps target uniqueFrames (List.ofSeq durations)
             finally
@@ -441,12 +462,22 @@ module private Comparison =
                     wait.Stop()
                     waits.Add wait.Elapsed
                     uniqueFrames <- uniqueFrames + 1
-                    do! browser.AcknowledgeScreencastFrameAsync(frame.SessionId, CancellationToken.None)
+
+                    do!
+                        browser.AcknowledgeScreencastFrameAsync(
+                            frame.SessionId,
+                            CancellationToken.None
+                        )
 
                 do! browser.StopScreencastAsync CancellationToken.None
 
                 let target =
-                    int (Math.Round(duration.TotalSeconds * double fps, MidpointRounding.AwayFromZero))
+                    int (
+                        Math.Round(
+                            duration.TotalSeconds * double fps,
+                            MidpointRounding.AwayFromZero
+                        )
+                    )
 
                 return result (source.ToString()) fps target uniqueFrames (List.ofSeq waits)
             finally
