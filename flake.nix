@@ -81,6 +81,7 @@
               ./global.json
               ./nuget.config
               ./packages.lock.json
+              ./src/Directory.Build.props
               ./src/Viset.Browser
               ./src/Viset.Browser.Management
               ./src/Viset.Capture
