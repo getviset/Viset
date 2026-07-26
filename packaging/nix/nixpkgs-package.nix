@@ -27,6 +27,9 @@ buildDotnetModule {
   dotnet-sdk = dotnetCorePackages.sdk_10_0;
   selfContainedBuild = true;
   executables = [ "viset" ];
+  postPatch = ''
+    rm -f .config/dotnet-tools.json
+  '';
   dotnetBuildFlags = [
     "-p:PublishAot=true"
     "-p:PublishTrimmed=true"
