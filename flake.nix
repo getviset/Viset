@@ -90,6 +90,7 @@
               ./src/Viset.Serialization
               ./src/Viset.WebP.Native
               ./src/Viset.WebP
+              ./src/assets
             ];
           };
 
