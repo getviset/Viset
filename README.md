@@ -50,6 +50,24 @@ viset.snapshot()
 Viset expands the matrix and writes both outputs. The same model supports
 multiple devices, framed captures, and continuous animated WebP recording.
 
+## Editor support
+
+`viset init` generates the capture scaffold and LuaLS metadata. The optional
+editor integrations below only add highlighting for embedded TOML and
+JavaScript. They do not execute captures or replace initialization.
+
+- **Neovim 0.12+:** install
+  [`getviset/viset.nvim`](https://github.com/getviset/viset.nvim) with your
+  plugin manager and the Lua, TOML, and JavaScript Tree-sitter parsers.
+- **Emacs 30.1+:** install
+  [`getviset/viset.el`](https://github.com/getviset/viset.el) from Git with
+  `package-vc-install`. Emacs needs Tree-sitter support and compatible Lua,
+  TOML, and JavaScript grammars.
+- **VS Code 1.130+:** install the
+  [`getviset.viset` v0.1.0 VSIX](https://github.com/getviset/viset-vscode/releases/download/v0.1.0/getviset.viset-0.1.0.vsix)
+  from its [GitHub release](https://github.com/getviset/viset-vscode/releases/tag/v0.1.0).
+  `getviset.viset` is not currently listed on the Marketplace.
+
 ## Built for reproducible capture
 
 - **Single-file intent.** The strict TOML header and trusted Lua actions live in
@@ -67,7 +85,6 @@ multiple devices, framed captures, and continuous animated WebP recording.
 | **[Read the wiki](https://github.com/getviset/Viset/wiki)** | Install Viset and learn the capture format and Lua API. |
 | **[Try the examples](examples)** | Start small, then explore device and theme matrices. |
 | **[Review the benchmarks](benchmarks)** | See measured capture, encoder, pipeline, and decoder results. |
-| **[Use viset.nvim](https://github.com/getviset/viset.nvim)** | Add Neovim highlighting for Viset capture files. |
 | **[Contribute](CONTRIBUTING.md)** | Build, test, format, and propose changes. |
 
 ## Status

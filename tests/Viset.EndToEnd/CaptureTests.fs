@@ -264,7 +264,7 @@ viset.snapshot()
             |> should equal false)
 
     [<Fact>]
-    let ``the initialized scaffold should contain exact editor files and standalone Neovim guidance``
+    let ``the initialized scaffold should contain exact editor files and standalone editor guidance``
         ()
         =
         use directory = createTemporaryDirectory "scaffold"
@@ -294,12 +294,17 @@ viset.snapshot()
 
         let readme = File.ReadAllText(Path.Combine(project, "README.md"))
         readme |> should haveSubstring "https://github.com/getviset/viset.nvim"
-        readme |> should haveSubstring "Lua, TOML, and JavaScript Tree-sitter parsers"
-        readme |> should haveSubstring ":checkhealth viset"
+        readme |> should haveSubstring "https://github.com/getviset/viset.el"
+
+        readme
+        |> should
+            haveSubstring
+            "https://github.com/getviset/viset-vscode/releases/download/v0.1.0/getviset.viset-0.1.0.vsix"
+
+        readme |> should haveSubstring "do not execute captures"
         readme |> should not' (haveSubstring ".viset/nvim")
         readme |> should not' (haveSubstring "runtimepath")
         readme |> should not' (haveSubstring "Tree-sitter query")
-        readme |> should not' (haveSubstring "VS Code")
 
     [<Fact>]
     let ``the scaffold should capture its example and apply interactive settings`` () =

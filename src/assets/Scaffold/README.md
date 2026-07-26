@@ -14,8 +14,25 @@ Capture files are trusted local Lua code and run with Lua's standard libraries.
 
 ## Editor support
 
-`.luarc.json` loads `.viset/viset.d.lua` for Viset API completion and diagnostics in Lua Language Server.
+`viset init` generated this capture scaffold and the `.luarc.json` and
+`.viset/viset.d.lua` LuaLS metadata. The optional editor integrations below only
+add highlighting for embedded TOML and JavaScript. They do not execute captures
+or replace `viset init`.
 
-Install [`getviset/viset.nvim`](https://github.com/getviset/viset.nvim) with your Neovim plugin manager for TOML header and `viset.javascript` highlighting; no setup call is required.
+- **Neovim 0.12+:** install
+  [`getviset/viset.nvim`](https://github.com/getviset/viset.nvim) with your
+  plugin manager and the Lua, TOML, and JavaScript Tree-sitter parsers.
+- **Emacs 30.1+:** install
+  [`getviset/viset.el`](https://github.com/getviset/viset.el) from Git:
 
-The plugin requires Neovim 0.12 or newer and the Lua, TOML, and JavaScript Tree-sitter parsers. Run `:checkhealth viset` for diagnostics.
+  ```elisp
+  (package-vc-install
+   '(viset-ts-mode :url "https://github.com/getviset/viset.el"))
+  ```
+
+  Emacs needs Tree-sitter support and compatible Lua, TOML, and JavaScript
+  grammars.
+- **VS Code 1.130+:** install the
+  [`getviset.viset` v0.1.0 VSIX](https://github.com/getviset/viset-vscode/releases/download/v0.1.0/getviset.viset-0.1.0.vsix)
+  from its [GitHub release](https://github.com/getviset/viset-vscode/releases/tag/v0.1.0).
+  `getviset.viset` is not currently listed on the Marketplace.
