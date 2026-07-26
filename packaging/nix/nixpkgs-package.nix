@@ -30,6 +30,17 @@ buildDotnetModule {
   postPatch = ''
     rm -f .config/dotnet-tools.json
   '';
+  configurePhase = ''
+    runHook preConfigure
+    # Nix normalizes NuGet archives; packaging/nix/deps.json is the fixed-output build lock.
+    dotnet restore src/Viset.Cli/Viset.Cli.fsproj \
+      -p:ContinuousIntegrationBuild=true \
+      -p:Deterministic=true \
+      -p:NuGetAudit=false \
+      -p:RestoreLockedMode=false \
+      --force-evaluate
+    runHook postConfigure
+  '';
   dotnetBuildFlags = [
     "-p:PublishAot=true"
     "-p:PublishTrimmed=true"
