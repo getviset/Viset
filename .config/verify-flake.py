@@ -11,7 +11,11 @@ OUTPUTS = {
     "apps": {"default", "viset"},
     "checks": {"cli", "documentation", "package"},
     "devShells": {"default"},
-    "packages": {"default", "viset"},
+}
+PACKAGE_OUTPUTS = {
+    "x86_64-linux": {"container", "default", "viset"},
+    "aarch64-linux": {"container", "default", "viset"},
+    "aarch64-darwin": {"default", "viset"},
 }
 
 
@@ -42,6 +46,26 @@ for output, names in OUTPUTS.items():
                 print(f"evaluated non-native output: {output}.{system}.{name}")
             else:
                 print(f"omitted non-native output: {output}.{system}.{name}")
+
+packages = inventory.get("packages")
+if not isinstance(packages, dict) or set(packages) != SYSTEMS:
+    raise RuntimeError(f"unexpected packages systems: {packages}")
+
+for system, values in packages.items():
+    expected = PACKAGE_OUTPUTS[system]
+    if not isinstance(values, dict) or set(values) != expected:
+        raise RuntimeError(f"unexpected packages.{system} outputs: {values}")
+
+    for name, descriptor in values.items():
+        if system == arguments.system:
+            if descriptor.get("type") != "derivation":
+                raise RuntimeError(
+                    f"unexpected native packages.{system}.{name} descriptor: {descriptor}"
+                )
+        elif descriptor:
+            print(f"evaluated non-native output: packages.{system}.{name}")
+        else:
+            print(f"omitted non-native output: packages.{system}.{name}")
 
 formatters = inventory.get("formatter")
 if not isinstance(formatters, dict) or set(formatters) != SYSTEMS:

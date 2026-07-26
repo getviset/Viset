@@ -176,12 +176,59 @@
             touch "$out"
           '';
 
+      mkContainer =
+        system:
+        let
+          pkgs = mkPkgs system;
+          viset = self.packages.${system}.default;
+          browser = mkBrowser pkgs;
+          architecture =
+            if system == "x86_64-linux" then
+              "amd64"
+            else if system == "aarch64-linux" then
+              "arm64"
+            else
+              throw "Viset's container does not support ${system}";
+          containerBrowser = pkgs.writeShellScriptBin "viset-container-browser" ''
+            exec ${browser.executable} --no-sandbox "$@"
+          '';
+        in
+        pkgs.dockerTools.buildLayeredImage {
+          name = "ghcr.io/getviset/viset";
+          tag = "v0.1.0-${architecture}";
+          contents = [
+            viset
+            browser.package
+            containerBrowser
+          ];
+          extraCommands = ''
+            mkdir -p tmp work
+            chmod 1777 tmp
+          '';
+          config = {
+            Entrypoint = [ "${viset}/bin/viset" ];
+            Env = [ "VISET_BROWSER=${containerBrowser}/bin/viset-container-browser" ];
+            WorkingDir = "/work";
+            Labels = {
+              "org.opencontainers.image.source" = "https://github.com/getviset/Viset";
+              "org.opencontainers.image.title" = "Viset";
+              "org.opencontainers.image.version" = "0.1.0";
+            };
+          };
+        };
+
     in
     {
-      packages = forAllSystems (system: {
-        default = mkViset system;
-        viset = self.packages.${system}.default;
-      });
+      packages = forAllSystems (
+        system:
+        {
+          default = mkViset system;
+          viset = self.packages.${system}.default;
+        }
+        // (mkPkgs system).lib.optionalAttrs (builtins.match ".*-linux" system != null) {
+          container = mkContainer system;
+        }
+      );
 
       apps = forAllSystems (system: {
         default = self.apps.${system}.viset;
