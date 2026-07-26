@@ -42,6 +42,11 @@ def archive_mode(name: str) -> int:
     return 0o755 if name in {"viset", "viset.exe"} else 0o644
 
 
+def canonical_text_bytes(path: pathlib.Path) -> bytes:
+    text = path.read_bytes().decode("utf-8")
+    return text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+
+
 def remove_macos_rpaths(path: pathlib.Path) -> None:
     output = subprocess.run(
         ["otool", "-l", str(path)],
@@ -151,8 +156,12 @@ def stage_payload(rid: str, publish_directory: pathlib.Path, destination: pathli
 
     destination.mkdir()
     for name in names:
-        shutil.copyfile(sources[name], destination / name)
-        (destination / name).chmod(archive_mode(name))
+        staged = destination / name
+        if name in {"browser-lock.toml", "LICENSE"}:
+            staged.write_bytes(canonical_text_bytes(sources[name]))
+        else:
+            shutil.copyfile(sources[name], staged)
+        staged.chmod(archive_mode(name))
 
     if rid == "osx-arm64":
         make_macos_sidecars_relocatable(destination)
@@ -255,7 +264,7 @@ def inspect_archive(path: pathlib.Path, rid: str) -> None:
             )
 
     for name in ("browser-lock.toml", "LICENSE"):
-        if entries[name][1] != (ROOT / name).read_bytes():
+        if entries[name][1] != canonical_text_bytes(ROOT / name):
             raise RuntimeError(f"archive contains an unexpected {name}")
 
     print(f"inspected {rid}: {', '.join(entries)}")
