@@ -4,7 +4,8 @@ open System
 open System.Threading
 open System.Threading.Tasks
 
-type FrameRenderer private (session: BrowserSession, server: FrameServer, readinessTimeout: TimeSpan) =
+type FrameRenderer
+    private (session: BrowserSession, server: FrameServer, readinessTimeout: TimeSpan) =
     let readyExpression = "document.querySelector('[data-frame-ready]') !== null"
 
     let waitUntilReadyAsync (cancellationToken: CancellationToken) =
@@ -23,7 +24,10 @@ type FrameRenderer private (session: BrowserSession, server: FrameServer, readin
                     | Error error ->
                         raise (
                             InvalidOperationException(
-                                String.Concat("Frame readiness evaluation failed: ", error.ToString())
+                                String.Concat(
+                                    "Frame readiness evaluation failed: ",
+                                    error.ToString()
+                                )
                             )
                         )
 
@@ -44,7 +48,8 @@ type FrameRenderer private (session: BrowserSession, server: FrameServer, readin
     member _.CapturePngAsync(cancellationToken: CancellationToken) =
         session.CapturePngAsync cancellationToken
 
-    member private _.WaitUntilReadyAsync(cancellationToken: CancellationToken) = waitUntilReadyAsync cancellationToken
+    member private _.WaitUntilReadyAsync(cancellationToken: CancellationToken) =
+        waitUntilReadyAsync cancellationToken
 
     member _.UpdateAsync(image: CompressedFrame, cancellationToken: CancellationToken) =
         task {
@@ -58,15 +63,28 @@ type FrameRenderer private (session: BrowserSession, server: FrameServer, readin
 
             match clearResult with
             | Error error ->
-                raise (InvalidOperationException(String.Concat("Frame readiness reset failed: ", error.ToString())))
+                raise (
+                    InvalidOperationException(
+                        String.Concat("Frame readiness reset failed: ", error.ToString())
+                    )
+                )
             | Ok _ -> ()
 
             server.UpdateImage image
 
-            let! updateResult = session.EvaluateAsync("window.visetFrame.update().then(() => true)", cancellationToken)
+            let! updateResult =
+                session.EvaluateAsync(
+                    "window.visetFrame.update().then(() => true)",
+                    cancellationToken
+                )
 
             match updateResult with
-            | Error error -> raise (InvalidOperationException(String.Concat("Frame update failed: ", error.ToString())))
+            | Error error ->
+                raise (
+                    InvalidOperationException(
+                        String.Concat("Frame update failed: ", error.ToString())
+                    )
+                )
             | Ok _ -> do! waitUntilReadyAsync cancellationToken
         }
 

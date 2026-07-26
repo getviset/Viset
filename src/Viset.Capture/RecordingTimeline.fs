@@ -37,7 +37,8 @@ module internal RecordingTimeline =
             | [] -> invalidOp "A recording cannot duplicate a frame before its first capture."
             | previous :: _ ->
                 { timeline with
-                    ReverseFrameIndices = List.replicate count previous @ timeline.ReverseFrameIndices
+                    ReverseFrameIndices =
+                        List.replicate count previous @ timeline.ReverseFrameIndices
                     FrameCount = timeline.FrameCount + count
                     MissedSlots = timeline.MissedSlots + count
                     DuplicatedFrames = timeline.DuplicatedFrames + count }
@@ -47,7 +48,12 @@ module internal RecordingTimeline =
         let missed = max 0 (elapsedSlots - segmentFrameCount)
         timeline |> appendDuplicates missed |> appendFrame frameIndex
 
-    let closeSegment (interval: TimeSpan) timelineOffset (segmentElapsed: TimeSpan) (timeline: RecordingTimeline) =
+    let closeSegment
+        (interval: TimeSpan)
+        timelineOffset
+        (segmentElapsed: TimeSpan)
+        (timeline: RecordingTimeline)
+        =
         let targetCount =
             max
                 1

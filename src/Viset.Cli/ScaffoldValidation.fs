@@ -42,7 +42,8 @@ module internal ScaffoldValidation =
             | [] -> Ok()
 
             | _ ->
-                Error $"""Scaffold files already exist; use --force to replace them: {String.Join(", ", conflicts)}"""
+                Error
+                    $"""Scaffold files already exist; use --force to replace them: {String.Join(", ", conflicts)}"""
 
     let validateAbsoluteUrl value =
         try

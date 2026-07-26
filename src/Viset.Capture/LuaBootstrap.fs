@@ -14,7 +14,8 @@ module internal LuaBootstrap =
         use stream =
             assembly.GetManifestResourceStream ResourceName
             |> Option.ofObj
-            |> Option.defaultWith (fun () -> invalidOp $"Embedded resource '{ResourceName}' was not found.")
+            |> Option.defaultWith (fun () ->
+                invalidOp $"Embedded resource '{ResourceName}' was not found.")
 
         use reader = new StreamReader(stream)
         reader.ReadToEnd()

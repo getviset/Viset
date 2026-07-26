@@ -31,11 +31,13 @@ module BrowserInstall =
                 | Error message -> return Error message
                 | Ok browserLock ->
                     match browserLock.Platforms.TryGetValue runtimeIdentifier with
-                    | false, _ -> return Error(BrowserInstaller.unsupportedDiagnostic runtimeIdentifier)
+                    | false, _ ->
+                        return Error(BrowserInstaller.unsupportedDiagnostic runtimeIdentifier)
                     | true, platform ->
                         let cacheRootResult =
                             match cacheRoot with
-                            | Some value when not (String.IsNullOrWhiteSpace value) -> Ok(Path.GetFullPath value)
+                            | Some value when not (String.IsNullOrWhiteSpace value) ->
+                                Ok(Path.GetFullPath value)
                             | Some _ -> Error "Managed browser cache path must not be empty."
                             | None -> BrowserCache.cacheRootForRuntime runtimeIdentifier
 
@@ -45,7 +47,12 @@ module BrowserInstall =
                             let workRoot =
                                 Path.Combine(
                                     resolvedCacheRoot,
-                                    String.Concat(".install-", runtimeIdentifier, "-", Guid.NewGuid().ToString "N")
+                                    String.Concat(
+                                        ".install-",
+                                        runtimeIdentifier,
+                                        "-",
+                                        Guid.NewGuid().ToString "N"
+                                    )
                                 )
 
                             let work =
@@ -56,11 +63,17 @@ module BrowserInstall =
                                         let installLockPath =
                                             Path.Combine(
                                                 resolvedCacheRoot,
-                                                String.Concat(".install-", runtimeIdentifier, ".lock")
+                                                String.Concat(
+                                                    ".install-",
+                                                    runtimeIdentifier,
+                                                    ".lock"
+                                                )
                                             )
 
                                         use! _ =
-                                            BrowserInstaller.acquireInstallLockAsync installLockPath cancellationToken
+                                            BrowserInstaller.acquireInstallLockAsync
+                                                installLockPath
+                                                cancellationToken
 
                                         return!
                                             BrowserInstaller.installUnderLockAsync
@@ -72,10 +85,18 @@ module BrowserInstall =
                                                 downloadTimeout
                                                 cancellationToken
                                     with
-                                    | :? OperationCanceledException when cancellationToken.IsCancellationRequested ->
+                                    | :? OperationCanceledException when
+                                        cancellationToken.IsCancellationRequested
+                                        ->
                                         return Error "Browser installation was cancelled."
                                     | error ->
-                                        return Error(String.Concat("Browser installation failed: ", error.Message))
+                                        return
+                                            Error(
+                                                String.Concat(
+                                                    "Browser installation failed: ",
+                                                    error.Message
+                                                )
+                                            )
                                 }
 
                             try

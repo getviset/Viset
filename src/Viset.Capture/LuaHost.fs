@@ -15,7 +15,12 @@ module LuaHost =
         =
         task {
             use! session =
-                CaptureSession.LaunchAsync(browserOptions, planned.Device, plan.FrameSource, cancellationToken)
+                CaptureSession.LaunchAsync(
+                    browserOptions,
+                    planned.Device,
+                    plan.FrameSource,
+                    cancellationToken
+                )
 
             use state = LuaState.Create()
             state.OpenStandardLibraries()
@@ -47,7 +52,13 @@ module LuaHost =
 
             try
                 try
-                    let! _ = state.DoStringAsync(LuaBootstrap.source, cancellationToken = cancellationToken).AsTask()
+                    let! _ =
+                        state
+                            .DoStringAsync(
+                                LuaBootstrap.source,
+                                cancellationToken = cancellationToken
+                            )
+                            .AsTask()
 
                     let! _ = state.DoFileAsync(plan.ScriptPath, cancellationToken).AsTask()
 
@@ -89,7 +100,9 @@ module LuaHost =
                     try
                         do! recorder.StopAsync()
                     with error ->
-                        cleanupFailures.Add(String.Concat("Recording cleanup failed: ", error.Message))
+                        cleanupFailures.Add(
+                            String.Concat("Recording cleanup failed: ", error.Message)
+                        )
                 | _ -> ()
 
                 let! processFailures = processes.CleanupAsync()
@@ -101,7 +114,9 @@ module LuaHost =
                     try
                         (recorder :> IDisposable).Dispose()
                     with error ->
-                        cleanupFailures.Add(String.Concat("Recording spool cleanup failed: ", error.Message)))
+                        cleanupFailures.Add(
+                            String.Concat("Recording spool cleanup failed: ", error.Message)
+                        ))
 
                 try
                     do! (session :> IAsyncDisposable).DisposeAsync().AsTask()
@@ -117,14 +132,19 @@ module LuaHost =
             | Some error, failures ->
                 raise (
                     InvalidOperationException(
-                        String.Concat(error.Message, " Cleanup also failed: ", String.Join(" ", failures)),
+                        String.Concat(
+                            error.Message,
+                            " Cleanup also failed: ",
+                            String.Join(" ", failures)
+                        ),
                         error
                     )
                 )
 
             let completed =
                 captured
-                |> Option.defaultWith (fun () -> invalidOp "Capture completed without output bytes.")
+                |> Option.defaultWith (fun () ->
+                    invalidOp "Capture completed without output bytes.")
 
             let writtenPath = Output.write plan.Force completed
 

@@ -72,7 +72,11 @@ module internal LibWebPFullNative =
 
                 try
                     if
-                        WebPInterop.WebPPictureImportRgba(&picture, pixels.AddrOfPinnedObject(), encoder.Width * 4) = 0
+                        WebPInterop.WebPPictureImportRgba(
+                            &picture,
+                            pixels.AddrOfPinnedObject(),
+                            encoder.Width * 4
+                        ) = 0
                     then
                         invalidOp "libwebp could not import an RGBA animation frame."
 

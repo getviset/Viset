@@ -28,11 +28,14 @@ module internal LuaPageBindings =
 
                     let expression =
                         if context.HasArgument 1 then
-                            LuaJavascript.evaluateExpression script (context.GetArgument<LuaTable> 1)
+                            LuaJavascript.evaluateExpression
+                                script
+                                (context.GetArgument<LuaTable> 1)
                         else
                             script
 
-                    let! result = activeCase.Session.Page.EvaluateAsync(expression, cancellationToken)
+                    let! result =
+                        activeCase.Session.Page.EvaluateAsync(expression, cancellationToken)
 
                     match result with
                     | Ok value -> return context.Return(LuaValueConversion.evaluationValue value)
@@ -84,7 +87,9 @@ module internal LuaPageBindings =
                     match result with
                     | Error error -> return raise (InvalidOperationException(error.ToString()))
                     | Ok value ->
-                        LuaValueConversion.collectAnimationDurations activeCase.AnimationUpdateDurations value
+                        LuaValueConversion.collectAnimationDurations
+                            activeCase.AnimationUpdateDurations
+                            value
 
                         return context.Return()
                 })
@@ -94,7 +99,8 @@ module internal LuaPageBindings =
                 task {
                     let device = context.GetArgument<LuaTable> 0
 
-                    let viewport = getValue device "viewport" |> fun value -> value.Read<LuaTable>()
+                    let viewport =
+                        getValue device "viewport" |> fun value -> value.Read<LuaTable>()
 
                     let width =
                         getValue viewport "width"

@@ -53,17 +53,32 @@ module internal BrowserDiscovery =
             addFromPath "Google Chrome" "google-chrome"
             addFromPath "Chromium" "chromium"
         elif runtimeIdentifier.StartsWith("win-", StringComparison.Ordinal) then
-            addWindowsRoot "PROGRAMFILES" "Google Chrome" [| "Google"; "Chrome"; "Application"; "chrome.exe" |]
+            addWindowsRoot
+                "PROGRAMFILES"
+                "Google Chrome"
+                [| "Google"; "Chrome"; "Application"; "chrome.exe" |]
 
-            addWindowsRoot "PROGRAMFILES(X86)" "Google Chrome" [| "Google"; "Chrome"; "Application"; "chrome.exe" |]
+            addWindowsRoot
+                "PROGRAMFILES(X86)"
+                "Google Chrome"
+                [| "Google"; "Chrome"; "Application"; "chrome.exe" |]
 
-            addWindowsRoot "LOCALAPPDATA" "Google Chrome" [| "Google"; "Chrome"; "Application"; "chrome.exe" |]
+            addWindowsRoot
+                "LOCALAPPDATA"
+                "Google Chrome"
+                [| "Google"; "Chrome"; "Application"; "chrome.exe" |]
 
             addWindowsRoot "PROGRAMFILES" "Chromium" [| "Chromium"; "Application"; "chrome.exe" |]
 
-            addWindowsRoot "PROGRAMFILES(X86)" "Microsoft Edge" [| "Microsoft"; "Edge"; "Application"; "msedge.exe" |]
+            addWindowsRoot
+                "PROGRAMFILES(X86)"
+                "Microsoft Edge"
+                [| "Microsoft"; "Edge"; "Application"; "msedge.exe" |]
 
-            addWindowsRoot "PROGRAMFILES" "Microsoft Edge" [| "Microsoft"; "Edge"; "Application"; "msedge.exe" |]
+            addWindowsRoot
+                "PROGRAMFILES"
+                "Microsoft Edge"
+                [| "Microsoft"; "Edge"; "Application"; "msedge.exe" |]
 
             addFromPath "Google Chrome" "chrome.exe"
             addFromPath "Chromium" "chromium.exe"

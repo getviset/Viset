@@ -20,7 +20,8 @@ module internal TomlValueParser =
             table
             |> Seq.map (fun entry -> entry.Key, entry.Value)
             |> List.ofSeq
-            |> traverse (fun _ (key, item) -> parse (appendKey path key) item |> Result.map (fun parsed -> key, parsed))
+            |> traverse (fun _ (key, item) ->
+                parse (appendKey path key) item |> Result.map (fun parsed -> key, parsed))
             |> Result.map Table
 
         match value with
@@ -58,4 +59,5 @@ module internal TomlValueParser =
         table
         |> Seq.map (fun entry -> entry.Key, entry.Value)
         |> List.ofSeq
-        |> traverse (fun _ (key, value) -> parse (appendKey path key) value |> Result.map (fun parsed -> key, parsed))
+        |> traverse (fun _ (key, value) ->
+            parse (appendKey path key) value |> Result.map (fun parsed -> key, parsed))

@@ -39,7 +39,11 @@ type CompressedFrame =
       Bytes: byte array }
 
     override frame.ToString() =
-        String.Concat(frame.Format.ToString(), ":", frame.Bytes.Length.ToString(CultureInfo.InvariantCulture))
+        String.Concat(
+            frame.Format.ToString(),
+            ":",
+            frame.Bytes.Length.ToString(CultureInfo.InvariantCulture)
+        )
 
 [<DebuggerDisplay("WebPEncoder")>]
 type WebPEncoder =

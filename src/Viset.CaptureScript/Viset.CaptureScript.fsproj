@@ -1,10 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <RootNamespace>Viset</RootNamespace>
-    <IsAotCompatible>true</IsAotCompatible>
-  </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="CaptureRequest.fs" />
     <Compile Include="CaptureScript.Primitives.fs" />

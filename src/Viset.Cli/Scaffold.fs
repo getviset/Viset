@@ -21,7 +21,9 @@ module Scaffold =
                     Directory.CreateDirectory(request.TargetDirectory) |> ignore
 
                     let write relativePath content =
-                        ScaffoldFileSystem.writeFile (Path.Combine(request.TargetDirectory, relativePath)) content
+                        ScaffoldFileSystem.writeFile
+                            (Path.Combine(request.TargetDirectory, relativePath))
+                            content
 
                     write "capture.lua" (ScaffoldContent.capture settings)
                     write "README.md" (ScaffoldContent.readme settings)

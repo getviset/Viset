@@ -38,7 +38,10 @@ module internal LuaHttpBindings =
             match getValue options "headers" |> tryRead<LuaTable> with
             | Some headers ->
                 for item in headers do
-                    request.Headers.TryAddWithoutValidation(item.Key.Read<string>(), item.Value.Read<string>())
+                    request.Headers.TryAddWithoutValidation(
+                        item.Key.Read<string>(),
+                        item.Value.Read<string>()
+                    )
                     |> ignore
             | None -> ()
 
@@ -64,7 +67,8 @@ module internal LuaHttpBindings =
                         | value when value.Type = LuaValueType.Nil -> 30000.0
                         | value -> durationMilliseconds value
 
-                    let! response, body = sendGetAsync client options timeoutMilliseconds cancellationToken
+                    let! response, body =
+                        sendGetAsync client options timeoutMilliseconds cancellationToken
 
                     use response = response
                     return context.Return(responseTable response body)
@@ -83,21 +87,28 @@ module internal LuaHttpBindings =
                     let stopwatch = Stopwatch.StartNew()
                     let mutable completed = None
 
-                    while completed.IsNone && stopwatch.Elapsed.TotalMilliseconds < timeoutMilliseconds do
+                    while completed.IsNone
+                          && stopwatch.Elapsed.TotalMilliseconds < timeoutMilliseconds do
                         let remaining = timeoutMilliseconds - stopwatch.Elapsed.TotalMilliseconds
 
                         let requestTimeout = max 1.0 (min 500.0 remaining)
 
                         try
-                            let! response, body = sendGetAsync client options requestTimeout cancellationToken
+                            let! response, body =
+                                sendGetAsync client options requestTimeout cancellationToken
 
                             use response = response
 
-                            if int response.StatusCode >= 200 && int response.StatusCode <= 299 then
+                            if
+                                int response.StatusCode >= 200 && int response.StatusCode <= 299
+                            then
                                 completed <- Some(responseTable response body)
                         with
                         | :? HttpRequestException -> ()
-                        | :? OperationCanceledException when not cancellationToken.IsCancellationRequested -> ()
+                        | :? OperationCanceledException when
+                            not cancellationToken.IsCancellationRequested
+                            ->
+                            ()
 
                         if completed.IsNone then
                             do! Task.Delay(50, cancellationToken)
@@ -106,7 +117,10 @@ module internal LuaHttpBindings =
                     | Some value -> return context.Return value
                     | None ->
                         return
-                            raise (TimeoutException "The HTTP endpoint did not return a 2xx response before timeout.")
+                            raise (
+                                TimeoutException
+                                    "The HTTP endpoint did not return a 2xx response before timeout."
+                            )
                 })
 
         let table = LuaTable()

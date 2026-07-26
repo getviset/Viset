@@ -45,7 +45,10 @@ module internal CapturePlanner =
             || conflicts
                |> List.exists (fun required ->
                    argument.Equals(required, StringComparison.OrdinalIgnoreCase)
-                   || argument.StartsWith(String.Concat(required, "="), StringComparison.OrdinalIgnoreCase)))
+                   || argument.StartsWith(
+                       String.Concat(required, "="),
+                       StringComparison.OrdinalIgnoreCase
+                   )))
         |> function
             | Some argument when String.IsNullOrWhiteSpace argument ->
                 error "browser_arguments must not contain empty values."
@@ -83,10 +86,14 @@ module internal CapturePlanner =
                 let! relativePath = CaptureOutputTemplate.validateRelativePath rendered
 
                 let absolutePath =
-                    Path.GetFullPath(relativePath.Replace('/', Path.DirectorySeparatorChar), outputRoot)
+                    Path.GetFullPath(
+                        relativePath.Replace('/', Path.DirectorySeparatorChar),
+                        outputRoot
+                    )
 
                 if not (outputPaths.Add absolutePath) then
-                    return! error (String.Concat("Expanded output path is duplicated: ", relativePath))
+                    return!
+                        error (String.Concat("Expanded output path is duplicated: ", relativePath))
                 else
                     return
                         { Format = format
@@ -123,7 +130,8 @@ module internal CapturePlanner =
 
             let! outputRoot = resolveOutputRoot request scriptDirectory model.OutputRoot
 
-            let! captures = createCaptures encoding.Format outputTemplate outputRoot devices axes data
+            let! captures =
+                createCaptures encoding.Format outputTemplate outputRoot devices axes data
 
             return
                 { ScriptPath = request.ScriptPath

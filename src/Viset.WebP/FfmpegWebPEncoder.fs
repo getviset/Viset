@@ -29,7 +29,10 @@ module internal FfmpegWebPEncoder =
             ImageValidation.validate firstFrame |> ignore
 
             let outputPath =
-                Path.Combine(Path.GetTempPath(), String.Concat("viset-", Guid.NewGuid().ToString("N"), ".webp"))
+                Path.Combine(
+                    Path.GetTempPath(),
+                    String.Concat("viset-", Guid.NewGuid().ToString("N"), ".webp")
+                )
 
             let startInfo = ProcessStartInfo(executable)
             startInfo.UseShellExecute <- false
@@ -93,9 +96,14 @@ module internal FfmpegWebPEncoder =
                                 readFrameAsync index cancellationToken
 
                         if frame.Format <> firstFrame.Format then
-                            invalidOp "FFmpeg animation input frames must use one compressed image format."
+                            invalidOp
+                                "FFmpeg animation input frames must use one compressed image format."
 
-                        do! ffmpegProcess.StandardInput.BaseStream.WriteAsync(frame.Bytes, cancellationToken)
+                        do!
+                            ffmpegProcess.StandardInput.BaseStream.WriteAsync(
+                                frame.Bytes,
+                                cancellationToken
+                            )
 
                     ffmpegProcess.StandardInput.Close()
                     do! ffmpegProcess.WaitForExitAsync cancellationToken
@@ -115,7 +123,10 @@ module internal FfmpegWebPEncoder =
 
                     raise (
                         InvalidOperationException(
-                            String.Concat("ffmpeg could not consume Viset's compressed frames: ", errorText.Trim()),
+                            String.Concat(
+                                "ffmpeg could not consume Viset's compressed frames: ",
+                                errorText.Trim()
+                            ),
                             writeError
                         )
                     )
@@ -128,7 +139,10 @@ module internal FfmpegWebPEncoder =
                 let! encodedBytes = File.ReadAllBytesAsync(outputPath, cancellationToken)
                 let container = WebPContainerParser.parse encodedBytes
 
-                WebPDurationNormalization.plan WebPEncoding.MaximumFrameDurationMilliseconds (List.sum ticks) container
+                WebPDurationNormalization.plan
+                    WebPEncoding.MaximumFrameDurationMilliseconds
+                    (List.sum ticks)
+                    container
                 |> Option.iter (fun patch ->
                     encodedBytes[patch.Offset] <- byte patch.Duration
                     encodedBytes[patch.Offset + 1] <- byte (patch.Duration >>> 8)

@@ -64,7 +64,11 @@ type internal CdpTransport private (socket: ClientWebSocket, commandTimeout: Tim
                         let mutable complete = false
 
                         while not complete do
-                            let! result = socket.ReceiveAsync(ArraySegment<byte> buffer, readerCancellation.Token)
+                            let! result =
+                                socket.ReceiveAsync(
+                                    ArraySegment<byte> buffer,
+                                    readerCancellation.Token
+                                )
 
                             if result.MessageType = WebSocketMessageType.Close then
                                 raise (WebSocketException "The CDP WebSocket closed unexpectedly.")
@@ -84,8 +88,10 @@ type internal CdpTransport private (socket: ClientWebSocket, commandTimeout: Tim
                             | false, _ -> ()
                         else
                             match incoming.Method with
-                            | "Page.loadEventFired" -> pageLoadEvents.Writer.TryWrite incoming |> ignore
-                            | "Page.screencastFrame" -> screencastEvents.Writer.TryWrite incoming |> ignore
+                            | "Page.loadEventFired" ->
+                                pageLoadEvents.Writer.TryWrite incoming |> ignore
+                            | "Page.screencastFrame" ->
+                                screencastEvents.Writer.TryWrite incoming |> ignore
                             | _ -> ()
                 with
                 | :? OperationCanceledException when readerCancellation.IsCancellationRequested ->
@@ -107,7 +113,8 @@ type internal CdpTransport private (socket: ClientWebSocket, commandTimeout: Tim
             let id = Interlocked.Increment(&nextId)
 
             let completion =
-                TaskCompletionSource<CdpIncomingMessageModel> TaskCreationOptions.RunContinuationsAsynchronously
+                TaskCompletionSource<CdpIncomingMessageModel>
+                    TaskCreationOptions.RunContinuationsAsynchronously
 
             if not (pending.TryAdd(id, completion)) then
                 raise (InvalidOperationException "A duplicate CDP command ID was generated.")
@@ -181,7 +188,8 @@ type internal CdpTransport private (socket: ClientWebSocket, commandTimeout: Tim
                         socket.State = WebSocketState.Open
                         || socket.State = WebSocketState.CloseReceived
                     then
-                        use closeCancellation = new CancellationTokenSource(TimeSpan.FromSeconds 1.0)
+                        use closeCancellation =
+                            new CancellationTokenSource(TimeSpan.FromSeconds 1.0)
 
                         do!
                             socket.CloseOutputAsync(
@@ -206,7 +214,9 @@ type internal CdpTransport private (socket: ClientWebSocket, commandTimeout: Tim
     interface IAsyncDisposable with
         member this.DisposeAsync() = ValueTask(this.DisposeCoreAsync())
 
-    static member ConnectAsync(endpoint: Uri, commandTimeout: TimeSpan, cancellationToken: CancellationToken) =
+    static member ConnectAsync
+        (endpoint: Uri, commandTimeout: TimeSpan, cancellationToken: CancellationToken)
+        =
         task {
             ArgumentNullException.ThrowIfNull endpoint
 
@@ -233,7 +243,11 @@ type internal CdpTransport private (socket: ClientWebSocket, commandTimeout: Tim
                     return
                         raise (
                             CdpConnectionException(
-                                String.Concat("Timed out connecting to CDP endpoint ", endpoint.AbsoluteUri, "."),
+                                String.Concat(
+                                    "Timed out connecting to CDP endpoint ",
+                                    endpoint.AbsoluteUri,
+                                    "."
+                                ),
                                 error
                             )
                         )
@@ -241,7 +255,11 @@ type internal CdpTransport private (socket: ClientWebSocket, commandTimeout: Tim
                     return
                         raise (
                             CdpConnectionException(
-                                String.Concat("Failed to connect to CDP endpoint ", endpoint.AbsoluteUri, "."),
+                                String.Concat(
+                                    "Failed to connect to CDP endpoint ",
+                                    endpoint.AbsoluteUri,
+                                    "."
+                                ),
                                 error
                             )
                         )

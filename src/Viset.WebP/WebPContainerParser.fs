@@ -39,7 +39,11 @@ module internal WebPContainerParser =
                 invalidOp "An encoder returned a malformed WebP container."
             else
                 let dataSize64 =
-                    uint64 (BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(offset + 4, sizeof<uint32>)))
+                    uint64 (
+                        BinaryPrimitives.ReadUInt32LittleEndian(
+                            bytes.AsSpan(offset + 4, sizeof<uint32>)
+                        )
+                    )
 
                 let dataOffset64 = uint64 offset + 8UL
                 let nextOffset64 = dataOffset64 + dataSize64 + dataSize64 % 2UL
@@ -48,7 +52,8 @@ module internal WebPContainerParser =
                     invalidOp "An encoder returned a truncated WebP chunk."
 
                 if dataSize64 > uint64 Int32.MaxValue then
-                    invalidOp "An encoder returned a WebP chunk that exceeds Viset's managed size limit."
+                    invalidOp
+                        "An encoder returned a WebP chunk that exceeds Viset's managed size limit."
 
                 let dataOffset = int dataOffset64
                 let dataSize = int dataSize64

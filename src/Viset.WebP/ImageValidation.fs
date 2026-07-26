@@ -10,7 +10,10 @@ module internal ImageValidation =
         if frame.Bytes.Length = 0 then
             invalidArg
                 (nameof frame)
-                (String.Concat(frame.Format.ToString().ToUpperInvariant(), " bytes must not be empty."))
+                (String.Concat(
+                    frame.Format.ToString().ToUpperInvariant(),
+                    " bytes must not be empty."
+                ))
 
         let signatureMatches =
             match frame.Format with
@@ -33,7 +36,11 @@ module internal ImageValidation =
         if not signatureMatches then
             invalidArg
                 (nameof frame)
-                (String.Concat("Bytes do not contain the declared ", frame.Format.ToString(), " format."))
+                (String.Concat(
+                    "Bytes do not contain the declared ",
+                    frame.Format.ToString(),
+                    " format."
+                ))
 
         let image = ImageResult.FromMemory(frame.Bytes, ColorComponents.RedGreenBlueAlpha)
 

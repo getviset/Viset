@@ -24,7 +24,11 @@ module internal FrameCoalescing =
           Source = source
           Duration = int64 duration }
 
-    let step source duration (state: FrameCoalescingState) : FrameCoalescingState * CoalescedSourceRun option =
+    let step
+        source
+        duration
+        (state: FrameCoalescingState)
+        : FrameCoalescingState * CoalescedSourceRun option =
         if exactSameSource state.Source source then
             { state with
                 Duration = Checked.(+) state.Duration (int64 duration) },

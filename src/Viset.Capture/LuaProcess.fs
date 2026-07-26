@@ -7,7 +7,8 @@ open System.Threading
 open System.Threading.Tasks
 open Lua
 
-type private ManagedProcess(childProcess: Process, standardOutput: Task<string>, standardError: Task<string>) =
+type private ManagedProcess
+    (childProcess: Process, standardOutput: Task<string>, standardError: Task<string>) =
     member _.Process = childProcess
     member _.StandardOutput = standardOutput
     member _.StandardError = standardError

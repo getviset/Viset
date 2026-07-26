@@ -45,7 +45,9 @@ module internal LibWebPAnimEncoder =
                             }
 
                     if LibWebPAnimNative.dimensions encoder <> (frame.Width, frame.Height) then
-                        invalidArg (nameof frameCount) "Animated WebP frames must have identical dimensions."
+                        invalidArg
+                            (nameof frameCount)
+                            "Animated WebP frames must have identical dimensions."
 
                     let encode = Stopwatch.StartNew()
                     LibWebPAnimNative.addFrame encoder timestamp frame.Rgba
@@ -54,7 +56,9 @@ module internal LibWebPAnimEncoder =
                     encodeDurations.Add encode.Elapsed
 
                     if timestamp > Int32.MaxValue - ticks[index] then
-                        invalidArg (nameof frameCount) "Animated WebP timeline exceeds libwebp_anim's timestamp limit."
+                        invalidArg
+                            (nameof frameCount)
+                            "Animated WebP timeline exceeds libwebp_anim's timestamp limit."
 
                     timestamp <- timestamp + ticks[index]
 

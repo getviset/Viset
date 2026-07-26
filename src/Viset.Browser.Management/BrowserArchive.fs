@@ -14,7 +14,10 @@ module internal BrowserArchive =
         if entryName.Contains '\\' then
             raise (
                 InvalidDataException(
-                    String.Concat("Browser archive entry contains a backslash and was rejected: ", entryName)
+                    String.Concat(
+                        "Browser archive entry contains a backslash and was rejected: ",
+                        entryName
+                    )
                 )
             )
 
@@ -22,7 +25,11 @@ module internal BrowserArchive =
             Path.IsPathRooted entryName
             || entryName.StartsWith("/", StringComparison.Ordinal)
         then
-            raise (InvalidDataException(String.Concat("Browser archive entry must be relative: ", entryName)))
+            raise (
+                InvalidDataException(
+                    String.Concat("Browser archive entry must be relative: ", entryName)
+                )
+            )
 
         let segments = entryName.Split('/', StringSplitOptions.None)
 
@@ -39,7 +46,11 @@ module internal BrowserArchive =
                     || segment.Contains ':'))
 
         if unsafeSegment then
-            raise (InvalidDataException(String.Concat("Browser archive entry has an unsafe path: ", entryName)))
+            raise (
+                InvalidDataException(
+                    String.Concat("Browser archive entry has an unsafe path: ", entryName)
+                )
+            )
 
         entryName.TrimEnd '/'
 
@@ -55,20 +66,32 @@ module internal BrowserArchive =
             || target.Length > 4096
             || target.Contains(char 0)
         then
-            raise (InvalidDataException(String.Concat("Browser archive link has an invalid target: ", linkPath)))
+            raise (
+                InvalidDataException(
+                    String.Concat("Browser archive link has an invalid target: ", linkPath)
+                )
+            )
 
         if
             target.Contains '\\'
             || target.StartsWith("/", StringComparison.Ordinal)
             || Path.IsPathRooted target
         then
-            raise (InvalidDataException(String.Concat("Browser archive link target must be relative: ", linkPath)))
+            raise (
+                InvalidDataException(
+                    String.Concat("Browser archive link target must be relative: ", linkPath)
+                )
+            )
 
         let stack = ResizeArray<string>()
         let linkParentIndex = linkPath.LastIndexOf '/'
 
         if linkParentIndex >= 0 then
-            stack.AddRange(linkPath.Substring(0, linkParentIndex).Split('/', StringSplitOptions.RemoveEmptyEntries))
+            stack.AddRange(
+                linkPath
+                    .Substring(0, linkParentIndex)
+                    .Split('/', StringSplitOptions.RemoveEmptyEntries)
+            )
 
         for segment in target.Split('/', StringSplitOptions.None) do
             if
@@ -80,18 +103,29 @@ module internal BrowserArchive =
                 if stack.Count = 0 then
                     raise (
                         InvalidDataException(
-                            String.Concat("Browser archive link target escapes the extraction root: ", linkPath)
+                            String.Concat(
+                                "Browser archive link target escapes the extraction root: ",
+                                linkPath
+                            )
                         )
                     )
 
                 stack.RemoveAt(stack.Count - 1)
             elif segment.Contains ':' then
-                raise (InvalidDataException(String.Concat("Browser archive link has an unsafe target: ", linkPath)))
+                raise (
+                    InvalidDataException(
+                        String.Concat("Browser archive link has an unsafe target: ", linkPath)
+                    )
+                )
             else
                 stack.Add segment
 
         if stack.Count = 0 then
-            raise (InvalidDataException(String.Concat("Browser archive link targets the extraction root: ", linkPath)))
+            raise (
+                InvalidDataException(
+                    String.Concat("Browser archive link targets the extraction root: ", linkPath)
+                )
+            )
 
         String.Join("/", stack)
 
@@ -131,16 +165,25 @@ module internal BrowserArchive =
             | Some parent ->
                 current <- parent
                 reachedRoot <- String.Equals(current.FullName, root, comparison)
-            | None -> raise (InvalidDataException "Browser archive extraction left the temporary root.")
+            | None ->
+                raise (InvalidDataException "Browser archive extraction left the temporary root.")
 
     let private ensureNotLinkOrReparse (path: string) =
         let info = FileInfo path :> FileSystemInfo
 
         if info.LinkTarget |> Option.ofObj |> Option.isSome then
-            raise (InvalidDataException(String.Concat("Browser extraction encountered a symbolic link: ", path)))
+            raise (
+                InvalidDataException(
+                    String.Concat("Browser extraction encountered a symbolic link: ", path)
+                )
+            )
 
         if info.Attributes.HasFlag FileAttributes.ReparsePoint then
-            raise (InvalidDataException(String.Concat("Browser extraction encountered a reparse point: ", path)))
+            raise (
+                InvalidDataException(
+                    String.Concat("Browser extraction encountered a reparse point: ", path)
+                )
+            )
 
     let private setArchivedUnixMode (entry: ZipArchiveEntry) (destinationPath: string) =
         if OperatingSystem.IsLinux() || OperatingSystem.IsMacOS() then
@@ -172,7 +215,9 @@ module internal BrowserArchive =
         | Some(prefix, target, consumed) ->
             if not (visited.Add prefix) then
                 raise (
-                    InvalidDataException(String.Concat("Browser archive contains a symbolic-link cycle at: ", prefix))
+                    InvalidDataException(
+                        String.Concat("Browser archive contains a symbolic-link cycle at: ", prefix)
+                    )
                 )
 
             let remaining =
@@ -193,7 +238,9 @@ module internal BrowserArchive =
             | true, isDirectory -> path, isDirectory, depth
             | false, _ ->
                 raise (
-                    InvalidDataException(String.Concat("Browser archive link target is not archive-declared: ", path))
+                    InvalidDataException(
+                        String.Concat("Browser archive link target is not archive-declared: ", path)
+                    )
                 )
 
 
@@ -241,12 +288,21 @@ module internal BrowserArchive =
                     entryName.EndsWith("/", StringComparison.Ordinal) || fileType = 0x4000
 
                 if isWindowsReparsePoint entry then
-                    raise (InvalidDataException(String.Concat("Browser archive entry is a reparse point: ", entryName)))
-
-                if fileType <> 0 && fileType <> 0x4000 && fileType <> 0x8000 && fileType <> 0xA000 then
                     raise (
                         InvalidDataException(
-                            String.Concat("Browser archive entry has an unsupported special file type: ", entryName)
+                            String.Concat("Browser archive entry is a reparse point: ", entryName)
+                        )
+                    )
+
+                if
+                    fileType <> 0 && fileType <> 0x4000 && fileType <> 0x8000 && fileType <> 0xA000
+                then
+                    raise (
+                        InvalidDataException(
+                            String.Concat(
+                                "Browser archive entry has an unsupported special file type: ",
+                                entryName
+                            )
                         )
                     )
 
@@ -256,26 +312,49 @@ module internal BrowserArchive =
                 if not (destinationPath.StartsWith(rootPrefix, comparison)) then
                     raise (
                         InvalidDataException(
-                            String.Concat("Browser archive entry escapes the extraction root: ", entryName)
+                            String.Concat(
+                                "Browser archive entry escapes the extraction root: ",
+                                entryName
+                            )
                         )
                     )
 
                 if not (targets.Add destinationPath) || declarations.ContainsKey canonicalPath then
                     raise (
-                        InvalidDataException(String.Concat("Browser archive contains a duplicate entry: ", entryName))
+                        InvalidDataException(
+                            String.Concat("Browser archive contains a duplicate entry: ", entryName)
+                        )
                     )
 
                 declarations.Add(canonicalPath, isDirectory)
 
                 if fileType = 0xA000 then
-                    if not (String.Equals(platform.RuntimeIdentifier, "osx-arm64", StringComparison.Ordinal)) then
+                    if
+                        not (
+                            String.Equals(
+                                platform.RuntimeIdentifier,
+                                "osx-arm64",
+                                StringComparison.Ordinal
+                            )
+                        )
+                    then
                         raise (
-                            InvalidDataException(String.Concat("Browser archive entry is a symbolic link: ", entryName))
+                            InvalidDataException(
+                                String.Concat(
+                                    "Browser archive entry is a symbolic link: ",
+                                    entryName
+                                )
+                            )
                         )
 
                     if entry.Length <= 0L || entry.Length > 4096L then
                         raise (
-                            InvalidDataException(String.Concat("Browser archive link has an invalid size: ", entryName))
+                            InvalidDataException(
+                                String.Concat(
+                                    "Browser archive link has an invalid size: ",
+                                    entryName
+                                )
+                            )
                         )
 
                     use reader = new StreamReader(entry.Open())
@@ -301,7 +380,14 @@ module internal BrowserArchive =
                         (HashSet<string> StringComparer.Ordinal)
                         0
 
-                resolvedSymlinks.Add(linkPath, target, normalizedTarget, resolvedTarget, isDirectory, depth)
+                resolvedSymlinks.Add(
+                    linkPath,
+                    target,
+                    normalizedTarget,
+                    resolvedTarget,
+                    isDirectory,
+                    depth
+                )
 
             for entry in archive.Entries do
                 cancellationToken.ThrowIfCancellationRequested()
@@ -311,10 +397,16 @@ module internal BrowserArchive =
                     let canonicalPath = canonicalArchivePath entryName
 
                     let destinationPath =
-                        Path.GetFullPath(Path.Combine(root, canonicalPath.Replace('/', Path.DirectorySeparatorChar)))
+                        Path.GetFullPath(
+                            Path.Combine(
+                                root,
+                                canonicalPath.Replace('/', Path.DirectorySeparatorChar)
+                            )
+                        )
 
                     let isDirectory =
-                        entryName.EndsWith("/", StringComparison.Ordinal) || unixFileType entry = 0x4000
+                        entryName.EndsWith("/", StringComparison.Ordinal)
+                        || unixFileType entry = 0x4000
 
                     if isDirectory then
                         Directory.CreateDirectory destinationPath |> ignore
@@ -323,7 +415,12 @@ module internal BrowserArchive =
                         match Path.GetDirectoryName destinationPath |> Option.ofObj with
                         | None ->
                             raise (
-                                InvalidDataException(String.Concat("Browser archive entry has no parent: ", entryName))
+                                InvalidDataException(
+                                    String.Concat(
+                                        "Browser archive entry has no parent: ",
+                                        entryName
+                                    )
+                                )
                             )
                         | Some parent ->
                             Directory.CreateDirectory parent |> ignore
@@ -348,16 +445,28 @@ module internal BrowserArchive =
             for linkPath, target, normalizedTarget, _, isDirectory, _ in
                 resolvedSymlinks |> Seq.sortBy (fun (_, _, _, _, _, depth) -> depth) do
                 let destinationPath =
-                    Path.GetFullPath(Path.Combine(root, linkPath.Replace('/', Path.DirectorySeparatorChar)))
+                    Path.GetFullPath(
+                        Path.Combine(root, linkPath.Replace('/', Path.DirectorySeparatorChar))
+                    )
 
                 match Path.GetDirectoryName destinationPath |> Option.ofObj with
-                | None -> raise (InvalidDataException(String.Concat("Browser archive link has no parent: ", linkPath)))
+                | None ->
+                    raise (
+                        InvalidDataException(
+                            String.Concat("Browser archive link has no parent: ", linkPath)
+                        )
+                    )
                 | Some parent ->
                     ensureNoReparseParents root parent
 
                     if File.Exists destinationPath || Directory.Exists destinationPath then
                         raise (
-                            InvalidDataException(String.Concat("Browser archive link path already exists: ", linkPath))
+                            InvalidDataException(
+                                String.Concat(
+                                    "Browser archive link path already exists: ",
+                                    linkPath
+                                )
+                            )
                         )
 
                     if isDirectory then
@@ -372,15 +481,26 @@ module internal BrowserArchive =
                             FileInfo destinationPath :> FileSystemInfo
 
                     if linkInfo.LinkTarget |> Option.ofObj |> Option.isNone then
-                        raise (InvalidDataException(String.Concat("Browser archive link was not created: ", linkPath)))
+                        raise (
+                            InvalidDataException(
+                                String.Concat("Browser archive link was not created: ", linkPath)
+                            )
+                        )
 
                     match linkInfo.ResolveLinkTarget false |> Option.ofObj with
                     | None ->
-                        raise (InvalidDataException(String.Concat("Browser archive link does not resolve: ", linkPath)))
+                        raise (
+                            InvalidDataException(
+                                String.Concat("Browser archive link does not resolve: ", linkPath)
+                            )
+                        )
                     | Some resolvedInfo ->
                         let expectedPath =
                             Path.GetFullPath(
-                                Path.Combine(root, normalizedTarget.Replace('/', Path.DirectorySeparatorChar))
+                                Path.Combine(
+                                    root,
+                                    normalizedTarget.Replace('/', Path.DirectorySeparatorChar)
+                                )
                             )
 
                         if not (String.Equals(resolvedInfo.FullName, expectedPath, comparison)) then

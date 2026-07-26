@@ -74,13 +74,19 @@ module internal LibWebPFullEncoder =
                                             | Some decoded -> decoded
                                             | None -> ImageDecoder.decodeMeasured work.Source
 
-                                        if LibWebPFullNative.dimensions encoder <> (frame.Width, frame.Height) then
+                                        if
+                                            LibWebPFullNative.dimensions encoder
+                                            <> (frame.Width, frame.Height)
+                                        then
                                             invalidArg
                                                 (nameof frameCount)
                                                 "Animated WebP frames must have identical dimensions."
 
                                         let encode = Stopwatch.StartNew()
-                                        let bytes = LibWebPFullNative.encodeFrame encoder frame.Rgba
+
+                                        let bytes =
+                                            LibWebPFullNative.encodeFrame encoder frame.Rgba
+
                                         encode.Stop()
 
                                         { Sequence = work.Sequence
@@ -95,7 +101,8 @@ module internal LibWebPFullEncoder =
 
                             for frame in completed |> Array.sortBy _.Sequence do
                                 encodedFrameCount <-
-                                    encodedFrameCount + addFullFrameWithDuration encoder frame.Duration frame.Bytes
+                                    encodedFrameCount
+                                    + addFullFrameWithDuration encoder frame.Duration frame.Bytes
 
                                 encodedSourceRunCount <- encodedSourceRunCount + 1
                                 decodeDurations.Add frame.DecodeDuration

@@ -11,7 +11,13 @@ module internal BrowserCache =
         let environmentRoot variableName segments =
             match Environment.GetEnvironmentVariable variableName |> nonEmptyString with
             | Some root -> Ok(Path.Combine(Array.append [| root |] segments))
-            | None -> Error(String.Concat(variableName, " is not set; the managed browser cache cannot be located."))
+            | None ->
+                Error(
+                    String.Concat(
+                        variableName,
+                        " is not set; the managed browser cache cannot be located."
+                    )
+                )
 
         if runtimeIdentifier.StartsWith("linux-", StringComparison.Ordinal) then
             match Environment.GetEnvironmentVariable "XDG_CACHE_HOME" |> nonEmptyString with
@@ -25,7 +31,11 @@ module internal BrowserCache =
             Error(String.Concat("No managed browser cache is defined for ", runtimeIdentifier, "."))
 
     let targetDirectory (cacheRoot: string) (browserLock: BrowserLock) (runtimeIdentifier: string) =
-        Path.Combine(cacheRoot, String.Concat(browserLock.BrowserVersion, "-", browserLock.Revision), runtimeIdentifier)
+        Path.Combine(
+            cacheRoot,
+            String.Concat(browserLock.BrowserVersion, "-", browserLock.Revision),
+            runtimeIdentifier
+        )
 
     let executablePath (targetDirectoryPath: string) (platform: BrowserPlatformLock) =
         platform.ExecutableLayout.Split('/', StringSplitOptions.RemoveEmptyEntries)

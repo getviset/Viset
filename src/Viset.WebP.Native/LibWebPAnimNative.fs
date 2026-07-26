@@ -30,14 +30,24 @@ module internal LibWebPAnimNative =
         let config = WebPNativeConfig.create options
         let mutable encoderOptions = Unchecked.defaultof<WebPAnimEncoderOptions>
 
-        if WebPInterop.WebPAnimEncoderOptionsInitInternal(&encoderOptions, WebPInterop.MuxAbiVersion) = 0 then
+        if
+            WebPInterop.WebPAnimEncoderOptionsInitInternal(
+                &encoderOptions,
+                WebPInterop.MuxAbiVersion
+            ) = 0
+        then
             invalidOp "libwebp_anim rejected the mux ABI version."
 
         encoderOptions.AnimationParameters.LoopCount <- 0
         encoderOptions.AnimationParameters.BackgroundColor <- 0u
 
         let handle =
-            WebPInterop.WebPAnimEncoderNewInternal(width, height, &encoderOptions, WebPInterop.MuxAbiVersion)
+            WebPInterop.WebPAnimEncoderNewInternal(
+                width,
+                height,
+                &encoderOptions,
+                WebPInterop.MuxAbiVersion
+            )
 
         if handle = 0n then
             invalidOp "libwebp_anim could not create an animation encoder."
@@ -68,12 +78,25 @@ module internal LibWebPAnimNative =
             let pixels = GCHandle.Alloc(rgba, GCHandleType.Pinned)
 
             try
-                if WebPInterop.WebPPictureImportRgba(&picture, pixels.AddrOfPinnedObject(), encoder.Width * 4) = 0 then
+                if
+                    WebPInterop.WebPPictureImportRgba(
+                        &picture,
+                        pixels.AddrOfPinnedObject(),
+                        encoder.Width * 4
+                    ) = 0
+                then
                     invalidOp "libwebp could not import an RGBA animation frame."
 
                 let mutable config = encoder.Config
 
-                if WebPInterop.WebPAnimEncoderAdd(encoder.Handle, &picture, timestampMilliseconds, &config) = 0 then
+                if
+                    WebPInterop.WebPAnimEncoderAdd(
+                        encoder.Handle,
+                        &picture,
+                        timestampMilliseconds,
+                        &config
+                    ) = 0
+                then
                     encoderError encoder.Handle "Adding a libwebp_anim frame"
             finally
                 pixels.Free()
@@ -81,7 +104,9 @@ module internal LibWebPAnimNative =
             WebPInterop.WebPPictureFree(&picture)
 
     let assemble (encoder: Encoder) finalTimestampMilliseconds =
-        if WebPInterop.WebPAnimEncoderFinish(encoder.Handle, 0n, finalTimestampMilliseconds, 0n) = 0 then
+        if
+            WebPInterop.WebPAnimEncoderFinish(encoder.Handle, 0n, finalTimestampMilliseconds, 0n) = 0
+        then
             encoderError encoder.Handle "Finalizing libwebp_anim timestamps"
 
         let mutable data = Unchecked.defaultof<WebPData>

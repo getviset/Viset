@@ -18,7 +18,8 @@ module internal WebPDurationNormalization =
             let adjusted = currentDuration + expectedDuration - actualDuration
 
             if adjusted <= 0 || adjusted > maximumDuration then
-                invalidOp "FFmpeg produced a WebP timeline that Viset could not normalize without losing duration."
+                invalidOp
+                    "FFmpeg produced a WebP timeline that Viset could not normalize without losing duration."
 
             Some
                 { Offset = durationOffset

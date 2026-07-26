@@ -17,7 +17,8 @@ module internal CaptureDeviceParser =
             with
             | :? ArgumentException
             | :? NotSupportedException
-            | :? PathTooLongException -> error (concat [| fieldName; " is not a valid path: "; path |])
+            | :? PathTooLongException ->
+                error (concat [| fieldName; " is not a valid path: "; path |])
 
     let parseFrameSource scriptDirectory value =
         if String.IsNullOrWhiteSpace value then
@@ -66,9 +67,13 @@ module internal CaptureDeviceParser =
             let deviceScale = model.DeviceScale |> Option.ofNullable |> Option.defaultValue 1.0
 
             if not (Double.IsFinite deviceScale) || deviceScale <= 0.0 then
-                error (concat [| "devices."; name; ".device_scale must be a positive finite number." |])
+                error (
+                    concat [| "devices."; name; ".device_scale must be a positive finite number." |]
+                )
             else
-                match parseDimensions (concat [| "devices."; name; ".viewport" |]) model.Viewport with
+                match
+                    parseDimensions (concat [| "devices."; name; ".viewport" |]) model.Viewport
+                with
                 | Error errors -> Error errors
                 | Ok viewport ->
                     let explicitFrameResult =
@@ -83,7 +88,8 @@ module internal CaptureDeviceParser =
                     | Ok explicitFrame ->
                         let device =
                             { Name = name
-                              Mobile = model.Mobile |> Option.ofNullable |> Option.defaultValue false
+                              Mobile =
+                                model.Mobile |> Option.ofNullable |> Option.defaultValue false
                               Touch = model.Touch |> Option.ofNullable |> Option.defaultValue false
                               DeviceScale = deviceScale
                               Viewport = viewport

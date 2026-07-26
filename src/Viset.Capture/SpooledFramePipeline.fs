@@ -6,7 +6,10 @@ open System.Threading
 
 type internal SpooledFramePipeline(session: CaptureSession) =
     let root =
-        Path.Combine(Path.GetTempPath(), String.Concat("viset-spooled-recording-", Guid.NewGuid().ToString "N"))
+        Path.Combine(
+            Path.GetTempPath(),
+            String.Concat("viset-spooled-recording-", Guid.NewGuid().ToString "N")
+        )
 
     let sourceFrames = ResizeArray<StoredFrame>()
     let preparedFrames = ResizeArray<StoredFrame>()
@@ -23,7 +26,8 @@ type internal SpooledFramePipeline(session: CaptureSession) =
 
                 let index = sourceFrames.Count
 
-                let! stored = RecordingPipeline.writeAsync root "source-" index frame cancellationToken
+                let! stored =
+                    RecordingPipeline.writeAsync root "source-" index frame cancellationToken
 
                 sourceFrames.Add stored
                 return index
@@ -35,11 +39,18 @@ type internal SpooledFramePipeline(session: CaptureSession) =
                     completed <- true
 
                     for index in 0 .. sourceFrames.Count - 1 do
-                        let! source = RecordingPipeline.readAsync sourceFrames[index] cancellationToken
+                        let! source =
+                            RecordingPipeline.readAsync sourceFrames[index] cancellationToken
 
                         let! prepared = session.PrepareFrameAsync(source, cancellationToken)
 
-                        let! stored = RecordingPipeline.writeAsync root "prepared-" index prepared cancellationToken
+                        let! stored =
+                            RecordingPipeline.writeAsync
+                                root
+                                "prepared-"
+                                index
+                                prepared
+                                cancellationToken
 
                         preparedFrames.Add stored
             }

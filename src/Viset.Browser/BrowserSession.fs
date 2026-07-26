@@ -31,12 +31,14 @@ type BrowserSession
                 with error ->
                     failures.Add(String.Concat("Failed to close CDP: ", error.Message))
 
-                let! processExited, processFailure = BrowserProcess.cleanupProcessAsync browserProcess
+                let! processExited, processFailure =
+                    BrowserProcess.cleanupProcessAsync browserProcess
 
                 processFailure |> Option.iter failures.Add
 
                 if processExited then
-                    let! diagnosticsResult = BrowserProcess.readProcessDiagnosticsAsync standardError standardOutput
+                    let! diagnosticsResult =
+                        BrowserProcess.readProcessDiagnosticsAsync standardError standardOutput
 
                     match diagnosticsResult with
                     | Ok _ -> ()
@@ -45,7 +47,9 @@ type BrowserSession
                 try
                     browserProcess.Dispose()
                 with error ->
-                    failures.Add(String.Concat("Failed to dispose browser process: ", error.Message))
+                    failures.Add(
+                        String.Concat("Failed to dispose browser process: ", error.Message)
+                    )
 
                 let! profileFailure = BrowserProcess.deleteProfileAsync profilePath
                 profileFailure |> Option.iter failures.Add
@@ -91,10 +95,18 @@ type BrowserSession
         }
 
     member this.NavigateAsync(url: Uri, cancellationToken: CancellationToken) =
-        this.RunAsync("navigate", cancellationToken, fun () -> client.NavigateAsync(url, cancellationToken))
+        this.RunAsync(
+            "navigate",
+            cancellationToken,
+            fun () -> client.NavigateAsync(url, cancellationToken)
+        )
 
     member this.EvaluateAsync(expression: string, cancellationToken: CancellationToken) =
-        this.RunAsync("evaluate", cancellationToken, fun () -> client.EvaluateAsync(expression, cancellationToken))
+        this.RunAsync(
+            "evaluate",
+            cancellationToken,
+            fun () -> client.EvaluateAsync(expression, cancellationToken)
+        )
 
     member this.ConfigureEmulationAsync
         (
@@ -108,7 +120,15 @@ type BrowserSession
         this.RunAsync(
             "configure emulation",
             cancellationToken,
-            fun () -> client.ConfigureEmulationAsync(width, height, deviceScaleFactor, mobile, touch, cancellationToken)
+            fun () ->
+                client.ConfigureEmulationAsync(
+                    width,
+                    height,
+                    deviceScaleFactor,
+                    mobile,
+                    touch,
+                    cancellationToken
+                )
         )
 
     member this.SetTransparentBackgroundAsync(cancellationToken: CancellationToken) =
@@ -119,10 +139,18 @@ type BrowserSession
         )
 
     member this.TouchAsync(x: double, y: double, cancellationToken: CancellationToken) =
-        this.RunAsync("dispatch touch", cancellationToken, fun () -> client.TouchAsync(x, y, cancellationToken))
+        this.RunAsync(
+            "dispatch touch",
+            cancellationToken,
+            fun () -> client.TouchAsync(x, y, cancellationToken)
+        )
 
     member this.CapturePngAsync(cancellationToken: CancellationToken) =
-        this.RunAsync("capture PNG", cancellationToken, fun () -> client.CapturePngAsync cancellationToken)
+        this.RunAsync(
+            "capture PNG",
+            cancellationToken,
+            fun () -> client.CapturePngAsync cancellationToken
+        )
 
     member this.StartScreencastAsync
         (source: WebPSource, width: int, height: int, cancellationToken: CancellationToken)
@@ -147,7 +175,9 @@ type BrowserSession
             fun () -> client.ReadScreencastFrameAsync cancellationToken
         )
 
-    member this.AcknowledgeScreencastFrameAsync(sessionId: int, cancellationToken: CancellationToken) =
+    member this.AcknowledgeScreencastFrameAsync
+        (sessionId: int, cancellationToken: CancellationToken)
+        =
         this.RunAsync(
             "acknowledge screencast frame",
             cancellationToken,
@@ -155,12 +185,18 @@ type BrowserSession
         )
 
     member this.StopScreencastAsync(cancellationToken: CancellationToken) =
-        this.RunAsync("stop screencast", cancellationToken, fun () -> client.StopScreencastAsync cancellationToken)
+        this.RunAsync(
+            "stop screencast",
+            cancellationToken,
+            fun () -> client.StopScreencastAsync cancellationToken
+        )
 
     interface IAsyncDisposable with
         member _.DisposeAsync() = ValueTask(this.DisposeCoreAsync())
 
-    static member LaunchAsync(options: BrowserSessionOptions, cancellationToken: CancellationToken) =
+    static member LaunchAsync
+        (options: BrowserSessionOptions, cancellationToken: CancellationToken)
+        =
         task {
             ArgumentNullException.ThrowIfNull options
             BrowserProcess.validateBrowserArguments options.BrowserArguments
@@ -171,7 +207,10 @@ type BrowserSession
                     (String.Concat("Browser executable does not exist: ", options.ExecutablePath))
 
             let profilePath =
-                Path.Combine(Path.GetTempPath(), String.Concat("viset-browser-", Guid.NewGuid().ToString "N"))
+                Path.Combine(
+                    Path.GetTempPath(),
+                    String.Concat("viset-browser-", Guid.NewGuid().ToString "N")
+                )
 
             Directory.CreateDirectory profilePath |> ignore
             let mutable browserProcess = None
@@ -184,7 +223,9 @@ type BrowserSession
                     Process.Start(BrowserProcess.createStartInfo options profilePath)
                     |> Option.ofObj
                     |> Option.defaultWith (fun () ->
-                        raise (InvalidOperationException "The browser process could not be started."))
+                        raise (
+                            InvalidOperationException "The browser process could not be started."
+                        ))
 
                 browserProcess <- Some started
                 standardOutput <- started.StandardOutput.ReadToEndAsync()
@@ -199,14 +240,20 @@ type BrowserSession
                         options.StartupTimeout
                         cancellationToken
 
-                let! endpoint = BrowserProcess.findPageEndpointAsync port options.StartupTimeout cancellationToken
+                let! endpoint =
+                    BrowserProcess.findPageEndpointAsync
+                        port
+                        options.StartupTimeout
+                        cancellationToken
 
-                let! connected = CdpClient.ConnectAsync(endpoint, options.CommandTimeout, cancellationToken)
+                let! connected =
+                    CdpClient.ConnectAsync(endpoint, options.CommandTimeout, cancellationToken)
 
                 client <- Some connected
                 do! connected.EnablePageAndRuntimeAsync cancellationToken
 
-                return BrowserSession(started, profilePath, connected, standardOutput, standardError)
+                return
+                    BrowserSession(started, profilePath, connected, standardOutput, standardError)
             with error ->
                 let failures = ResizeArray<string>()
 
@@ -224,7 +271,8 @@ type BrowserSession
                     processFailure |> Option.iter failures.Add
 
                     if processExited then
-                        let! diagnosticsResult = BrowserProcess.readProcessDiagnosticsAsync standardError standardOutput
+                        let! diagnosticsResult =
+                            BrowserProcess.readProcessDiagnosticsAsync standardError standardOutput
 
                         match diagnosticsResult with
                         | Ok _ -> ()
@@ -233,7 +281,12 @@ type BrowserSession
                     try
                         started.Dispose()
                     with cleanupError ->
-                        failures.Add(String.Concat("Failed to dispose browser process: ", cleanupError.Message))
+                        failures.Add(
+                            String.Concat(
+                                "Failed to dispose browser process: ",
+                                cleanupError.Message
+                            )
+                        )
                 | None -> ()
 
                 let! profileFailure = BrowserProcess.deleteProfileAsync profilePath

@@ -22,7 +22,10 @@ module internal OutputWriter =
         OutputSafety.ensureExistingAncestorsAreNotLinked parent
 
         let temporaryPath =
-            Path.Combine(parent, String.Concat $""".{Path.GetFileName path}.{Guid.NewGuid().ToString "N"}.tmp""")
+            Path.Combine(
+                parent,
+                String.Concat $""".{Path.GetFileName path}.{Guid.NewGuid().ToString "N"}.tmp"""
+            )
 
         try
             File.WriteAllBytes(temporaryPath, captured.Bytes)

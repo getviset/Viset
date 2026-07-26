@@ -38,7 +38,11 @@ type internal ScreencastFrameSource(session: CaptureSession, source: WebPSource)
 
                     let! frame = session.Page.ReadScreencastFrameAsync cancellationToken
 
-                    do! session.Page.AcknowledgeScreencastFrameAsync(frame.SessionId, cancellationToken)
+                    do!
+                        session.Page.AcknowledgeScreencastFrameAsync(
+                            frame.SessionId,
+                            cancellationToken
+                        )
 
                     acquisition.Stop()
 
@@ -85,15 +89,18 @@ type internal ScreencastFrameSource(session: CaptureSession, source: WebPSource)
 
             let cancellation =
                 segmentCancellation
-                |> Option.defaultWith (fun () -> invalidOp "The active screencast source has no cancellation signal.")
+                |> Option.defaultWith (fun () ->
+                    invalidOp "The active screencast source has no cancellation signal.")
 
             let frames =
                 segmentFrames
-                |> Option.defaultWith (fun () -> invalidOp "The active screencast source has no frame buffer.")
+                |> Option.defaultWith (fun () ->
+                    invalidOp "The active screencast source has no frame buffer.")
 
             let pump =
                 pumpTask
-                |> Option.defaultWith (fun () -> invalidOp "The active screencast source has no frame pump.")
+                |> Option.defaultWith (fun () ->
+                    invalidOp "The active screencast source has no frame pump.")
 
             let failures = ResizeArray<Exception>()
             cancellation.Cancel()
@@ -161,7 +168,8 @@ type internal ScreencastFrameSource(session: CaptureSession, source: WebPSource)
 
                 let frames =
                     segmentFrames
-                    |> Option.defaultWith (fun () -> invalidOp "The active screencast source has no frame buffer.")
+                    |> Option.defaultWith (fun () ->
+                        invalidOp "The active screencast source has no frame buffer.")
 
                 try
                     return! frames.Reader.ReadAsync(cancellationToken).AsTask()

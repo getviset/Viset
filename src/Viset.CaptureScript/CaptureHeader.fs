@@ -31,5 +31,6 @@ module internal CaptureHeader =
                 use reader = new StringReader(trimmed)
 
                 match reader.ReadLine() |> Option.ofObj with
-                | Some marker when String.Equals(marker.Trim(), "# viset", StringComparison.Ordinal) -> Ok content
+                | Some marker when String.Equals(marker.Trim(), "# viset", StringComparison.Ordinal) ->
+                    Ok content
                 | _ -> error "Capture Lua TOML header must begin with '# viset'."

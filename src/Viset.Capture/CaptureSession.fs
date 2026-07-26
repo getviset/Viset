@@ -40,7 +40,8 @@ type CaptureSession
                             do! renderer.UpdateAsync(raw, cancellationToken)
                             return renderer
                         | None ->
-                            let! browser = BrowserSession.LaunchAsync(browserOptions, cancellationToken)
+                            let! browser =
+                                BrowserSession.LaunchAsync(browserOptions, cancellationToken)
 
                             try
                                 let! renderer =
@@ -70,7 +71,8 @@ type CaptureSession
         task {
             let! raw = this.CaptureRawPngAsync cancellationToken
 
-            let! framed = this.PrepareFrameAsync({ Format = PngImage; Bytes = raw }, cancellationToken)
+            let! framed =
+                this.PrepareFrameAsync({ Format = PngImage; Bytes = raw }, cancellationToken)
 
             return framed.Bytes
         }
@@ -126,7 +128,9 @@ type CaptureSession
                         invalidArg (nameof frameSource) "Frame path must not be empty."
 
                     if not (File.Exists path) then
-                        invalidArg (nameof frameSource) (String.Concat("Frame HTML does not exist: ", path))
+                        invalidArg
+                            (nameof frameSource)
+                            (String.Concat("Frame HTML does not exist: ", path))
                 | BuiltInFrame _ -> ()
 
                 if device.Frame.IsNone then

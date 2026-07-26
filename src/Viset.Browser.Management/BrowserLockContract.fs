@@ -57,7 +57,8 @@ module internal BrowserLockContract =
     let private requireText label (value: string | null) =
         match nonEmptyString value with
         | Some text -> text
-        | None -> raise (InvalidDataException(String.Concat("browser-lock.toml requires ", label, ".")))
+        | None ->
+            raise (InvalidDataException(String.Concat("browser-lock.toml requires ", label, ".")))
 
     let private validateSha256 runtimeIdentifier value =
         let digest =
@@ -66,7 +67,11 @@ module internal BrowserLockContract =
         if digest.Length <> 64 || not (digest |> Seq.forall Char.IsAsciiHexDigit) then
             raise (
                 InvalidDataException(
-                    String.Concat("browser-lock.toml has an invalid SHA-256 for ", runtimeIdentifier, ".")
+                    String.Concat(
+                        "browser-lock.toml has an invalid SHA-256 for ",
+                        runtimeIdentifier,
+                        "."
+                    )
                 )
             )
 
@@ -92,7 +97,11 @@ module internal BrowserLockContract =
         then
             raise (
                 InvalidDataException(
-                    String.Concat("browser-lock.toml has an unsafe executable layout for ", runtimeIdentifier, ".")
+                    String.Concat(
+                        "browser-lock.toml has an unsafe executable layout for ",
+                        runtimeIdentifier,
+                        "."
+                    )
                 )
             )
 
@@ -115,13 +124,21 @@ module internal BrowserLockContract =
                 | _ ->
                     raise (
                         InvalidDataException(
-                            String.Concat("browser-lock.toml has an invalid download URL for ", runtimeIdentifier, ".")
+                            String.Concat(
+                                "browser-lock.toml has an invalid download URL for ",
+                                runtimeIdentifier,
+                                "."
+                            )
                         )
                     )
             | false, _ ->
                 raise (
                     InvalidDataException(
-                        String.Concat("browser-lock.toml has an invalid download URL for ", runtimeIdentifier, ".")
+                        String.Concat(
+                            "browser-lock.toml has an invalid download URL for ",
+                            runtimeIdentifier,
+                            "."
+                        )
                     )
                 )
 
@@ -148,7 +165,11 @@ module internal BrowserLockContract =
                 if not (String.Equals(publisher, expectedPublisher, StringComparison.Ordinal)) then
                     raise (
                         InvalidDataException(
-                            String.Concat("browser-lock.toml publisher must be '", expectedPublisher, "'.")
+                            String.Concat(
+                                "browser-lock.toml publisher must be '",
+                                expectedPublisher,
+                                "'."
+                            )
                         )
                     )
 
@@ -157,18 +178,27 @@ module internal BrowserLockContract =
 
                 if model.Platforms.Count <> supportedPlatforms.Length then
                     raise (
-                        InvalidDataException "browser-lock.toml must define exactly linux-x64, win-x64, and osx-arm64."
+                        InvalidDataException
+                            "browser-lock.toml must define exactly linux-x64, win-x64, and osx-arm64."
                     )
 
                 let platforms = Dictionary<string, BrowserPlatformLock> StringComparer.Ordinal
 
                 for runtimeIdentifier in supportedPlatforms do
                     match model.Platforms.TryGetValue runtimeIdentifier with
-                    | true, platform -> platforms.Add(runtimeIdentifier, validatePlatform runtimeIdentifier platform)
+                    | true, platform ->
+                        platforms.Add(
+                            runtimeIdentifier,
+                            validatePlatform runtimeIdentifier platform
+                        )
                     | false, _ ->
                         raise (
                             InvalidDataException(
-                                String.Concat("browser-lock.toml is missing platforms.", runtimeIdentifier, ".")
+                                String.Concat(
+                                    "browser-lock.toml is missing platforms.",
+                                    runtimeIdentifier,
+                                    "."
+                                )
                             )
                         )
 
@@ -201,11 +231,16 @@ module internal BrowserLockContract =
         && supportedPlatforms
            |> Array.forall (fun runtimeIdentifier ->
                match
-                   candidate.Platforms.TryGetValue runtimeIdentifier, canonical.Platforms.TryGetValue runtimeIdentifier
+                   candidate.Platforms.TryGetValue runtimeIdentifier,
+                   canonical.Platforms.TryGetValue runtimeIdentifier
                with
                | (true, candidatePlatform), (true, canonicalPlatform) ->
                    candidatePlatform.Url = canonicalPlatform.Url
-                   && String.Equals(candidatePlatform.Sha256, canonicalPlatform.Sha256, StringComparison.Ordinal)
+                   && String.Equals(
+                       candidatePlatform.Sha256,
+                       canonicalPlatform.Sha256,
+                       StringComparison.Ordinal
+                   )
                    && String.Equals(
                        candidatePlatform.ExecutableLayout,
                        canonicalPlatform.ExecutableLayout,
@@ -219,7 +254,8 @@ module internal BrowserLockContract =
         | Some path ->
             match parseBrowserLock path with
             | Ok candidate when browserLocksEqual candidate -> Ok candidate
-            | Ok _ -> Error "browser-lock.toml does not match the compiled trusted browser contract."
+            | Ok _ ->
+                Error "browser-lock.toml does not match the compiled trusted browser contract."
             | Error message -> Error message
 
     let validateBrowserLockSidecar lockPath =

@@ -99,7 +99,8 @@ module internal LuaCaptureBindings =
                 task {
                     let recorder =
                         activeCase.Recorder
-                        |> Option.defaultWith (fun () -> invalidOp "viset.record must be called first.")
+                        |> Option.defaultWith (fun () ->
+                            invalidOp "viset.record must be called first.")
 
                     do! recorder.StartAsync()
                     return context.Return()
@@ -110,7 +111,8 @@ module internal LuaCaptureBindings =
                 task {
                     let recorder =
                         activeCase.Recorder
-                        |> Option.defaultWith (fun () -> invalidOp "viset.record must be called first.")
+                        |> Option.defaultWith (fun () ->
+                            invalidOp "viset.record must be called first.")
 
                     do! recorder.StopAsync()
                     return context.Return()

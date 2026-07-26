@@ -24,7 +24,10 @@ module internal BrowserProcess =
             || conflictingArguments
                |> Array.exists (fun required ->
                    argument.Equals(required, StringComparison.OrdinalIgnoreCase)
-                   || argument.StartsWith(String.Concat(required, "="), StringComparison.OrdinalIgnoreCase)))
+                   || argument.StartsWith(
+                       String.Concat(required, "="),
+                       StringComparison.OrdinalIgnoreCase
+                   )))
         |> function
             | Some argument when String.IsNullOrWhiteSpace argument ->
                 invalidArg (nameof arguments) "Browser arguments must not contain empty values."
@@ -59,7 +62,9 @@ module internal BrowserProcess =
     let readProcessDiagnosticsAsync (standardError: Task<string>) (standardOutput: Task<string>) =
         task {
             try
-                let! diagnostics = Task.WhenAll([| standardError; standardOutput |]).WaitAsync diagnosticReadTimeout
+                let! diagnostics =
+                    Task.WhenAll([| standardError; standardOutput |]).WaitAsync
+                        diagnosticReadTimeout
 
                 let errorText = diagnostics[0]
                 let outputText = diagnostics[1]
@@ -76,11 +81,15 @@ module internal BrowserProcess =
                     Error(
                         String.Concat(
                             "Browser diagnostic streams did not close within ",
-                            diagnosticReadTimeout.TotalMilliseconds.ToString("0", CultureInfo.InvariantCulture),
+                            diagnosticReadTimeout.TotalMilliseconds.ToString(
+                                "0",
+                                CultureInfo.InvariantCulture
+                            ),
                             " ms."
                         )
                     )
-            | error -> return Error(String.Concat("Failed to read browser diagnostics: ", error.Message))
+            | error ->
+                return Error(String.Concat("Failed to read browser diagnostics: ", error.Message))
         }
 
     let private invariantInt (value: int) =
@@ -107,7 +116,8 @@ module internal BrowserProcess =
 
                 while port.IsNone do
                     if browserProcess.HasExited then
-                        let! diagnosticsResult = readProcessDiagnosticsAsync standardError standardOutput
+                        let! diagnosticsResult =
+                            readProcessDiagnosticsAsync standardError standardOutput
 
                         let diagnostics =
                             match diagnosticsResult with
@@ -116,7 +126,10 @@ module internal BrowserProcess =
 
                         raise (
                             InvalidOperationException(
-                                String.Concat("Browser exited before DevToolsActivePort was available: ", diagnostics)
+                                String.Concat(
+                                    "Browser exited before DevToolsActivePort was available: ",
+                                    diagnostics
+                                )
                             )
                         )
 
@@ -124,12 +137,21 @@ module internal BrowserProcess =
                         let lines = File.ReadAllLines activePortPath
 
                         if lines.Length >= 2 then
-                            match Int32.TryParse(lines[0], NumberStyles.None, CultureInfo.InvariantCulture) with
+                            match
+                                Int32.TryParse(
+                                    lines[0],
+                                    NumberStyles.None,
+                                    CultureInfo.InvariantCulture
+                                )
+                            with
                             | true, parsed when parsed > 0 -> port <- Some parsed
                             | _ ->
                                 raise (
                                     InvalidDataException(
-                                        String.Concat("DevToolsActivePort contained an invalid port: ", lines[0])
+                                        String.Concat(
+                                            "DevToolsActivePort contained an invalid port: ",
+                                            lines[0]
+                                        )
                                     )
                                 )
 
@@ -143,7 +165,10 @@ module internal BrowserProcess =
                         TimeoutException(
                             String.Concat(
                                 "Browser did not create DevToolsActivePort within ",
-                                timeout.TotalMilliseconds.ToString("0", CultureInfo.InvariantCulture),
+                                timeout.TotalMilliseconds.ToString(
+                                    "0",
+                                    CultureInfo.InvariantCulture
+                                ),
                                 " ms. Profile: ",
                                 profilePath
                             )
@@ -151,7 +176,11 @@ module internal BrowserProcess =
                     )
         }
 
-    let findPageEndpointAsync (port: int) (timeout: TimeSpan) (cancellationToken: CancellationToken) =
+    let findPageEndpointAsync
+        (port: int)
+        (timeout: TimeSpan)
+        (cancellationToken: CancellationToken)
+        =
         task {
             use httpClient = new HttpClient()
 
@@ -189,7 +218,10 @@ module internal BrowserProcess =
                                 "No page target appeared at ",
                                 targetListUri.AbsoluteUri,
                                 " within ",
-                                timeout.TotalMilliseconds.ToString("0", CultureInfo.InvariantCulture),
+                                timeout.TotalMilliseconds.ToString(
+                                    "0",
+                                    CultureInfo.InvariantCulture
+                                ),
                                 " ms."
                             )
                         )
@@ -215,7 +247,15 @@ module internal BrowserProcess =
 
             match lastError with
             | Some error when Directory.Exists profilePath ->
-                return Some(String.Concat("Failed to remove browser profile '", profilePath, "': ", error.Message))
+                return
+                    Some(
+                        String.Concat(
+                            "Failed to remove browser profile '",
+                            profilePath,
+                            "': ",
+                            error.Message
+                        )
+                    )
             | _ -> return None
         }
 

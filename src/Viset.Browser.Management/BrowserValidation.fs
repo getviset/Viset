@@ -12,7 +12,10 @@ module internal BrowserValidation =
     let private diagnosticTimeout = TimeSpan.FromSeconds 1.0
 
     let private tryParseVersionToken (text: string) =
-        text.Split([| ' '; '\t'; '\r'; '\n'; '('; ')'; ','; ';' |], StringSplitOptions.RemoveEmptyEntries)
+        text.Split(
+            [| ' '; '\t'; '\r'; '\n'; '('; ')'; ','; ';' |],
+            StringSplitOptions.RemoveEmptyEntries
+        )
         |> Array.tryPick (fun token ->
             let candidate = token.Trim()
             let segments = candidate.Split('.', StringSplitOptions.None)
@@ -20,7 +23,8 @@ module internal BrowserValidation =
             if
                 segments.Length = 4
                 && segments
-                   |> Array.forall (fun segment -> segment.Length > 0 && segment |> Seq.forall Char.IsAsciiDigit)
+                   |> Array.forall (fun segment ->
+                       segment.Length > 0 && segment |> Seq.forall Char.IsAsciiDigit)
             then
                 Some candidate
             else
@@ -29,12 +33,18 @@ module internal BrowserValidation =
     let private readDiagnosticsAsync (standardOutput: Task<string>) (standardError: Task<string>) =
         task {
             try
-                let! output = Task.WhenAll([| standardOutput; standardError |]).WaitAsync diagnosticTimeout
+                let! output =
+                    Task.WhenAll([| standardOutput; standardError |]).WaitAsync diagnosticTimeout
 
                 return Ok(String.Concat(output[0], Environment.NewLine, output[1]).Trim())
             with
-            | :? TimeoutException -> return Error "Browser version diagnostic streams did not close within 1000 ms."
-            | error -> return Error(String.Concat("Failed to read browser version diagnostics: ", error.Message))
+            | :? TimeoutException ->
+                return Error "Browser version diagnostic streams did not close within 1000 ms."
+            | error ->
+                return
+                    Error(
+                        String.Concat("Failed to read browser version diagnostics: ", error.Message)
+                    )
         }
 
     let readBrowserVersionAsync (executablePath: string) (cancellationToken: CancellationToken) =
@@ -56,7 +66,10 @@ module internal BrowserValidation =
                         Process.Start startInfo
                         |> Option.ofObj
                         |> Option.defaultWith (fun () ->
-                            raise (InvalidOperationException "The browser version process could not be started."))
+                            raise (
+                                InvalidOperationException
+                                    "The browser version process could not be started."
+                            ))
 
                     let standardOutput = browserProcess.StandardOutput.ReadToEndAsync()
                     let standardError = browserProcess.StandardError.ReadToEndAsync()
@@ -72,7 +85,9 @@ module internal BrowserValidation =
                                 do! browserProcess.WaitForExitAsync timeoutCancellation.Token
                                 return Ok()
                             with
-                            | :? OperationCanceledException when cancellationToken.IsCancellationRequested ->
+                            | :? OperationCanceledException when
+                                cancellationToken.IsCancellationRequested
+                                ->
                                 return Error "Browser version validation was cancelled."
                             | :? OperationCanceledException ->
                                 try
@@ -84,7 +99,10 @@ module internal BrowserValidation =
                                     Error(
                                         String.Concat(
                                             "Browser executable did not answer --version within ",
-                                            versionTimeout.TotalMilliseconds.ToString("0", CultureInfo.InvariantCulture),
+                                            versionTimeout.TotalMilliseconds.ToString(
+                                                "0",
+                                                CultureInfo.InvariantCulture
+                                            ),
                                             " ms: ",
                                             executablePath
                                         )
@@ -103,7 +121,8 @@ module internal BrowserValidation =
                                 Error(
                                     String.Concat(
                                         "Browser executable --version failed with exit code ",
-                                        browserProcess.ExitCode.ToString CultureInfo.InvariantCulture,
+                                        browserProcess.ExitCode.ToString
+                                            CultureInfo.InvariantCulture,
                                         ": ",
                                         diagnostics
                                     )
@@ -145,10 +164,18 @@ module internal BrowserValidation =
             | Error message -> return Error message
             | Ok version ->
                 match expectedVersion with
-                | Some expected when not (String.Equals(version, expected, StringComparison.Ordinal)) ->
+                | Some expected when
+                    not (String.Equals(version, expected, StringComparison.Ordinal))
+                    ->
                     return
                         Error(
-                            String.Concat("Browser executable reported version ", version, "; expected ", expected, ".")
+                            String.Concat(
+                                "Browser executable reported version ",
+                                version,
+                                "; expected ",
+                                expected,
+                                "."
+                            )
                         )
                 | _ ->
                     return
@@ -164,9 +191,21 @@ module internal BrowserValidation =
                 let file = FileInfo(Path.GetFullPath executablePath)
 
                 if file.LinkTarget |> Option.ofObj |> Option.isSome then
-                    return Error(String.Concat("Managed browser executable is a symbolic link: ", executablePath))
+                    return
+                        Error(
+                            String.Concat(
+                                "Managed browser executable is a symbolic link: ",
+                                executablePath
+                            )
+                        )
                 elif file.Exists && file.Attributes.HasFlag FileAttributes.ReparsePoint then
-                    return Error(String.Concat("Managed browser executable is a reparse point: ", executablePath))
+                    return
+                        Error(
+                            String.Concat(
+                                "Managed browser executable is a reparse point: ",
+                                executablePath
+                            )
+                        )
                 else
                     let mutable current = file.Directory |> Option.ofObj
                     let mutable unsafeAncestor = None
@@ -176,7 +215,8 @@ module internal BrowserValidation =
 
                         if
                             directory.LinkTarget |> Option.ofObj |> Option.isSome
-                            || directory.Exists && directory.Attributes.HasFlag FileAttributes.ReparsePoint
+                            || directory.Exists
+                               && directory.Attributes.HasFlag FileAttributes.ReparsePoint
                         then
                             unsafeAncestor <- Some directory.FullName
 
@@ -184,10 +224,21 @@ module internal BrowserValidation =
 
                     match unsafeAncestor with
                     | Some path ->
-                        return Error(String.Concat("Managed browser executable has a link or reparse ancestor: ", path))
+                        return
+                            Error(
+                                String.Concat(
+                                    "Managed browser executable has a link or reparse ancestor: ",
+                                    path
+                                )
+                            )
                     | None ->
                         return!
-                            validateBrowserAsync ManagedCache (Some expectedVersion) executablePath cancellationToken
+                            validateBrowserAsync
+                                ManagedCache
+                                (Some expectedVersion)
+                                executablePath
+                                cancellationToken
             with error ->
-                return Error(String.Concat("Managed browser cache validation failed: ", error.Message))
+                return
+                    Error(String.Concat("Managed browser cache validation failed: ", error.Message))
         }

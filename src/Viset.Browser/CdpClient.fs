@@ -48,7 +48,11 @@ type CdpClient private (transport: CdpTransport) =
                 let result = this.RequireSuccess response |> CdpJson.DeserializeNavigateResult
 
                 if not (String.IsNullOrWhiteSpace result.ErrorText) then
-                    raise (InvalidOperationException(String.Concat("Page navigation failed: ", result.ErrorText)))
+                    raise (
+                        InvalidOperationException(
+                            String.Concat("Page navigation failed: ", result.ErrorText)
+                        )
+                    )
 
                 do! loadTask
             with error ->
@@ -96,16 +100,24 @@ type CdpClient private (transport: CdpTransport) =
                         return
                             Ok(
                                 CdpEvaluationValue.String(
-                                    remote.Value.GetString() |> Option.ofObj |> Option.defaultValue String.Empty
+                                    remote.Value.GetString()
+                                    |> Option.ofObj
+                                    |> Option.defaultValue String.Empty
                                 )
                             )
-                    | "object" when String.Equals(remote.Subtype, "null", StringComparison.Ordinal) -> return Ok Null
-                    | _ when remote.Value.ValueKind <> JsonValueKind.Undefined -> return Ok(Json(remote.Value.Clone()))
+                    | "object" when String.Equals(remote.Subtype, "null", StringComparison.Ordinal) ->
+                        return Ok Null
+                    | _ when remote.Value.ValueKind <> JsonValueKind.Undefined ->
+                        return Ok(Json(remote.Value.Clone()))
                     | unsupported ->
                         return
                             Error(
                                 JavaScript(
-                                    String.Concat("Runtime.evaluate returned unsupported type '", unsupported, "'.")
+                                    String.Concat(
+                                        "Runtime.evaluate returned unsupported type '",
+                                        unsupported,
+                                        "'."
+                                    )
                                 )
                             )
         }
@@ -124,14 +136,17 @@ type CdpClient private (transport: CdpTransport) =
                 invalidArg (nameof width) "Emulation dimensions must be positive."
 
             if not (Double.IsFinite deviceScaleFactor) || deviceScaleFactor <= 0.0 then
-                invalidArg (nameof deviceScaleFactor) "Device scale factor must be positive and finite."
+                invalidArg
+                    (nameof deviceScaleFactor)
+                    "Device scale factor must be positive and finite."
 
             let metrics = CdpDeviceMetricsParameters(width, height, deviceScaleFactor, mobile)
 
             let! metricsResponse =
                 transport.SendCommandAsync(
                     "Emulation.setDeviceMetricsOverride",
-                    (fun id -> CdpJson.SerializeCommand(id, "Emulation.setDeviceMetricsOverride", metrics)),
+                    (fun id ->
+                        CdpJson.SerializeCommand(id, "Emulation.setDeviceMetricsOverride", metrics)),
                     cancellationToken
                 )
 
@@ -142,7 +157,12 @@ type CdpClient private (transport: CdpTransport) =
             let! touchResponse =
                 transport.SendCommandAsync(
                     "Emulation.setTouchEmulationEnabled",
-                    (fun id -> CdpJson.SerializeCommand(id, "Emulation.setTouchEmulationEnabled", touchParameters)),
+                    (fun id ->
+                        CdpJson.SerializeCommand(
+                            id,
+                            "Emulation.setTouchEmulationEnabled",
+                            touchParameters
+                        )),
                     cancellationToken
                 )
 
@@ -156,7 +176,12 @@ type CdpClient private (transport: CdpTransport) =
             let! response =
                 transport.SendCommandAsync(
                     "Emulation.setDefaultBackgroundColorOverride",
-                    (fun id -> CdpJson.SerializeCommand(id, "Emulation.setDefaultBackgroundColorOverride", parameters)),
+                    (fun id ->
+                        CdpJson.SerializeCommand(
+                            id,
+                            "Emulation.setDefaultBackgroundColorOverride",
+                            parameters
+                        )),
                     cancellationToken
                 )
 
@@ -176,7 +201,8 @@ type CdpClient private (transport: CdpTransport) =
             let! startResponse =
                 transport.SendCommandAsync(
                     "Input.dispatchTouchEvent",
-                    (fun id -> CdpJson.SerializeCommand(id, "Input.dispatchTouchEvent", startParameters)),
+                    (fun id ->
+                        CdpJson.SerializeCommand(id, "Input.dispatchTouchEvent", startParameters)),
                     cancellationToken
                 )
 
@@ -187,7 +213,8 @@ type CdpClient private (transport: CdpTransport) =
             let! endResponse =
                 transport.SendCommandAsync(
                     "Input.dispatchTouchEvent",
-                    (fun id -> CdpJson.SerializeCommand(id, "Input.dispatchTouchEvent", endParameters)),
+                    (fun id ->
+                        CdpJson.SerializeCommand(id, "Input.dispatchTouchEvent", endParameters)),
                     cancellationToken
                 )
 
@@ -219,9 +246,22 @@ type CdpClient private (transport: CdpTransport) =
 
             let parameters =
                 match source with
-                | PngScreencast -> CdpScreencastParameters("png", Nullable<int>(), Nullable width, Nullable height, 1)
+                | PngScreencast ->
+                    CdpScreencastParameters(
+                        "png",
+                        Nullable<int>(),
+                        Nullable width,
+                        Nullable height,
+                        1
+                    )
                 | JpegScreencast quality ->
-                    CdpScreencastParameters("jpeg", Nullable quality, Nullable width, Nullable height, 1)
+                    CdpScreencastParameters(
+                        "jpeg",
+                        Nullable quality,
+                        Nullable width,
+                        Nullable height,
+                        1
+                    )
 
             transport.ClearEvents "Page.screencastFrame"
 
@@ -241,9 +281,22 @@ type CdpClient private (transport: CdpTransport) =
 
             let parameters =
                 match source with
-                | PngScreencast -> CdpScreencastParameters("png", Nullable<int>(), Nullable<int>(), Nullable<int>(), 1)
+                | PngScreencast ->
+                    CdpScreencastParameters(
+                        "png",
+                        Nullable<int>(),
+                        Nullable<int>(),
+                        Nullable<int>(),
+                        1
+                    )
                 | JpegScreencast quality ->
-                    CdpScreencastParameters("jpeg", Nullable quality, Nullable<int>(), Nullable<int>(), 1)
+                    CdpScreencastParameters(
+                        "jpeg",
+                        Nullable quality,
+                        Nullable<int>(),
+                        Nullable<int>(),
+                        1
+                    )
 
             let! response =
                 transport.SendCommandAsync(
@@ -266,7 +319,9 @@ type CdpClient private (transport: CdpTransport) =
                   SessionId = frame.SessionId }
         }
 
-    member this.AcknowledgeScreencastFrameAsync(sessionId: int, cancellationToken: CancellationToken) =
+    member this.AcknowledgeScreencastFrameAsync
+        (sessionId: int, cancellationToken: CancellationToken)
+        =
         task {
             if sessionId < 0 then
                 invalidArg (nameof sessionId) "Screencast session ID must be non-negative."
@@ -293,7 +348,9 @@ type CdpClient private (transport: CdpTransport) =
         member _.DisposeAsync() =
             (transport :> IAsyncDisposable).DisposeAsync()
 
-    static member ConnectAsync(endpoint: Uri, commandTimeout: TimeSpan, cancellationToken: CancellationToken) =
+    static member ConnectAsync
+        (endpoint: Uri, commandTimeout: TimeSpan, cancellationToken: CancellationToken)
+        =
         task {
             let! transport = CdpTransport.ConnectAsync(endpoint, commandTimeout, cancellationToken)
 

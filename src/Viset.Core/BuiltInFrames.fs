@@ -282,7 +282,13 @@ module BuiltInFrames =
         let height = int64 device.Viewport.Height + heightChrome
 
         if width > int64 Int32.MaxValue || height > int64 Int32.MaxValue then
-            Error(String.Concat("Built-in ", resolved.ToString(), " frame dimensions exceed the supported maximum."))
+            Error(
+                String.Concat(
+                    "Built-in ",
+                    resolved.ToString(),
+                    " frame dimensions exceed the supported maximum."
+                )
+            )
         else
             Ok
                 { Width = int width

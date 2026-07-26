@@ -13,7 +13,9 @@ module internal LuaJavascriptArguments =
 
         let rec writeValue depth (value: LuaValue) =
             if depth > 64 then
-                invalidArg (nameof arguments) "JavaScript arguments must not exceed 64 nested tables."
+                invalidArg
+                    (nameof arguments)
+                    "JavaScript arguments must not exceed 64 nested tables."
 
             match value.Type with
             | LuaValueType.Nil -> writer.WriteNullValue()
@@ -23,7 +25,9 @@ module internal LuaJavascriptArguments =
                 let number = value.Read<double>()
 
                 if not (Double.IsFinite number) then
-                    invalidArg (nameof arguments) "JavaScript arguments must not contain non-finite numbers."
+                    invalidArg
+                        (nameof arguments)
+                        "JavaScript arguments must not contain non-finite numbers."
 
                 writer.WriteNumberValue number
             | LuaValueType.Table -> writeTable (depth + 1) (value.Read<LuaTable>())
@@ -38,7 +42,9 @@ module internal LuaJavascriptArguments =
 
         and writeTable depth (table: LuaTable) =
             if table.ArrayLength > 0 && table.HashMapCount > 0 then
-                invalidArg (nameof arguments) "JavaScript argument tables must not mix array and object entries."
+                invalidArg
+                    (nameof arguments)
+                    "JavaScript argument tables must not mix array and object entries."
 
             elif table.ArrayLength > 0 then
                 writer.WriteStartArray()
@@ -53,7 +59,9 @@ module internal LuaJavascriptArguments =
 
                 for item in table do
                     if item.Key.Type <> LuaValueType.String then
-                        invalidArg (nameof arguments) "JavaScript argument object keys must be strings."
+                        invalidArg
+                            (nameof arguments)
+                            "JavaScript argument object keys must be strings."
 
                     writer.WritePropertyName(item.Key.Read<string>())
 

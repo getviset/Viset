@@ -52,14 +52,22 @@ module internal BrowserDownload =
                     let mutable complete = false
 
                     while not complete do
-                        let! read = source.ReadAsync(buffer.AsMemory(0, buffer.Length), timeoutCancellation.Token)
+                        let! read =
+                            source.ReadAsync(
+                                buffer.AsMemory(0, buffer.Length),
+                                timeoutCancellation.Token
+                            )
 
                         if read = 0 then
                             complete <- true
                         else
                             digest.AppendData(buffer, 0, read)
 
-                            do! destination.WriteAsync(buffer.AsMemory(0, read), timeoutCancellation.Token)
+                            do!
+                                destination.WriteAsync(
+                                    buffer.AsMemory(0, read),
+                                    timeoutCancellation.Token
+                                )
                 finally
                     ArrayPool<byte>.Shared.Return buffer
 
@@ -89,7 +97,10 @@ module internal BrowserDownload =
                     TimeoutException(
                         String.Concat(
                             "Browser download exceeded ",
-                            downloadTimeout.TotalMilliseconds.ToString("0", CultureInfo.InvariantCulture),
+                            downloadTimeout.TotalMilliseconds.ToString(
+                                "0",
+                                CultureInfo.InvariantCulture
+                            ),
                             " ms."
                         )
                     )

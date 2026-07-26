@@ -8,7 +8,12 @@ module internal WebPNativeData =
     let checkMux operation result =
         if result <> WebPInterop.MuxSuccess then
             invalidOp (
-                String.Format(CultureInfo.InvariantCulture, "{0} failed with libwebpmux result {1}.", operation, result)
+                String.Format(
+                    CultureInfo.InvariantCulture,
+                    "{0} failed with libwebpmux result {1}.",
+                    operation,
+                    result
+                )
             )
 
     let private readWriterSize writer =

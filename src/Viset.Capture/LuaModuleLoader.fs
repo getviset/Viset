@@ -39,5 +39,6 @@ type internal CaptureModuleLoader(scriptDirectory: string) =
             cancellationToken.ThrowIfCancellationRequested()
 
             match modulePath moduleName with
-            | Some path when File.Exists path -> ValueTask<LuaModule>(new LuaModule(moduleName, File.ReadAllBytes path))
+            | Some path when File.Exists path ->
+                ValueTask<LuaModule>(new LuaModule(moduleName, File.ReadAllBytes path))
             | _ -> ValueTask.FromException<LuaModule>(LuaModuleNotFoundException moduleName)

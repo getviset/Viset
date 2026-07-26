@@ -18,7 +18,8 @@ module internal CaptureOutputTemplate =
             if String.IsNullOrWhiteSpace axisName then
                 error "matrix contains an empty axis name."
             elif String.Equals(axisName, "device", StringComparison.Ordinal) then
-                error "matrix.device is redundant; declared devices expand automatically in declaration order."
+                error
+                    "matrix.device is redundant; declared devices expand automatically in declaration order."
             else
                 match axisValue with
                 | :? TomlArray as values when values.Count > 0 ->
@@ -26,7 +27,9 @@ module internal CaptureOutputTemplate =
                     |> Seq.cast<obj | null>
                     |> List.ofSeq
                     |> traverse (fun index value ->
-                        TomlValueParser.parse (concat [| "matrix."; axisName; "["; invariantInt32 index; "]" |]) value)
+                        TomlValueParser.parse
+                            (concat [| "matrix."; axisName; "["; invariantInt32 index; "]" |])
+                            value)
                     |> Result.map (fun parsed -> axisName, parsed)
                 | :? TomlArray -> error (concat [| "matrix."; axisName; " must not be empty." |])
                 | _ -> error (concat [| "matrix."; axisName; " must be a TOML array." |]))
@@ -71,7 +74,12 @@ module internal CaptureOutputTemplate =
                         else
                             match bindings.TryGetValue placeholder with
                             | false, _ ->
-                                error (concat [| "output requires missing capture value '"; placeholder; "'." |])
+                                error (
+                                    concat
+                                        [| "output requires missing capture value '"
+                                           placeholder
+                                           "'." |]
+                                )
                             | true, value ->
                                 match scalarText placeholder value with
                                 | Error errors -> Error errors

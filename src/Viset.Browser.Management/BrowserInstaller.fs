@@ -46,7 +46,10 @@ module internal BrowserInstaller =
                         TimeoutException(
                             String.Concat(
                                 "Timed out waiting for the managed browser install lock after ",
-                                installLockTimeout.TotalMilliseconds.ToString("0", CultureInfo.InvariantCulture),
+                                installLockTimeout.TotalMilliseconds.ToString(
+                                    "0",
+                                    CultureInfo.InvariantCulture
+                                ),
                                 " ms."
                             )
                         )
@@ -68,7 +71,11 @@ module internal BrowserInstaller =
         let file = FileInfo(Path.GetFullPath path)
 
         if fileSystemInfoIsLinkOrReparse file then
-            raise (InvalidDataException(String.Concat("Managed browser executable is a link or reparse point: ", path)))
+            raise (
+                InvalidDataException(
+                    String.Concat("Managed browser executable is a link or reparse point: ", path)
+                )
+            )
 
         let mutable current = file.Directory |> Option.ofObj
 
@@ -78,7 +85,10 @@ module internal BrowserInstaller =
             if fileSystemInfoIsLinkOrReparse directory then
                 raise (
                     InvalidDataException(
-                        String.Concat("Managed browser executable has a link or reparse ancestor: ", directory.FullName)
+                        String.Concat(
+                            "Managed browser executable has a link or reparse ancestor: ",
+                            directory.FullName
+                        )
                     )
                 )
 
@@ -93,7 +103,10 @@ module internal BrowserInstaller =
             if fileSystemInfoIsLinkOrReparse directory then
                 raise (
                     InvalidDataException(
-                        String.Concat("Managed browser target has a link or reparse ancestor: ", directory.FullName)
+                        String.Concat(
+                            "Managed browser target has a link or reparse ancestor: ",
+                            directory.FullName
+                        )
                     )
                 )
 
@@ -103,7 +116,10 @@ module internal BrowserInstaller =
         Directory.CreateDirectory path |> ignore
 
         if OperatingSystem.IsLinux() || OperatingSystem.IsMacOS() then
-            File.SetUnixFileMode(path, UnixFileMode.UserRead ||| UnixFileMode.UserWrite ||| UnixFileMode.UserExecute)
+            File.SetUnixFileMode(
+                path,
+                UnixFileMode.UserRead ||| UnixFileMode.UserWrite ||| UnixFileMode.UserExecute
+            )
 
     let verifyExpectedExecutableAsync
         (browserLock: BrowserLock)
@@ -161,7 +177,10 @@ module internal BrowserInstaller =
             if fileSystemInfoIsLinkOrReparse targetInfo then
                 raise (
                     InvalidDataException(
-                        String.Concat("Managed browser target is a link or reparse point: ", targetDirectory)
+                        String.Concat(
+                            "Managed browser target is a link or reparse point: ",
+                            targetDirectory
+                        )
                     )
                 )
 
@@ -169,7 +188,11 @@ module internal BrowserInstaller =
                 task {
                     if Directory.Exists targetDirectory then
                         let! validation =
-                            verifyExpectedExecutableAsync browserLock platform targetDirectory cancellationToken
+                            verifyExpectedExecutableAsync
+                                browserLock
+                                platform
+                                targetDirectory
+                                cancellationToken
 
                         match validation with
                         | Ok browser -> return Ok(Some browser)
@@ -186,11 +209,26 @@ module internal BrowserInstaller =
                 let archivePath = Path.Combine(workRoot, "browser.zip")
                 let extractionRoot = Path.Combine(workRoot, "extracted")
 
-                do! BrowserDownload.downloadAndVerifyAsync platform archivePath downloadTimeout cancellationToken
+                do!
+                    BrowserDownload.downloadAndVerifyAsync
+                        platform
+                        archivePath
+                        downloadTimeout
+                        cancellationToken
 
-                do! BrowserArchive.extractArchiveAsync platform archivePath extractionRoot cancellationToken
+                do!
+                    BrowserArchive.extractArchiveAsync
+                        platform
+                        archivePath
+                        extractionRoot
+                        cancellationToken
 
-                let! staged = verifyExpectedExecutableAsync browserLock platform extractionRoot cancellationToken
+                let! staged =
+                    verifyExpectedExecutableAsync
+                        browserLock
+                        platform
+                        extractionRoot
+                        cancellationToken
 
                 match staged with
                 | Error message -> return Error message
@@ -215,7 +253,11 @@ module internal BrowserInstaller =
                             Directory.Move(extractionRoot, targetDirectory)
 
                             let! promoted =
-                                verifyExpectedExecutableAsync browserLock platform targetDirectory cancellationToken
+                                verifyExpectedExecutableAsync
+                                    browserLock
+                                    platform
+                                    targetDirectory
+                                    cancellationToken
 
                             match promoted with
                             | Ok browser -> return Ok browser

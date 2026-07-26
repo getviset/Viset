@@ -27,7 +27,11 @@ module internal OutputSafety =
                 let directory = DirectoryInfo candidate
 
                 if isLinkOrReparse directory then
-                    raise (InvalidDataException(String.Concat("Output path is a link or reparse point: ", candidate)))
+                    raise (
+                        InvalidDataException(
+                            String.Concat("Output path is a link or reparse point: ", candidate)
+                        )
+                    )
 
             current <- Path.GetDirectoryName candidate |> Option.ofObj
 
@@ -35,10 +39,18 @@ module internal OutputSafety =
         let target = FileInfo path
 
         if isLinkOrReparse target then
-            raise (InvalidDataException(String.Concat("Output file is a link or reparse point: ", path)))
+            raise (
+                InvalidDataException(
+                    String.Concat("Output file is a link or reparse point: ", path)
+                )
+            )
 
         if Directory.Exists path then
-            raise (InvalidDataException(String.Concat("Output file path is occupied by a directory: ", path)))
+            raise (
+                InvalidDataException(
+                    String.Concat("Output file path is occupied by a directory: ", path)
+                )
+            )
 
         Path.GetDirectoryName path
         |> Option.ofObj
@@ -52,10 +64,17 @@ module internal OutputSafety =
             raise (InvalidDataException "Output file path must not equal the output root.")
 
         let prefix =
-            String.Concat(normalizedRoot.TrimEnd Path.DirectorySeparatorChar, Path.DirectorySeparatorChar)
+            String.Concat(
+                normalizedRoot.TrimEnd Path.DirectorySeparatorChar,
+                Path.DirectorySeparatorChar
+            )
 
         if not (normalizedPath.StartsWith(prefix, pathComparison)) then
-            raise (InvalidDataException(String.Concat("Output path escapes the output root: ", normalizedPath)))
+            raise (
+                InvalidDataException(
+                    String.Concat("Output path escapes the output root: ", normalizedPath)
+                )
+            )
 
     let preflight (plan: CapturePlan) =
         let root = Path.GetFullPath plan.OutputPath
@@ -72,6 +91,9 @@ module internal OutputSafety =
             if entryExists capture.OutputPath && not plan.Force then
                 raise (
                     IOException(
-                        String.Concat("Refusing to overwrite existing output without --force: ", capture.OutputPath)
+                        String.Concat(
+                            "Refusing to overwrite existing output without --force: ",
+                            capture.OutputPath
+                        )
                     )
                 )

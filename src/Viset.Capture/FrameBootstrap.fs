@@ -61,10 +61,12 @@ module internal FrameBootstrap =
         builder.Append "await Promise.all(Array.from(subscribers, callback => callback(value))); "
         |> ignore
 
-        builder.Append "window.dispatchEvent(new CustomEvent('viset-frame-update',{detail:value})); return value;};\n"
+        builder.Append
+            "window.dispatchEvent(new CustomEvent('viset-frame-update',{detail:value})); return value;};\n"
         |> ignore
 
-        builder.Append "window.visetFrame = Object.freeze({device,get current(){return snapshot();},"
+        builder.Append
+            "window.visetFrame = Object.freeze({device,get current(){return snapshot();},"
         |> ignore
 
         builder.Append
@@ -81,7 +83,8 @@ module internal FrameBootstrap =
         builder.Append "window.addEventListener('DOMContentLoaded', () => {window.dispatchEvent("
         |> ignore
 
-        builder.Append "new CustomEvent('viset-frame-ready',{detail:window.visetFrame.current}));}, {once:true});\n"
+        builder.Append
+            "new CustomEvent('viset-frame-ready',{detail:window.visetFrame.current}));}, {once:true});\n"
         |> ignore
 
         builder.Append "})();\n" |> ignore

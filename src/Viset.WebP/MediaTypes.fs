@@ -9,4 +9,7 @@ type EncodedAnimation =
       Metrics: WebPProductionMetrics }
 
     override animation.ToString() =
-        String.Concat(animation.FrameTicksMs.Length.ToString(CultureInfo.InvariantCulture), " frames")
+        String.Concat(
+            animation.FrameTicksMs.Length.ToString(CultureInfo.InvariantCulture),
+            " frames"
+        )

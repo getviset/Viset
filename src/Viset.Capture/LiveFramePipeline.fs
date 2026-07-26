@@ -8,7 +8,10 @@ open System.Threading.Tasks
 
 type internal LiveFramePipeline(session: CaptureSession) =
     let root =
-        Path.Combine(Path.GetTempPath(), String.Concat("viset-live-recording-", Guid.NewGuid().ToString "N"))
+        Path.Combine(
+            Path.GetTempPath(),
+            String.Concat("viset-live-recording-", Guid.NewGuid().ToString "N")
+        )
 
     let options = UnboundedChannelOptions(SingleReader = true, SingleWriter = true)
     let queue = Channel.CreateUnbounded<int> options
@@ -45,7 +48,8 @@ type internal LiveFramePipeline(session: CaptureSession) =
                 let mutable reading = true
 
                 while reading do
-                    let! available = queue.Reader.WaitToReadAsync(processorCancellation.Token).AsTask()
+                    let! available =
+                        queue.Reader.WaitToReadAsync(processorCancellation.Token).AsTask()
 
                     if not available then
                         reading <- false
@@ -58,15 +62,23 @@ type internal LiveFramePipeline(session: CaptureSession) =
                             let! source =
                                 match pendingFrame with
                                 | InMemory frame -> Task.FromResult frame
-                                | OnDisk stored -> RecordingPipeline.readAsync stored processorCancellation.Token
+                                | OnDisk stored ->
+                                    RecordingPipeline.readAsync stored processorCancellation.Token
 
-                            let! prepared = session.PrepareFrameAsync(source, processorCancellation.Token)
+                            let! prepared =
+                                session.PrepareFrameAsync(source, processorCancellation.Token)
 
                             let! stored =
-                                RecordingPipeline.writeAsync root "prepared-" index prepared processorCancellation.Token
+                                RecordingPipeline.writeAsync
+                                    root
+                                    "prepared-"
+                                    index
+                                    prepared
+                                    processorCancellation.Token
 
                             if preparedFrames.Count <> index then
-                                invalidOp "The live recording pipeline produced frames out of order."
+                                invalidOp
+                                    "The live recording pipeline produced frames out of order."
 
                             preparedFrames.Add stored
             with error ->
@@ -87,7 +99,8 @@ type internal LiveFramePipeline(session: CaptureSession) =
                         processorTask.Exception
                         |> Option.ofObj
                         |> Option.map _.GetBaseException()
-                        |> Option.defaultWith (fun () -> invalidOp "The live recording processor failed.")
+                        |> Option.defaultWith (fun () ->
+                            invalidOp "The live recording processor failed.")
 
                     raise processorError
 
@@ -107,7 +120,13 @@ type internal LiveFramePipeline(session: CaptureSession) =
                         if reserveMemory then
                             return InMemory frame
                         else
-                            let! stored = RecordingPipeline.writeAsync root "overflow-" index frame cancellationToken
+                            let! stored =
+                                RecordingPipeline.writeAsync
+                                    root
+                                    "overflow-"
+                                    index
+                                    frame
+                                    cancellationToken
 
                             Interlocked.Increment(&spilledFrameCount) |> ignore
                             return OnDisk stored

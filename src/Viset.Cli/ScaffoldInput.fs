@@ -18,7 +18,12 @@ module internal ScaffoldInput =
           ViewportWidth = 1280
           ViewportHeight = 720 }
 
-    let private prompt label displayedDefault defaultValue (validator: string -> Result<'value, string>) =
+    let private prompt
+        label
+        displayedDefault
+        defaultValue
+        (validator: string -> Result<'value, string>)
+        =
         let rec read () =
             Console.Out.Write($"{label} [{displayedDefault}]: ")
 
@@ -43,23 +48,43 @@ module internal ScaffoldInput =
         read ()
 
     let private interactiveSettings () =
-        match prompt "Page URL" "built-in page" defaults.PageUrl ScaffoldValidation.validateAbsoluteUrl with
+        match
+            prompt
+                "Page URL"
+                "built-in page"
+                defaults.PageUrl
+                ScaffoldValidation.validateAbsoluteUrl
+        with
         | Error message -> Error message
         | Ok pageUrl ->
             match
-                prompt "Output file" defaults.OutputPath defaults.OutputPath ScaffoldValidation.validateOutputPath
+                prompt
+                    "Output file"
+                    defaults.OutputPath
+                    defaults.OutputPath
+                    ScaffoldValidation.validateOutputPath
             with
             | Error message -> Error message
             | Ok outputPath ->
                 let width = defaults.ViewportWidth.ToString(CultureInfo.InvariantCulture)
 
-                match prompt "Viewport width" width width (ScaffoldValidation.validateDimension "Viewport width") with
+                match
+                    prompt
+                        "Viewport width"
+                        width
+                        width
+                        (ScaffoldValidation.validateDimension "Viewport width")
+                with
                 | Error message -> Error message
                 | Ok viewportWidth ->
                     let height = defaults.ViewportHeight.ToString(CultureInfo.InvariantCulture)
 
                     match
-                        prompt "Viewport height" height height (ScaffoldValidation.validateDimension "Viewport height")
+                        prompt
+                            "Viewport height"
+                            height
+                            height
+                            (ScaffoldValidation.validateDimension "Viewport height")
                     with
                     | Error message -> Error message
                     | Ok viewportHeight ->

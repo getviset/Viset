@@ -12,11 +12,15 @@ module internal CliOutput =
     let writePlan (plan: CapturePlan) =
         Console.Out.WriteLine(String.Concat("output: ", plan.OutputPath))
 
-        Console.Out.WriteLine(String.Concat("captures: ", plan.Captures.Length.ToString(CultureInfo.InvariantCulture)))
+        Console.Out.WriteLine(
+            String.Concat("captures: ", plan.Captures.Length.ToString(CultureInfo.InvariantCulture))
+        )
 
         plan.Captures
         |> List.iter (fun capture ->
-            Console.Out.WriteLine(String.Concat(capture.Format.ToString(), ": ", capture.OutputRelativePath)))
+            Console.Out.WriteLine(
+                String.Concat(capture.Format.ToString(), ": ", capture.OutputRelativePath)
+            ))
 
     let private percentile percentileValue (durations: TimeSpan list) =
         match durations |> List.sort with
@@ -68,7 +72,10 @@ module internal CliOutput =
                     " workers=",
                     metrics.WorkerCount.ToString(CultureInfo.InvariantCulture),
                     " total_ms=",
-                    metrics.TotalDuration.TotalMilliseconds.ToString("0.00", CultureInfo.InvariantCulture),
+                    metrics.TotalDuration.TotalMilliseconds.ToString(
+                        "0.00",
+                        CultureInfo.InvariantCulture
+                    ),
                     " per_frame_ms=",
                     perFrame.ToString("0.00", CultureInfo.InvariantCulture),
                     " decode_p95_ms=",
@@ -76,7 +83,10 @@ module internal CliOutput =
                     " encode_p95_ms=",
                     encodeP95Text,
                     " mux_ms=",
-                    metrics.MuxDuration.TotalMilliseconds.ToString("0.00", CultureInfo.InvariantCulture)
+                    metrics.MuxDuration.TotalMilliseconds.ToString(
+                        "0.00",
+                        CultureInfo.InvariantCulture
+                    )
                 )
             )
 
@@ -184,11 +194,20 @@ module internal CliOutput =
                         ": overruns=",
                         animationOverruns.Length.ToString(CultureInfo.InvariantCulture),
                         ", p95_ms=",
-                        animationP95.TotalMilliseconds.ToString("0.00", CultureInfo.InvariantCulture),
+                        animationP95.TotalMilliseconds.ToString(
+                            "0.00",
+                            CultureInfo.InvariantCulture
+                        ),
                         ", p99_ms=",
-                        animationP99.TotalMilliseconds.ToString("0.00", CultureInfo.InvariantCulture),
+                        animationP99.TotalMilliseconds.ToString(
+                            "0.00",
+                            CultureInfo.InvariantCulture
+                        ),
                         ", max_ms=",
-                        animationMax.TotalMilliseconds.ToString("0.00", CultureInfo.InvariantCulture)
+                        animationMax.TotalMilliseconds.ToString(
+                            "0.00",
+                            CultureInfo.InvariantCulture
+                        )
                     )
                 )
 

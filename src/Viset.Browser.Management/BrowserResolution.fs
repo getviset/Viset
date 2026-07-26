@@ -20,7 +20,8 @@ module BrowserResolution =
                 | true, platform ->
                     let rootResult =
                         match cacheRoot with
-                        | Some root when not (String.IsNullOrWhiteSpace root) -> Ok(Path.GetFullPath root)
+                        | Some root when not (String.IsNullOrWhiteSpace root) ->
+                            Ok(Path.GetFullPath root)
                         | Some _ -> Error "Managed browser cache path must not be empty."
                         | None -> BrowserCache.cacheRootForRuntime runtimeIdentifier
 
@@ -50,7 +51,12 @@ module BrowserResolution =
             match candidates with
             | [] -> return None
             | (name, path) :: remaining ->
-                let! result = BrowserValidation.validateBrowserAsync (SystemDiscovery name) None path cancellationToken
+                let! result =
+                    BrowserValidation.validateBrowserAsync
+                        (SystemDiscovery name)
+                        None
+                        path
+                        cancellationToken
 
                 match result with
                 | Ok browser -> return Some browser
@@ -66,20 +72,30 @@ module BrowserResolution =
         =
         task {
             match explicitPath with
-            | Some path -> return! BrowserValidation.validateBrowserAsync ExplicitPath None path cancellationToken
+            | Some path ->
+                return!
+                    BrowserValidation.validateBrowserAsync ExplicitPath None path cancellationToken
             | None ->
                 match Environment.GetEnvironmentVariable "VISET_BROWSER" |> Option.ofObj with
                 | Some path when not (String.IsNullOrWhiteSpace path) ->
-                    return! BrowserValidation.validateBrowserAsync EnvironmentVariable None path cancellationToken
+                    return!
+                        BrowserValidation.validateBrowserAsync
+                            EnvironmentVariable
+                            None
+                            path
+                            cancellationToken
                 | _ ->
-                    let! managedResult = tryManagedAsync lockPath cacheRoot runtimeIdentifier cancellationToken
+                    let! managedResult =
+                        tryManagedAsync lockPath cacheRoot runtimeIdentifier cancellationToken
 
                     match managedResult with
                     | Error message -> return Error message
                     | Ok(Some browser) -> return Ok browser
                     | Ok None ->
                         let! systemBrowser =
-                            trySystemAsync (BrowserDiscovery.systemCandidates runtimeIdentifier) cancellationToken
+                            trySystemAsync
+                                (BrowserDiscovery.systemCandidates runtimeIdentifier)
+                                cancellationToken
 
                         match systemBrowser with
                         | Some browser -> return Ok browser
@@ -90,4 +106,9 @@ module BrowserResolution =
         }
 
     let resolveAsync explicitPath lockPath cancellationToken =
-        resolveForRuntimeAsync explicitPath lockPath None (BrowserRuntime.currentRuntimeIdentifier ()) cancellationToken
+        resolveForRuntimeAsync
+            explicitPath
+            lockPath
+            None
+            (BrowserRuntime.currentRuntimeIdentifier ())
+            cancellationToken

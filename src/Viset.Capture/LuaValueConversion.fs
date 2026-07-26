@@ -34,7 +34,8 @@ module internal LuaValueConversion =
         | JsonValueKind.Undefined -> LuaValue.Nil
         | JsonValueKind.True -> LuaValue true
         | JsonValueKind.False -> LuaValue false
-        | JsonValueKind.String -> LuaValue(element.GetString() |> Option.ofObj |> Option.defaultValue String.Empty)
+        | JsonValueKind.String ->
+            LuaValue(element.GetString() |> Option.ofObj |> Option.defaultValue String.Empty)
         | JsonValueKind.Number -> LuaValue(element.GetDouble())
         | JsonValueKind.Array ->
             let values = element.EnumerateArray() |> Seq.toArray
@@ -42,7 +43,8 @@ module internal LuaValueConversion =
             let table = LuaTable(values.Length, 0)
 
             values
-            |> Array.iteri (fun index value -> table[LuaValue(double (index + 1))] <- jsonValue value)
+            |> Array.iteri (fun index value ->
+                table[LuaValue(double (index + 1))] <- jsonValue value)
 
             LuaValue table
         | JsonValueKind.Object ->

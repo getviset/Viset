@@ -10,7 +10,8 @@ module EmbeddedText =
             assembly.GetManifestResourceStream resourceName
             |> Option.ofObj
             |> Option.defaultWith (fun () ->
-                invalidOp $"Embedded resource '{resourceName}' was not found in '{assembly.FullName}'")
+                invalidOp
+                    $"Embedded resource '{resourceName}' was not found in '{assembly.FullName}'")
 
         use reader = new StreamReader(stream)
         reader.ReadToEnd()

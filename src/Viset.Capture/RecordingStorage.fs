@@ -15,7 +15,14 @@ module internal RecordingPipeline =
         | JpegImage -> ".jpg"
 
     let path root prefix (index: int) format =
-        Path.Combine(root, String.Concat(prefix, index.ToString("D8", CultureInfo.InvariantCulture), extension format))
+        Path.Combine(
+            root,
+            String.Concat(
+                prefix,
+                index.ToString("D8", CultureInfo.InvariantCulture),
+                extension format
+            )
+        )
 
     let writeAsync root prefix index (frame: CompressedFrame) cancellationToken =
         task {

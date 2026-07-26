@@ -61,20 +61,32 @@ module internal LuaTableHelpers =
         : LuaFunction =
         LuaFunction(
             name,
-            Func<LuaFunctionExecutionContext, CancellationToken, ValueTask<int>>(fun context cancellationToken ->
-                ValueTask<int>(
-                    task {
-                        try
-                            return! operation context cancellationToken
-                        with
-                        | :? OperationCanceledException when cancellationToken.IsCancellationRequested ->
-                            return raise (OperationCanceledException cancellationToken)
-                        | :? OperationCanceledException as error ->
-                            return raise (TimeoutException(String.Concat(name, " timed out."), error))
-                        | error ->
-                            return raise (InvalidOperationException(String.Concat(name, ": ", error.Message), error))
-                    }
-                ))
+            Func<LuaFunctionExecutionContext, CancellationToken, ValueTask<int>>
+                (fun context cancellationToken ->
+                    ValueTask<int>(
+                        task {
+                            try
+                                return! operation context cancellationToken
+                            with
+                            | :? OperationCanceledException when
+                                cancellationToken.IsCancellationRequested
+                                ->
+                                return raise (OperationCanceledException cancellationToken)
+                            | :? OperationCanceledException as error ->
+                                return
+                                    raise (
+                                        TimeoutException(String.Concat(name, " timed out."), error)
+                                    )
+                            | error ->
+                                return
+                                    raise (
+                                        InvalidOperationException(
+                                            String.Concat(name, ": ", error.Message),
+                                            error
+                                        )
+                                    )
+                        }
+                    ))
         )
 
     let durationMilliseconds (value: LuaValue) =
@@ -88,14 +100,23 @@ module internal LuaTableHelpers =
         | Some number -> validate number
         | None ->
             match tryRead<string> value with
-            | None -> invalidArg "duration" "duration must be a number of milliseconds or a string ending in ms or s."
+            | None ->
+                invalidArg
+                    "duration"
+                    "duration must be a number of milliseconds or a string ending in ms or s."
             | Some text ->
                 let trimmed = text.Trim()
 
                 let parse (suffix: string) multiplier =
                     let numberText = trimmed.Substring(0, trimmed.Length - suffix.Length)
 
-                    match Double.TryParse(numberText, NumberStyles.Float, CultureInfo.InvariantCulture) with
+                    match
+                        Double.TryParse(
+                            numberText,
+                            NumberStyles.Float,
+                            CultureInfo.InvariantCulture
+                        )
+                    with
                     | true, number -> validate (number * multiplier)
                     | _ -> invalidArg "duration" (String.Concat("Invalid duration: ", text))
 

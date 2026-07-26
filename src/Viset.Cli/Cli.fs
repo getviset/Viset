@@ -29,13 +29,20 @@ module Cli =
             with
             | :? ArgumentException
             | :? NotSupportedException
-            | :? PathTooLongException -> Error(String.Concat(label, " is not a valid path: ", value))
+            | :? PathTooLongException ->
+                Error(String.Concat(label, " is not a valid path: ", value))
 
     let private parseCapture currentDirectory scriptArgument optionArguments =
         match resolvePath "CAPTURE" currentDirectory scriptArgument with
         | Error message -> Error message
         | Ok scriptPath when
-            not (String.Equals(Path.GetExtension scriptPath, ".lua", StringComparison.OrdinalIgnoreCase))
+            not (
+                String.Equals(
+                    Path.GetExtension scriptPath,
+                    ".lua",
+                    StringComparison.OrdinalIgnoreCase
+                )
+            )
             ->
             Error "CAPTURE must be a Lua file with a .lua extension."
         | Ok scriptPath ->
@@ -53,13 +60,15 @@ module Cli =
                           OutputPath = outputPath
                           BrowserPath = browserPath
                           Force = force }
-                | "--output" :: tail when outputPath.IsSome -> Error "--output may be specified only once."
+                | "--output" :: tail when outputPath.IsSome ->
+                    Error "--output may be specified only once."
                 | "--output" :: tail ->
                     requireValue "--output" tail (fun value rest ->
                         match resolvePath "--output" currentDirectory value with
                         | Ok path -> parseOptions rest (Some path) browserPath force
                         | Error message -> Error message)
-                | "--browser" :: tail when browserPath.IsSome -> Error "--browser may be specified only once."
+                | "--browser" :: tail when browserPath.IsSome ->
+                    Error "--browser may be specified only once."
                 | "--browser" :: tail ->
                     requireValue "--browser" tail (fun value rest ->
                         match resolvePath "--browser" currentDirectory value with
@@ -81,13 +90,15 @@ module Cli =
                     { TargetDirectory = targetDirectory |> Option.defaultValue currentDirectory
                       Interactive = interactive
                       Force = force }
-            | ("-i" | "--interactive") :: _ when interactive -> Error "--interactive may be specified only once."
+            | ("-i" | "--interactive") :: _ when interactive ->
+                Error "--interactive may be specified only once."
             | ("-i" | "--interactive") :: tail -> parseOptions tail targetDirectory true force
             | "--force" :: _ when force -> Error "--force may be specified only once."
             | "--force" :: tail -> parseOptions tail targetDirectory interactive true
             | argument :: _ when argument.StartsWith("-", StringComparison.Ordinal) ->
                 Error(String.Concat("Unknown init option: ", argument))
-            | _ :: _ when targetDirectory.IsSome -> Error "init accepts at most one target directory."
+            | _ :: _ when targetDirectory.IsSome ->
+                Error "init accepts at most one target directory."
             | directory :: tail ->
                 match resolvePath "DIR" currentDirectory directory with
                 | Ok path -> parseOptions tail (Some path) interactive force

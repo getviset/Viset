@@ -58,7 +58,11 @@ type RecordingController
                 do! Task.Delay(remaining, delayCancellation)
         }
 
-    let startCaptureLoop timelineOffset (stopwatch: Stopwatch) (delayCancellation: CancellationToken) =
+    let startCaptureLoop
+        timelineOffset
+        (stopwatch: Stopwatch)
+        (delayCancellation: CancellationToken)
+        =
         let rec run nextSlot =
             task {
                 try
@@ -70,9 +74,19 @@ type RecordingController
                         let elapsedSlots =
                             max
                                 nextSlot
-                                (int (Math.Floor(stopwatch.Elapsed.TotalMilliseconds / interval.TotalMilliseconds)))
+                                (int (
+                                    Math.Floor(
+                                        stopwatch.Elapsed.TotalMilliseconds
+                                        / interval.TotalMilliseconds
+                                    )
+                                ))
 
-                        timeline <- RecordingTimeline.capture timelineOffset elapsedSlots frameIndex timeline
+                        timeline <-
+                            RecordingTimeline.capture
+                                timelineOffset
+                                elapsedSlots
+                                frameIndex
+                                timeline
 
                         return! run (elapsedSlots + 1)
                 with :? OperationCanceledException when delayCancellation.IsCancellationRequested ->
@@ -112,7 +126,11 @@ type RecordingController
                     return
                         raise (
                             InvalidOperationException(
-                                String.Concat(error.Message, " Screencast cleanup also failed: ", cleanupError.Message),
+                                String.Concat(
+                                    error.Message,
+                                    " Screencast cleanup also failed: ",
+                                    cleanupError.Message
+                                ),
                                 error
                             )
                         )
@@ -140,7 +158,12 @@ type RecordingController
 
             segment.Stopwatch.Stop()
 
-            timeline <- RecordingTimeline.closeSegment interval segment.TimelineOffset segmentElapsed timeline
+            timeline <-
+                RecordingTimeline.closeSegment
+                    interval
+                    segment.TimelineOffset
+                    segmentElapsed
+                    timeline
 
             segment.StopSignal.Dispose()
 
@@ -178,7 +201,9 @@ type RecordingController
 
             let readFrameAsync logicalIndex readCancellation =
                 if logicalIndex < 0 || logicalIndex >= frameIndices.Length then
-                    invalidArg (nameof logicalIndex) "Logical frame index is outside the recording timeline."
+                    invalidArg
+                        (nameof logicalIndex)
+                        "Logical frame index is outside the recording timeline."
 
                 pipeline.ReadAsync(frameIndices[logicalIndex], readCancellation)
 
@@ -249,8 +274,12 @@ type RecordingController
         member this.Dispose() = this.DisposeCore()
 
     static member CreateScreencast
-        (session: CaptureSession, framesPerSecond: int, webPOptions: WebPOptions, cancellationToken: CancellationToken)
-        =
+        (
+            session: CaptureSession,
+            framesPerSecond: int,
+            webPOptions: WebPOptions,
+            cancellationToken: CancellationToken
+        ) =
         let source =
             ScreencastFrameSource(session, webPOptions.Source) :> IContinuousFrameSource
 

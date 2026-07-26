@@ -7,8 +7,12 @@ type BrowserSessionException(message: string, innerException: Exception) =
     inherit Exception(message, innerException)
 
 type BrowserSessionOptions
-    (executablePath: string, browserArguments: IReadOnlyList<string>, startupTimeout: TimeSpan, commandTimeout: TimeSpan)
-    =
+    (
+        executablePath: string,
+        browserArguments: IReadOnlyList<string>,
+        startupTimeout: TimeSpan,
+        commandTimeout: TimeSpan
+    ) =
     do
         ArgumentException.ThrowIfNullOrWhiteSpace executablePath
         ArgumentNullException.ThrowIfNull browserArguments
@@ -27,4 +31,9 @@ type BrowserSessionOptions
     override _.ToString() = executablePath
 
     new(executablePath: string, browserArguments: IReadOnlyList<string>) =
-        BrowserSessionOptions(executablePath, browserArguments, TimeSpan.FromSeconds 10.0, TimeSpan.FromSeconds 10.0)
+        BrowserSessionOptions(
+            executablePath,
+            browserArguments,
+            TimeSpan.FromSeconds 10.0,
+            TimeSpan.FromSeconds 10.0
+        )

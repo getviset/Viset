@@ -12,7 +12,13 @@ open System.Threading.Tasks
 module private FrameHttp =
     let private utf8 = UTF8Encoding false
 
-    let writeResponseAsync (stream: NetworkStream) status contentType (body: byte array) cancellationToken =
+    let writeResponseAsync
+        (stream: NetworkStream)
+        status
+        contentType
+        (body: byte array)
+        cancellationToken
+        =
         task {
             let header =
                 String.Concat(
@@ -61,7 +67,8 @@ module private FrameHttp =
                     return Some path
         }
 
-type FrameServer private (listener: TcpListener, token: string, html: byte array, script: byte array) =
+type FrameServer
+    private (listener: TcpListener, token: string, html: byte array, script: byte array) =
     let cancellation = new CancellationTokenSource()
     let imageLock = obj ()
     let mutable image: CompressedFrame option = None
@@ -83,8 +90,20 @@ type FrameServer private (listener: TcpListener, token: string, html: byte array
 
             match path with
             | Some value when String.Equals(value, rootPath, StringComparison.Ordinal) ->
-                do! FrameHttp.writeResponseAsync stream "200 OK" "text/html; charset=utf-8" html cancellation.Token
-            | Some value when String.Equals(value, String.Concat(rootPath, "viset-frame.js"), StringComparison.Ordinal) ->
+                do!
+                    FrameHttp.writeResponseAsync
+                        stream
+                        "200 OK"
+                        "text/html; charset=utf-8"
+                        html
+                        cancellation.Token
+            | Some value when
+                String.Equals(
+                    value,
+                    String.Concat(rootPath, "viset-frame.js"),
+                    StringComparison.Ordinal
+                )
+                ->
                 do!
                     FrameHttp.writeResponseAsync
                         stream
@@ -92,7 +111,9 @@ type FrameServer private (listener: TcpListener, token: string, html: byte array
                         "text/javascript; charset=utf-8"
                         script
                         cancellation.Token
-            | Some value when String.Equals(value, String.Concat(rootPath, "image"), StringComparison.Ordinal) ->
+            | Some value when
+                String.Equals(value, String.Concat(rootPath, "image"), StringComparison.Ordinal)
+                ->
                 match currentImage () with
                 | None ->
                     do!
@@ -108,7 +129,13 @@ type FrameServer private (listener: TcpListener, token: string, html: byte array
                         | PngImage -> "image/png"
                         | JpegImage -> "image/jpeg"
 
-                    do! FrameHttp.writeResponseAsync stream "200 OK" contentType frame.Bytes cancellation.Token
+                    do!
+                        FrameHttp.writeResponseAsync
+                            stream
+                            "200 OK"
+                            contentType
+                            frame.Bytes
+                            cancellation.Token
             | _ ->
                 do!
                     FrameHttp.writeResponseAsync
@@ -174,7 +201,9 @@ type FrameServer private (listener: TcpListener, token: string, html: byte array
             match frameSource with
             | CustomFrame path ->
                 if not (File.Exists path) then
-                    invalidArg (nameof frameSource) (String.Concat("Frame HTML does not exist: ", path))
+                    invalidArg
+                        (nameof frameSource)
+                        (String.Concat("Frame HTML does not exist: ", path))
 
                 File.ReadAllText path
             | BuiltInFrame style -> BuiltInFrames.html style device

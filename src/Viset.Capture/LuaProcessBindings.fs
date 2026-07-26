@@ -26,13 +26,16 @@ module internal LuaProcessBindings =
                     match getValue options "arguments" |> tryRead<LuaTable> with
                     | Some arguments ->
                         for index in 1 .. arguments.ArrayLength do
-                            startInfo.ArgumentList.Add(arguments[LuaValue(double index)].Read<string>())
+                            startInfo.ArgumentList.Add(
+                                arguments[LuaValue(double index)].Read<string>()
+                            )
                     | None -> ()
 
                     match getValue options "environment" |> tryRead<LuaTable> with
                     | Some environment ->
                         for item in environment do
-                            startInfo.Environment[item.Key.Read<string>()] <- item.Value.Read<string>()
+                            startInfo.Environment[item.Key.Read<string>()] <-
+                                item.Value.Read<string>()
                     | None -> ()
 
                     let handle = registry.Start startInfo
@@ -47,7 +50,9 @@ module internal LuaProcessBindings =
 
                     let timeout =
                         if context.HasArgument 1 then
-                            context.GetArgument 1 |> durationMilliseconds |> TimeSpan.FromMilliseconds
+                            context.GetArgument 1
+                            |> durationMilliseconds
+                            |> TimeSpan.FromMilliseconds
                         else
                             TimeSpan.FromSeconds 30.0
 

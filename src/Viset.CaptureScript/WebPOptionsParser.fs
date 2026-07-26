@@ -87,7 +87,10 @@ module internal WebPOptionsParser =
                     Error "ffmpeg did not respond to its encoder probe within five seconds."
                 else
                     let output =
-                        String.Concat(standardOutput.GetAwaiter().GetResult(), standardError.GetAwaiter().GetResult())
+                        String.Concat(
+                            standardOutput.GetAwaiter().GetResult(),
+                            standardError.GetAwaiter().GetResult()
+                        )
 
                     if
                         ffmpegProcess.ExitCode = 0
@@ -137,7 +140,9 @@ module internal WebPOptionsParser =
             let source =
                 if String.IsNullOrWhiteSpace sourceName || sourceName = "png_screencast" then
                     match sourceQuality with
-                    | Some _ -> error "webp.source_quality is valid only when webp.source = 'jpeg_screencast'."
+                    | Some _ ->
+                        error
+                            "webp.source_quality is valid only when webp.source = 'jpeg_screencast'."
                     | None -> Ok PngScreencast
                 elif sourceName = "jpeg_screencast" then
                     let quality = sourceQuality |> Option.defaultValue DefaultJpegSourceQuality
@@ -171,7 +176,13 @@ module internal WebPOptionsParser =
                 elif modeName = "lossless" then
                     Ok("lossless", 50.0)
                 else
-                    error (String.Concat("Unknown webp.mode '", modeName, "'; expected lossy or lossless."))
+                    error (
+                        String.Concat(
+                            "Unknown webp.mode '",
+                            modeName,
+                            "'; expected lossy or lossless."
+                        )
+                    )
 
             let qualityValue =
                 model |> Option.bind (fun value -> value.Quality |> Option.ofNullable)
@@ -227,17 +238,30 @@ module internal WebPOptionsParser =
                     elif pipelineName = "live" then
                         Ok Live
                     else
-                        error (String.Concat("Unknown webp.pipeline '", pipelineName, "'; expected spooled or live."))
+                        error (
+                            String.Concat(
+                                "Unknown webp.pipeline '",
+                                pipelineName,
+                                "'; expected spooled or live."
+                            )
+                        )
 
                 match source, encoder, pipeline, modeDefaultQuality with
                 | Error errors, _, _, _
                 | _, Error errors, _, _
                 | _, _, Error errors, _
                 | _, _, _, Error errors -> Error errors
-                | Ok selectedSource, Ok selectedEncoder, Ok selectedPipeline, Ok(mode, defaultQuality) ->
+                | Ok selectedSource,
+                  Ok selectedEncoder,
+                  Ok selectedPipeline,
+                  Ok(mode, defaultQuality) ->
                     let quality = qualityValue |> Option.defaultValue defaultQuality
 
-                    if not (Double.IsFinite quality) || quality < 0.0 || quality > MaximumWebPQuality then
+                    if
+                        not (Double.IsFinite quality)
+                        || quality < 0.0
+                        || quality > MaximumWebPQuality
+                    then
                         error "webp.quality must be a finite number between 0 and 100."
                     else
                         let selectedMode =

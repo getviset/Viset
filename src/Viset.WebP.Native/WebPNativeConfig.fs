@@ -7,7 +7,9 @@ module internal WebPNativeConfig =
         WebPNativeLibraries.ensureLoaded ()
         WebPInteropLayouts.validate ()
 
-        if WebPInterop.WebPConfigInitInternal(&config, 0, 75.0f, WebPInterop.EncoderAbiVersion) = 0 then
+        if
+            WebPInterop.WebPConfigInitInternal(&config, 0, 75.0f, WebPInterop.EncoderAbiVersion) = 0
+        then
             invalidOp "libwebp rejected the encoder ABI version."
 
         config.Lossless <- if options.Lossless then 1 else 0
