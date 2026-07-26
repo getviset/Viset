@@ -34,6 +34,6 @@ type BrowserSessionOptions
         BrowserSessionOptions(
             executablePath,
             browserArguments,
-            TimeSpan.FromSeconds 10.0,
+            TimeSpan.FromMinutes 1.0,
             TimeSpan.FromSeconds 10.0
         )
