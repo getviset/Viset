@@ -1,14 +1,14 @@
 namespace Viset.Tests
 
 open System
-open FsUnit
-open NUnit.Framework
+open FsUnit.Xunit
+open Xunit
 open Viset
 
 module FrameCoalescingTests =
     let private frame format bytes = { Format = format; Bytes = bytes }
 
-    [<Test>]
+    [<Fact>]
     let ``equal consecutive source bytes should coalesce into one run`` () =
         let coalescing = FrameCoalescing.start (frame PngImage [| 1uy; 2uy |]) 34
 
@@ -30,7 +30,7 @@ module FrameCoalescingTests =
         second.Sequence |> should equal 1
         second.Duration |> should equal 33L
 
-    [<Test>]
+    [<Fact>]
     let ``matching bytes in different source formats should start a new run`` () =
         let bytes = [| 1uy; 2uy |]
         let coalescing = FrameCoalescing.start (frame PngImage bytes) 17
@@ -38,7 +38,7 @@ module FrameCoalescingTests =
 
         completed.IsSome |> should equal true
 
-    [<Test>]
+    [<Fact>]
     let ``large coalesced durations should use checked wide arithmetic`` () =
         let source = frame PngImage [| 4uy |]
         let coalescing = FrameCoalescing.start source Int32.MaxValue
@@ -47,7 +47,7 @@ module FrameCoalescingTests =
         emitted |> should equal None
         (FrameCoalescing.finish coalescing).Duration |> should equal 4294967294L
 
-    [<Test>]
+    [<Fact>]
     let ``splitting a duration should preserve every millisecond within native limits`` () =
         let maximumDuration = WebPEncoding.MaximumFrameDurationMilliseconds
 

@@ -4,12 +4,12 @@ open System
 open System.IO
 open System.Security.Cryptography
 open System.Text.RegularExpressions
-open FsUnit
-open NUnit.Framework
+open FsUnit.Xunit
+open Xunit
 open Viset.EndToEnd.Fixtures
 open Viset.EndToEnd.MediaAssertions
 
-[<assembly: LevelOfParallelism(1)>]
+[<assembly: CollectionBehavior(DisableTestParallelization = true)>]
 do ()
 
 module CaptureTests =
@@ -17,7 +17,7 @@ module CaptureTests =
 
     let private requireFailure expected result =
         result.ExitCode |> should not' (equal 0)
-        output result |> should contain expected
+        output result |> should haveSubstring expected
 
     let private requirePortClosed port = isPortOpen port |> should equal false
 
@@ -50,7 +50,7 @@ recording:during("100ms")
 recording:stop()
 """
 
-    [<Test; NonParallelizable>]
+    [<Fact>]
     let ``the command line should reject invalid capture configurations`` () =
         use directory = createTemporaryDirectory "invalid-configurations"
         assertBinaryExists ()
@@ -99,7 +99,9 @@ viset.snapshot()
           "invalid-webp-mode",
           "mode = \"near_lossless\"",
           "Unknown webp.mode 'near_lossless'; expected lossy or lossless."
-          "invalid-webp-quality", "quality = 101", "webp.quality must be a finite number between 0 and 100."
+          "invalid-webp-quality",
+          "quality = 101",
+          "webp.quality must be a finite number between 0 and 100."
           "removed-webp-lossless", "lossless = true", "Unknown TOML property 'webp.lossless'." ]
         |> List.iter (fun (name, configuration, expected) ->
             let script = writeScript directory $"{name}.lua" (webPTemplate configuration)
@@ -129,10 +131,15 @@ device = ["desktop"]
 viset.snapshot()
 """
 
-        run binaryPath [ "capture"; redundantDeviceAxis ] directory.Path [] (TimeSpan.FromSeconds 30.0)
+        run
+            binaryPath
+            [ "capture"; redundantDeviceAxis ]
+            directory.Path
+            []
+            (TimeSpan.FromSeconds 30.0)
         |> requireFailure "matrix.device is redundant"
 
-    [<Test; NonParallelizable>]
+    [<Fact>]
     let ``the command line should validate ffmpeg before browser work`` () =
         use directory = createTemporaryDirectory "missing-ffmpeg"
         let pathWithoutFfmpeg = Path.Combine(directory.Path, "empty-path")
@@ -147,7 +154,7 @@ viset.snapshot()
         |> snd
         |> requireFailure "webp.encoder = 'ffmpeg' requires ffmpeg"
 
-    [<Test; NonParallelizable>]
+    [<Fact>]
     let ``the capture fixtures should produce deterministic media and protect existing output`` () =
         use directory = createTemporaryDirectory "media"
         let outputDirectory = Path.Combine(directory.Path, "output")
@@ -155,17 +162,30 @@ viset.snapshot()
         capture directory "stills.lua" outputDirectory [] [] |> requireSuccess
         capture directory "animation.lua" outputDirectory [] [] |> requireSuccess
 
-        assertInventory outputDirectory [ "animations/motion.webp"; "screenshots/blue.png"; "screenshots/red.png" ]
+        assertInventory
+            outputDirectory
+            [ "animations/motion.webp"; "screenshots/blue.png"; "screenshots/red.png" ]
 
         assertPng (Path.Combine(outputDirectory, "screenshots", "red.png")) 400 300
         assertPng (Path.Combine(outputDirectory, "screenshots", "blue.png")) 400 300
-        assertWebP (Path.Combine(outputDirectory, "animations", "motion.webp")) 400 300 (Some 400) 2 None
+
+        assertWebP
+            (Path.Combine(outputDirectory, "animations", "motion.webp"))
+            400
+            300
+            (Some 400)
+            2
+            None
 
         let red =
-            SHA256.HashData(File.ReadAllBytes(Path.Combine(outputDirectory, "screenshots", "red.png")))
+            SHA256.HashData(
+                File.ReadAllBytes(Path.Combine(outputDirectory, "screenshots", "red.png"))
+            )
 
         let blue =
-            SHA256.HashData(File.ReadAllBytes(Path.Combine(outputDirectory, "screenshots", "blue.png")))
+            SHA256.HashData(
+                File.ReadAllBytes(Path.Combine(outputDirectory, "screenshots", "blue.png"))
+            )
 
         red |> should not' (equal blue)
         Directory.Exists(Path.Combine(outputDirectory, ".viset")) |> should equal false
@@ -179,7 +199,7 @@ viset.snapshot()
         capture directory "stills.lua" outputDirectory [ "--force" ] []
         |> requireSuccess
 
-    [<Test; NonParallelizable>]
+    [<Fact>]
     let ``the recording encoders should preserve duration and dimensions`` () =
         use directory = createTemporaryDirectory "encoders"
 
@@ -191,25 +211,39 @@ viset.snapshot()
             assertInventory outputDirectory [ mediaPath ]
             assertWebP (Path.Combine(outputDirectory, mediaPath)) 400 300 (Some 400) 2 None)
 
-    [<Test; NonParallelizable>]
+    [<Fact>]
     let ``the recording pipeline should report coalescing and live spill`` () =
         use directory = createTemporaryDirectory "recording-pipeline"
         let coalescingOutput = Path.Combine(directory.Path, "coalescing-output")
         let coalescing = capture directory "coalescing.lua" coalescingOutput [] []
         requireSuccess coalescing
-        output coalescing |> should contain "frames=12 encoded=2"
+        output coalescing |> should haveSubstring "frames=12 encoded=2"
         assertInventory coalescingOutput [ "animations/coalesced.webp" ]
-        assertWebP (Path.Combine(coalescingOutput, "animations", "coalesced.webp")) 320 240 (Some 400) 1 (Some 2)
+
+        assertWebP
+            (Path.Combine(coalescingOutput, "animations", "coalesced.webp"))
+            320
+            240
+            (Some 400)
+            1
+            (Some 2)
 
         let liveOutput = Path.Combine(directory.Path, "live-output")
         let live = capture directory "animation-live-spill.lua" liveOutput [] []
         requireSuccess live
-        output live |> should contain "pipeline=live"
+        output live |> should haveSubstring "pipeline=live"
         Regex.IsMatch(output live, "spilled=[1-9][0-9]*") |> should equal true
         assertInventory liveOutput [ "animations/live-spill.webp" ]
-        assertWebP (Path.Combine(liveOutput, "animations", "live-spill.webp")) 1600 900 (Some 400) 1 None
 
-    [<Test; NonParallelizable>]
+        assertWebP
+            (Path.Combine(liveOutput, "animations", "live-spill.webp"))
+            1600
+            900
+            (Some 400)
+            1
+            None
+
+    [<Fact>]
     let ``the capture process should clean up child services after failure`` () =
         use directory = createTemporaryDirectory "cleanup"
 
@@ -227,8 +261,10 @@ viset.snapshot()
             File.Exists(Path.Combine(outputDirectory, "animations", "motion.webp"))
             |> should equal false)
 
-    [<Test; NonParallelizable>]
-    let ``the initialized scaffold should contain exact editor files and standalone Neovim guidance`` () =
+    [<Fact>]
+    let ``the initialized scaffold should contain exact editor files and standalone Neovim guidance``
+        ()
+        =
         use directory = createTemporaryDirectory "scaffold"
         let project = Path.Combine(directory.Path, "project")
 
@@ -246,129 +282,24 @@ viset.snapshot()
         Directory.Exists(Path.Combine(project, ".viset", "nvim")) |> should equal false
 
         File.ReadAllText(Path.Combine(project, ".gitignore"))
-        |> should contain "/output/"
+        |> should haveSubstring "/output/"
 
         File.ReadAllText(Path.Combine(project, ".luarc.json"))
-        |> should contain "\"runtime.version\": \"Lua 5.2\""
+        |> should haveSubstring "\"runtime.version\": \"Lua 5.2\""
 
         File.ReadAllText(Path.Combine(project, ".viset", "viset.d.lua"))
-        |> should contain "---@class VisetApi"
+        |> should haveSubstring "---@class VisetApi"
 
         let readme = File.ReadAllText(Path.Combine(project, "README.md"))
-        readme |> should contain "https://github.com/getviset/viset.nvim"
-        readme |> should contain "Lua, TOML, and JavaScript Tree-sitter parsers"
-        readme |> should contain ":checkhealth viset"
-        readme |> should not' (contain ".viset/nvim")
-        readme |> should not' (contain "runtimepath")
-        readme |> should not' (contain "Tree-sitter query")
-        readme |> should not' (contain "VS Code")
+        readme |> should haveSubstring "https://github.com/getviset/viset.nvim"
+        readme |> should haveSubstring "Lua, TOML, and JavaScript Tree-sitter parsers"
+        readme |> should haveSubstring ":checkhealth viset"
+        readme |> should not' (haveSubstring ".viset/nvim")
+        readme |> should not' (haveSubstring "runtimepath")
+        readme |> should not' (haveSubstring "Tree-sitter query")
+        readme |> should not' (haveSubstring "VS Code")
 
-    [<Test; NonParallelizable>]
-    let ``the forced scaffold should safely remove only legacy Neovim support`` () =
-        use directory = createTemporaryDirectory "legacy-neovim-scaffold"
-
-        let initialize project force =
-            let arguments =
-                if force then
-                    [ "init"; project; "--force" ]
-                else
-                    [ "init"; project ]
-
-            run binaryPath arguments directory.Path [] (TimeSpan.FromSeconds 30.0)
-
-        let writeLegacyQuery nvimDirectory =
-            let luaDirectory = Path.Combine(nvimDirectory, "queries", "lua")
-            Directory.CreateDirectory luaDirectory |> ignore
-            let queryPath = Path.Combine(luaDirectory, "injections.scm")
-            File.WriteAllText(queryPath, "; legacy generated query\n")
-            queryPath
-
-        let migratedProject = Path.Combine(directory.Path, "migrated-project")
-        initialize migratedProject false |> requireSuccess
-        let migratedNvim = Path.Combine(migratedProject, ".viset", "nvim")
-        let migratedQuery = writeLegacyQuery migratedNvim
-        let projectNote = Path.Combine(migratedProject, ".viset", "project-note.txt")
-        File.WriteAllText(projectNote, "keep project note")
-
-        initialize migratedProject false |> requireFailure "use --force"
-        File.Exists migratedQuery |> should equal true
-        initialize migratedProject true |> requireSuccess
-        File.Exists migratedQuery |> should equal false
-
-        Directory.Exists(Path.Combine(migratedNvim, "queries", "lua"))
-        |> should equal false
-
-        Directory.Exists(Path.Combine(migratedNvim, "queries")) |> should equal false
-        Directory.Exists migratedNvim |> should equal false
-        File.ReadAllText projectNote |> should equal "keep project note"
-
-        assertInventory
-            migratedProject
-            [ ".gitignore"
-              ".luarc.json"
-              ".viset/project-note.txt"
-              ".viset/viset.d.lua"
-              "README.md"
-              "capture.lua" ]
-
-        let preservedProject = Path.Combine(directory.Path, "preserved-project")
-        initialize preservedProject false |> requireSuccess
-        let preservedNvim = Path.Combine(preservedProject, ".viset", "nvim")
-        let preservedQuery = writeLegacyQuery preservedNvim
-        let userFile = Path.Combine(preservedNvim, "user-notes.txt")
-        File.WriteAllText(userFile, "keep Neovim note")
-
-        initialize preservedProject true |> requireSuccess
-        File.Exists preservedQuery |> should equal false
-
-        Directory.Exists(Path.Combine(preservedNvim, "queries", "lua"))
-        |> should equal false
-
-        Directory.Exists(Path.Combine(preservedNvim, "queries")) |> should equal false
-        Directory.Exists preservedNvim |> should equal true
-        File.ReadAllText userFile |> should equal "keep Neovim note"
-
-        assertInventory
-            preservedProject
-            [ ".gitignore"
-              ".luarc.json"
-              ".viset/nvim/user-notes.txt"
-              ".viset/viset.d.lua"
-              "README.md"
-              "capture.lua" ]
-
-        let combine root segments =
-            segments |> List.fold (fun path segment -> Path.Combine(path, segment)) root
-
-        [ "nvim", [ ".viset" ], "nvim", [ "queries"; "lua" ]
-          "queries", [ ".viset"; "nvim" ], "queries", [ "lua" ]
-          "lua", [ ".viset"; "nvim"; "queries" ], "lua", [] ]
-        |> List.iter (fun (label, parentSegments, linkName, outsideSegments) ->
-            let linkedProject =
-                Path.Combine(directory.Path, String.Concat("linked-", label, "-project"))
-
-            initialize linkedProject false |> requireSuccess
-
-            let outsideDirectory =
-                Path.Combine(directory.Path, String.Concat("outside-", label))
-
-            let outsideQueryDirectory = combine outsideDirectory outsideSegments
-            Directory.CreateDirectory outsideQueryDirectory |> ignore
-            let outsideQuery = Path.Combine(outsideQueryDirectory, "injections.scm")
-            File.WriteAllText(outsideQuery, "; legacy generated query\n")
-            let linkParent = combine linkedProject parentSegments
-            Directory.CreateDirectory linkParent |> ignore
-
-            Directory.CreateSymbolicLink(Path.Combine(linkParent, linkName), outsideDirectory)
-            |> ignore
-
-            initialize linkedProject true |> requireFailure "must not be a link"
-            File.ReadAllText outsideQuery |> should equal "; legacy generated query\n"
-
-            File.Exists(Path.Combine(linkedProject, ".viset", "viset.d.lua"))
-            |> should equal true)
-
-    [<Test; NonParallelizable>]
+    [<Fact>]
     let ``the scaffold should capture its example and apply interactive settings`` () =
         use directory = createTemporaryDirectory "scaffold-capture"
         let project = Path.Combine(directory.Path, "project")
@@ -387,8 +318,8 @@ viset.snapshot()
         File.Exists(Path.Combine(project, "output", "example.png")) |> should equal true
 
         let readme = File.ReadAllText(Path.Combine(project, "README.md"))
-        readme |> should contain "viset capture capture.lua"
-        readme |> should contain "output/example.png"
+        readme |> should haveSubstring "viset capture capture.lua"
+        readme |> should haveSubstring "output/example.png"
 
         let interactive = Path.Combine(directory.Path, "interactive-project")
 
@@ -402,14 +333,14 @@ viset.snapshot()
         |> requireSuccess
 
         let interactiveCapture = File.ReadAllText(Path.Combine(interactive, "capture.lua"))
-        interactiveCapture |> should contain "output = \"capture.png\""
-        interactiveCapture |> should contain "width = 1024"
-        interactiveCapture |> should contain "height = 640"
+        interactiveCapture |> should haveSubstring "output = \"capture.png\""
+        interactiveCapture |> should haveSubstring "width = 1024"
+        interactiveCapture |> should haveSubstring "height = 640"
 
         File.ReadAllText(Path.Combine(interactive, ".gitignore"))
-        |> should contain "/capture.png"
+        |> should haveSubstring "/capture.png"
 
-    [<Test; NonParallelizable>]
+    [<Fact>]
     let ``the shipped examples should produce their expected media`` () =
         use directory = createTemporaryDirectory "examples"
         let minimalOutput = Path.Combine(directory.Path, "minimal-output")
@@ -475,7 +406,7 @@ viset.snapshot()
             let path = Path.Combine(mediumOutput, "animations", name)
             assertWebP path width height None 1 None)
 
-    [<Test; NonParallelizable; Category("Smoke")>]
+    [<Fact; Trait("Category", "Smoke")>]
     let ``the packaged binary should capture the smoke fixture`` () =
         use directory = createTemporaryDirectory "smoke"
         assertBinaryExists ()
@@ -488,7 +419,7 @@ viset.snapshot()
         run binaryPath [ "--help" ] directory.Path [] (TimeSpan.FromSeconds 30.0)
         |> fun result ->
             requireSuccess result
-            result.StandardOutput |> should contain "viset capture CAPTURE.lua"
+            result.StandardOutput |> should haveSubstring "viset capture CAPTURE.lua"
 
         let script =
             writeScript

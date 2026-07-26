@@ -1,12 +1,12 @@
 namespace Viset.Tests
 
 open System
-open FsUnit
-open NUnit.Framework
+open FsUnit.Xunit
+open Xunit
 open Viset
 
 module PerformanceMetricsTests =
-    [<Test>]
+    [<Fact>]
     let ``capture observations should produce the public capture metrics`` () =
         let metrics =
             PerformanceMetrics.capture
@@ -23,7 +23,7 @@ module PerformanceMetricsTests =
         metrics.FrameCount |> should equal 3
         metrics.MissedSlots |> should equal 1
 
-    [<Test>]
+    [<Fact>]
     let ``production observations should preserve backend-specific metric values`` () =
         let metrics =
             PerformanceMetrics.webP

@@ -85,4 +85,4 @@ jobs:
             dotnet test tests/Viset.EndToEnd/Viset.EndToEnd.fsproj \
               --configuration Release \
               --no-restore \
-              --filter TestCategory=Smoke
+              -- --filter-query "/[Category=Smoke]"

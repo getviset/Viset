@@ -1,12 +1,12 @@
 namespace Viset.Tests
 
 open System
-open FsUnit
-open NUnit.Framework
+open FsUnit.Xunit
+open Xunit
 open Viset
 
 module RecordingTimelineTests =
-    [<Test>]
+    [<Fact>]
     let ``capturing after missed slots should duplicate the previous frame`` () =
         let timeline =
             RecordingTimeline.empty
@@ -18,7 +18,7 @@ module RecordingTimelineTests =
         RecordingTimeline.missedSlots timeline |> should equal 1
         RecordingTimeline.duplicatedFrames timeline |> should equal 1
 
-    [<Test>]
+    [<Fact>]
     let ``closing a segment should trim excess frames and accumulate active duration`` () =
         let timeline =
             RecordingTimeline.empty

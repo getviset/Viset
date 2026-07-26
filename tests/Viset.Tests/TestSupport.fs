@@ -4,7 +4,7 @@ open System
 open System.Buffers.Binary
 open System.IO
 open System.Text
-open FsUnit
+open FsUnit.Xunit
 
 module TestSupport =
     let resultValue result =

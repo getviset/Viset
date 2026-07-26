@@ -3,7 +3,7 @@ namespace Viset.EndToEnd
 open System
 open System.Buffers.Binary
 open System.IO
-open FsUnit
+open FsUnit.Xunit
 
 type AnimationFrame =
     { Duration: int
@@ -22,8 +22,14 @@ module MediaAssertions =
 
     let private animatedWebP (bytes: byte array) =
         require (bytes.Length >= 12) "WebP output is shorter than its container header."
-        require (bytes[0..3] = [| 82uy; 73uy; 70uy; 70uy |]) "WebP output does not have a RIFF header."
-        require (bytes[8..11] = [| 87uy; 69uy; 66uy; 80uy |]) "WebP output does not have a WEBP header."
+
+        require
+            (bytes[0..3] = [| 82uy; 73uy; 70uy; 70uy |])
+            "WebP output does not have a RIFF header."
+
+        require
+            (bytes[8..11] = [| 87uy; 69uy; 66uy; 80uy |])
+            "WebP output does not have a WEBP header."
 
         require
             (int (BinaryPrimitives.ReadUInt32LittleEndian(bytes.AsSpan(4, 4))) + 8 = bytes.Length)
@@ -65,7 +71,8 @@ module MediaAssertions =
     let assertInventory root expected =
         let actual =
             Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories)
-            |> Seq.map (fun path -> Path.GetRelativePath(root, path).Replace(Path.DirectorySeparatorChar, '/'))
+            |> Seq.map (fun path ->
+                Path.GetRelativePath(root, path).Replace(Path.DirectorySeparatorChar, '/'))
             |> Seq.sort
             |> Seq.toList
 

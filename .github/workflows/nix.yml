@@ -60,7 +60,7 @@ jobs:
                 VISET_END_TO_END_BROWSER_ARGUMENTS=--no-sandbox \
                 dotnet test tests/Viset.EndToEnd/Viset.EndToEnd.fsproj \
                   --configuration Release \
-                  --filter TestCategory=Smoke
+                  -- --filter-query "/[Category=Smoke]"
           fi
 
       - name: Exercise development shell and formatter

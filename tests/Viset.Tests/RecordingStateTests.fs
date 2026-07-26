@@ -3,8 +3,8 @@ namespace Viset.Tests
 open System.Diagnostics
 open System.Threading
 open System.Threading.Tasks
-open FsUnit
-open NUnit.Framework
+open FsUnit.Xunit
+open Xunit
 open Viset
 open Viset.Tests.TestSupport
 
@@ -15,14 +15,14 @@ module RecordingStateTests =
           StopSignal = stopSignal
           CaptureLoop = Task.CompletedTask }
 
-    [<Test>]
+    [<Fact>]
     let ``starting an idle recording should activate its segment`` () =
         use stopSignal = new CancellationTokenSource()
         let active = RecordingState.start (segment stopSignal) Idle |> resultValue
 
         RecordingState.isActive active |> should equal true
 
-    [<Test>]
+    [<Fact>]
     let ``stopping and restarting a recording should preserve legal transitions`` () =
         use stopSignal = new CancellationTokenSource()
         let expectedSegment = segment stopSignal
@@ -34,7 +34,7 @@ module RecordingStateTests =
         RecordingState.isActive stopped |> should equal false
         RecordingState.isActive restarted |> should equal true
 
-    [<Test>]
+    [<Fact>]
     let ``illegal recording transitions should return stable diagnostics`` () =
         use stopSignal = new CancellationTokenSource()
         let active = RecordingState.start (segment stopSignal) Idle |> resultValue
@@ -69,7 +69,7 @@ module RecordingStateTests =
         |> resultError
         |> should equal "The recording has already been finalized."
 
-    [<Test>]
+    [<Fact>]
     let ``disposing an active recording should expose its segment and finalize the state`` () =
         use stopSignal = new CancellationTokenSource()
         let expectedSegment = segment stopSignal

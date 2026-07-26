@@ -1,13 +1,13 @@
 namespace Viset.Tests
 
 open System
-open FsUnit
-open NUnit.Framework
+open FsUnit.Xunit
+open Xunit
 open Viset
 open Viset.Tests.TestSupport
 
 module WebPContainerTests =
-    [<Test>]
+    [<Fact>]
     let ``parsing an animated container should count frames without mutating bytes`` () =
         let webP = animatedWebP ()
         let original = Array.copy webP
@@ -16,19 +16,22 @@ module WebPContainerTests =
         WebPContainerInspection.frameCount container |> should equal 2
         webP |> should equal original
 
-    [<Test>]
+    [<Fact>]
     let ``planning a duration patch should correct only the final frame`` () =
         let webP = animatedWebP ()
         let container = WebPContainerParser.parse webP
 
         let patch =
-            WebPDurationNormalization.plan WebPEncoding.MaximumFrameDurationMilliseconds 40 container
+            WebPDurationNormalization.plan
+                WebPEncoding.MaximumFrameDurationMilliseconds
+                40
+                container
             |> Option.defaultWith (fun () -> failwith "Expected a duration patch.")
 
         patch.Duration |> should equal 30
         int webP[patch.Offset] |> should equal 20
 
-    [<Test>]
+    [<Fact>]
     let ``an invalid RIFF size should return an explicit diagnostic`` () =
         let webP = animatedWebP ()
         writeUInt32LittleEndian webP 4 0u
@@ -36,7 +39,7 @@ module WebPContainerTests =
         (fun () -> WebPContainerParser.parse webP |> ignore)
         |> shouldFailWithMessage "An encoder returned a WebP container with an invalid RIFF size."
 
-    [<Test>]
+    [<Fact>]
     let ``a truncated WebP chunk should return an explicit diagnostic`` () =
         let webP = animatedWebP ()
         writeUInt32LittleEndian webP 16 UInt32.MaxValue
@@ -44,7 +47,7 @@ module WebPContainerTests =
         (fun () -> WebPContainerParser.parse webP |> ignore)
         |> shouldFailWithMessage "An encoder returned a truncated WebP chunk."
 
-    [<Test>]
+    [<Fact>]
     let ``a WebP container without an image should return an explicit diagnostic`` () =
         let webP = webPWithoutImageFrame ()
 
