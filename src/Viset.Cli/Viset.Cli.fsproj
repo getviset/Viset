@@ -53,6 +53,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None
+      Include="../../browser-lock.toml"
+      Link="browser-lock.toml"
+      CopyToPublishDirectory="PreserveNewest"
+    />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Viset.Core\Viset.Core.fsproj" />
     <ProjectReference Include="..\Viset.CaptureScript\Viset.CaptureScript.fsproj" />
     <ProjectReference Include="..\Viset.Browser.Management\Viset.Browser.Management.fsproj" />

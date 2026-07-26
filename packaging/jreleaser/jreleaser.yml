@@ -1,0 +1,194 @@
+hooks:
+  script:
+    before:
+      - filter:
+          includes:
+            - publish
+        run: >-
+          {{basedir}}/packaging/jreleaser/finalize_metadata.sh
+          --version {{projectVersion}}
+          --release-directory {{basedir}}/artifacts/release
+          --metadata-directory {{basedir}}/out/jreleaser/package
+
+project:
+  name: viset
+  description: Reproducible browser screenshots and animations as code
+  longDescription: Viset captures browser screenshots and animations from trusted Lua scripts.
+  authors:
+    - Viset contributors
+  license: MIT
+  inceptionYear: "2026"
+  links:
+    homepage: https://github.com/getviset/Viset
+    documentation: https://github.com/getviset/Viset/blob/v{{projectVersion}}/README.md
+    license: https://github.com/getviset/Viset/blob/v{{projectVersion}}/LICENSE
+    bugTracker: https://github.com/getviset/Viset/issues
+  tags:
+    - browser
+    - screenshots
+    - cli
+  stereotype: CLI
+
+release:
+  github:
+    owner: getviset
+    name: Viset
+    tagName: v{{projectVersion}}
+    overwrite: false
+    skipRelease: true
+
+checksum:
+  artifacts: true
+  files: false
+  individual: false
+
+assemble:
+  archive:
+    viset-tar:
+      active: ALWAYS
+      exported: false
+      distributionType: BINARY
+      attachPlatform: false
+      archiveName: viset-v{{projectVersion}}-{{matrix.rid}}
+      formats:
+        - TAR_GZ
+      applyDefaultMatrix: false
+      matrix:
+        rows:
+          - rid: linux-x64
+            os: linux
+            arch: x86_64
+          - rid: linux-arm64
+            os: linux
+            arch: aarch_64
+      options:
+        timestamp: 2026-01-01T00:00:00Z
+      fileSets:
+        - input: artifacts/publish/{{matrix.rid}}
+          output: bin
+        - input: .
+          output: .
+          includes:
+            - LICENSE
+    viset-zip:
+      active: ALWAYS
+      exported: false
+      distributionType: BINARY
+      attachPlatform: false
+      archiveName: viset-v{{projectVersion}}-{{matrix.rid}}
+      formats:
+        - ZIP
+      applyDefaultMatrix: false
+      matrix:
+        rows:
+          - rid: osx-arm64
+            os: osx
+            arch: aarch_64
+          - rid: win-x64
+            os: windows
+            arch: x86_64
+          - rid: win-arm64
+            os: windows
+            arch: aarch_64
+      options:
+        timestamp: 2026-01-01T00:00:00Z
+      fileSets:
+        - input: artifacts/publish/{{matrix.rid}}
+          output: bin
+        - input: .
+          output: .
+          includes:
+            - LICENSE
+
+distributions:
+  viset:
+    type: BINARY
+    stereotype: CLI
+    executable:
+      name: viset
+      windowsExtension: exe
+    extraProperties:
+      skipJava: "true"
+    artifacts:
+      - path: out/jreleaser/assemble/viset-tar/archive/viset-v{{projectVersion}}-linux-x64.tar.gz
+        platform: linux-x86_64
+        extraProperties:
+          skipBrew: "true"
+          skipScoop: "true"
+          skipChocolatey: "true"
+          skipWinget: "true"
+      - path: out/jreleaser/assemble/viset-tar/archive/viset-v{{projectVersion}}-linux-arm64.tar.gz
+        platform: linux-aarch_64
+        extraProperties:
+          skipBrew: "true"
+          skipScoop: "true"
+          skipChocolatey: "true"
+          skipWinget: "true"
+      - path: out/jreleaser/assemble/viset-zip/archive/viset-v{{projectVersion}}-osx-arm64.zip
+        platform: osx-aarch_64
+        extraProperties:
+          skipScoop: "true"
+          skipChocolatey: "true"
+          skipWinget: "true"
+      - path: out/jreleaser/assemble/viset-zip/archive/viset-v{{projectVersion}}-win-x64.zip
+        platform: windows-x86_64
+        extraProperties:
+          skipBrew: "true"
+      - path: out/jreleaser/assemble/viset-zip/archive/viset-v{{projectVersion}}-win-arm64.zip
+        platform: windows-aarch_64
+        extraProperties:
+          skipBrew: "true"
+          skipScoop: "true"
+          skipChocolatey: "true"
+          skipWinget: "true"
+
+packagers:
+  brew:
+    active: ALWAYS
+    downloadUrl: https://github.com/getviset/Viset/releases/download/v{{projectVersion}}/{{artifactFile}}
+    formulaName: viset
+    repository:
+      owner: alsi-lawr
+      name: homebrew-tap
+  scoop:
+    active: ALWAYS
+    downloadUrl: https://github.com/getviset/Viset/releases/download/v{{projectVersion}}/{{artifactFile}}
+    packageName: viset
+    templateDirectory: packaging/jreleaser/templates/scoop
+    repository:
+      owner: alsi-lawr
+      name: scoop-bucket
+  chocolatey:
+    active: ALWAYS
+    skipPublishing: true
+    downloadUrl: https://github.com/getviset/Viset/releases/download/v{{projectVersion}}/{{artifactFile}}
+    remoteBuild: true
+    packageName: viset
+    title: Viset
+    iconUrl: https://cdn.jsdelivr.net/gh/getviset/Viset@v{{projectVersion}}/docs/assets/viset-social.png
+    repository:
+      owner: getviset
+      name: Viset
+  winget:
+    active: ALWAYS
+    repository:
+      owner: alsi-lawr
+      name: winget-pkgs
+      branch: master
+      branchPush: winget-viset-v{{projectVersion}}
+    downloadUrl: https://github.com/getviset/Viset/releases/download/v{{projectVersion}}/{{artifactFile}}
+    templateDirectory: packaging/jreleaser/templates/winget
+    author: Viset contributors
+    moniker: viset
+    package:
+      identifier: alsi-lawr.Viset
+      name: Viset
+      version: "{{projectVersion}}"
+      url: https://github.com/getviset/Viset
+    publisher:
+      name: alsi-lawr
+      url: https://github.com/alsi-lawr
+      supportUrl: https://github.com/getviset/Viset/issues
+    installer:
+      type: ZIP
+      command: viset

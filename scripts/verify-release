@@ -1,0 +1,262 @@
+#!/usr/bin/env python3
+"""Run Viset's repeatable pull-request and release-review checks as one gate."""
+
+from __future__ import annotations
+
+import argparse
+from collections.abc import Sequence
+import platform
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+SOLUTION = "Viset.slnx"
+CLI_PROJECT = "src/Viset.Cli/Viset.Cli.fsproj"
+VERSION = "0.1.0"
+
+
+class GateFailure(RuntimeError):
+    pass
+
+
+def command_text(command: Sequence[str]) -> str:
+    return " ".join(subprocess.list2cmdline([part]) for part in command)
+
+
+def run(command: Sequence[str], *, capture: bool = False) -> subprocess.CompletedProcess[str]:
+    print(f"\n$ {command_text(command)}", flush=True)
+    result = subprocess.run(
+        command,
+        cwd=ROOT,
+        check=False,
+        text=True,
+        stdout=subprocess.PIPE if capture else None,
+        stderr=subprocess.STDOUT if capture else None,
+    )
+    if capture and result.stdout:
+        print(result.stdout, end="" if result.stdout.endswith("\n") else "\n")
+    if result.returncode != 0:
+        raise GateFailure(f"command failed with exit code {result.returncode}: {command_text(command)}")
+    return result
+
+
+def git_value(*arguments: str) -> str:
+    return run(["git", *arguments], capture=True).stdout.strip()
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run clean-tree, format, build, MTP, Native AOT, and Nix checks."
+    )
+    parser.add_argument(
+        "--allow-dirty",
+        action="store_true",
+        help="Allow tracked or untracked changes while developing the gate.",
+    )
+    parser.add_argument(
+        "--no-restore",
+        action="store_true",
+        help="Skip solution and local-tool restore.",
+    )
+    parser.add_argument(
+        "--base-ref",
+        help="Git ref used for committed diff checking (default: HEAD^).",
+    )
+    parser.add_argument("--expected-head", help="Require HEAD to equal this commit.")
+    parser.add_argument("--expected-parent", help="Require HEAD^ to equal this commit.")
+    return parser.parse_args()
+
+
+def check_git(args: argparse.Namespace) -> tuple[str, str, str]:
+    status = git_value("status", "--porcelain=v1", "--untracked-files=all")
+    if status and not args.allow_dirty:
+        raise GateFailure(f"working tree is not clean:\n{status}")
+
+    head = git_value("rev-parse", "HEAD")
+    parent = git_value("rev-parse", "HEAD^")
+    base = git_value("rev-parse", args.base_ref or "HEAD^")
+    if args.expected_head and head != git_value("rev-parse", args.expected_head):
+        raise GateFailure(f"HEAD does not equal {args.expected_head}")
+    if args.expected_parent and parent != git_value("rev-parse", args.expected_parent):
+        raise GateFailure(f"HEAD^ does not equal {args.expected_parent}")
+    run(["git", "diff", "--check", base, head])
+    if args.allow_dirty:
+        run(["git", "diff", "--check"])
+        run(["git", "diff", "--cached", "--check"])
+
+    print(f"HEAD:   {head}")
+    print(f"Parent: {parent}")
+    print(f"Base:   {base}")
+    return head, parent, base
+
+
+def native_rid() -> str:
+    machine = platform.machine().casefold()
+    if sys.platform.startswith("linux") and machine in {"amd64", "x86_64"}:
+        return "linux-x64"
+    if sys.platform.startswith("linux") and machine in {"aarch64", "arm64"}:
+        return "linux-arm64"
+    if sys.platform == "darwin" and machine in {"aarch64", "arm64"}:
+        return "osx-arm64"
+    raise GateFailure(f"the release gate does not support {sys.platform}/{machine}")
+
+
+def nix_system() -> str:
+    return run(
+        ["nix", "eval", "--impure", "--raw", "--expr", "builtins.currentSystem"],
+        capture=True,
+    ).stdout.strip()
+
+
+def check_native_publish(head: str) -> None:
+    rid = native_rid()
+    executable_name = "viset.exe" if rid.startswith("win-") else "viset"
+    with tempfile.TemporaryDirectory(prefix="viset-release-gate-") as temporary:
+        directory = Path(temporary)
+        publish_directory = directory / "publish"
+        publish_log = directory / "publish.log"
+        command = [
+            "dotnet",
+            "publish",
+            CLI_PROJECT,
+            "--configuration",
+            "Release",
+            "--runtime",
+            rid,
+            "--self-contained",
+            "true",
+            "--output",
+            str(publish_directory),
+            "--no-restore",
+            f"-p:Version={VERSION}",
+            f"-p:SourceRevisionId={head}",
+            "-p:DebugSymbols=false",
+            "-p:DebugType=None",
+            "-p:PublishSingleFile=false",
+        ]
+        print(f"\n$ {command_text(command)}", flush=True)
+        with publish_log.open("w", encoding="utf-8", newline="\n") as log:
+            result = subprocess.run(
+                command,
+                cwd=ROOT,
+                check=False,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
+            output = result.stdout or ""
+            print(output, end="" if output.endswith("\n") else "\n")
+            log.write(output)
+        if result.returncode != 0:
+            raise GateFailure(f"Native AOT publish failed with exit code {result.returncode}")
+        run(["python3", ".config/verify-aot-log.py", str(publish_log)])
+        run(
+            [
+                "python3",
+                "packaging/publish/prepare.py",
+                "--rid",
+                rid,
+                "--publish-directory",
+                str(publish_directory),
+            ]
+        )
+        run(
+            [
+                "python3",
+                "packaging/smoke/native_smoke.py",
+                str(publish_directory / executable_name),
+                "--version",
+                VERSION,
+            ]
+        )
+
+
+def check_flake_inventory() -> None:
+    with tempfile.TemporaryDirectory(prefix="viset-flake-inventory-") as temporary:
+        inventory = Path(temporary) / "flake-show.json"
+        print("\n$ nix flake show --json", flush=True)
+        with inventory.open("w", encoding="utf-8", newline="\n") as stream:
+            result = subprocess.run(
+                ["nix", "flake", "show", "--json"],
+                cwd=ROOT,
+                check=False,
+                text=True,
+                stdout=stream,
+            )
+        if result.returncode != 0:
+            raise GateFailure("nix flake show failed")
+        run(
+            [
+                "python3",
+                ".config/verify-flake.py",
+                "--inventory",
+                str(inventory),
+                "--system",
+                nix_system(),
+            ]
+        )
+
+
+def main() -> int:
+    args = parse_args()
+    try:
+        head, parent, base = check_git(args)
+        if not args.no_restore:
+            run(["dotnet", "restore", SOLUTION, "--locked-mode"])
+            run(["dotnet", "tool", "restore"])
+        run(["dotnet", "fantomas", "--check", "src", "tests", "benchmarks"])
+        run(["dotnet", "csharpier", "check", "src/Viset.Serialization"])
+        run(["nix", "fmt", "--", "--check", "flake.nix"])
+        run(["python3", ".config/verify-documentation.py"])
+        run(
+            [
+                "dotnet",
+                "build",
+                SOLUTION,
+                "--configuration",
+                "Release",
+                "--no-restore",
+                "-warnaserror",
+            ]
+        )
+        run(
+            [
+                "dotnet",
+                "test",
+                "tests/Viset.Tests/Viset.Tests.fsproj",
+                "--configuration",
+                "Release",
+                "--no-build",
+                "--no-restore",
+            ]
+        )
+        run(
+            [
+                "dotnet",
+                "test",
+                "tests/Viset.EndToEnd/Viset.EndToEnd.fsproj",
+                "--configuration",
+                "Release",
+                "--no-build",
+                "--no-restore",
+            ]
+        )
+        check_native_publish(head)
+        check_flake_inventory()
+        run(["nix", "flake", "check", "--print-build-logs"])
+    except (GateFailure, OSError, subprocess.SubprocessError, UnicodeError) as error:
+        print(f"\nRELEASE GATE FAILED: {error}", file=sys.stderr)
+        return 1
+
+    print("\nRELEASE GATE PASSED")
+    print(f"HEAD: {head}")
+    print(f"Parent: {parent}")
+    print(f"Diff base: {base}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

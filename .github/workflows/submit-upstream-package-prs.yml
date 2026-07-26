@@ -1,0 +1,30 @@
+name: Submit upstream package PRs
+
+on:
+  workflow_dispatch:
+    inputs:
+      version: { description: Existing non-draft release version in strict X.Y.Z form., required: true, type: string }
+      submit_winget: { description: Submit the prepared WinGet fork branch., required: true, default: true, type: boolean }
+      submit_nixpkgs: { description: Submit the prepared nixpkgs fork branch., required: true, default: true, type: boolean }
+
+permissions: { contents: read }
+
+jobs:
+  submit:
+    uses: alsi-lawr/package-release-workflows/.github/workflows/submit-upstream-prs.yml@main
+    with:
+      version: ${{ inputs.version }}
+      release_name: Viset
+      submit_winget: ${{ inputs.submit_winget }}
+      submit_nixpkgs: ${{ inputs.submit_nixpkgs }}
+      winget_upstream_repo: microsoft/winget-pkgs
+      winget_fork_owner: alsi-lawr
+      winget_fork_repo: winget-pkgs
+      winget_branch_prefix: winget-viset-v
+      nix_upstream_repo: NixOS/nixpkgs
+      nix_fork_owner: alsi-lawr
+      nix_fork_repo: nixpkgs
+      nix_branch_prefix: viset-v
+      nix_package_name: viset
+    secrets:
+      PACKAGE_REPOSITORY_TOKEN: ${{ secrets.PACKAGE_REPOSITORY_TOKEN }}

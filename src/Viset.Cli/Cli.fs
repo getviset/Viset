@@ -2,10 +2,14 @@ namespace Viset
 
 open System
 open System.IO
+open System.Reflection
 
 module Cli =
-    [<Literal>]
-    let version = "0.1.0"
+    let version =
+        match Assembly.GetExecutingAssembly().GetName().Version |> Option.ofObj with
+        | Some assemblyVersion ->
+            $"{assemblyVersion.Major}.{assemblyVersion.Minor}.{assemblyVersion.Build}"
+        | None -> invalidOp "Viset assembly version is unavailable."
 
     let usage =
         String.Join(

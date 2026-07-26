@@ -21,6 +21,19 @@
       forAllSystems = nixpkgs.lib.genAttrs systems;
       mkPkgs = system: import nixpkgs { inherit system; };
       mkDotnetPkgs = system: import dotnet-nixpkgs { inherit system; };
+      packageVersion = builtins.getEnv "PACKAGE_VERSION";
+      visetVersion = builtins.getEnv "VISET_VERSION";
+      releaseVersion =
+        if packageVersion != "" then
+          packageVersion
+        else if visetVersion != "" then
+          visetVersion
+        else
+          "0.1.0";
+      suppliedRevision = builtins.getEnv "REVISION";
+      imageRevision =
+        if suppliedRevision != "" then suppliedRevision else self.rev or self.dirtyRev or "unknown";
+      imageSource = "https://github.com/getviset/Viset";
 
       mkBrowser =
         pkgs:
@@ -64,13 +77,13 @@
           nugetDependencies = map pkgs.dotnetCorePackages.fetchNupkg (
             builtins.filter (
               dependency: !(lib.elem "${dependency.pname}-${dependency.version}" sdkPackageNames)
-            ) (builtins.fromJSON (builtins.readFile ./nix/deps.json))
+            ) (builtins.fromJSON (builtins.readFile ./packaging/nix/deps.json))
           );
         in
         pkgs.buildDotnetModule {
           __structuredAttrs = true;
           pname = "viset";
-          version = "0.1.0";
+          version = releaseVersion;
 
           src = lib.fileset.toSource {
             root = ./.;
@@ -103,7 +116,7 @@
 
           configurePhase = ''
             runHook preConfigure
-            # Nix normalizes NuGet archives; nix/deps.json is the fixed-output build lock.
+            # Nix normalizes NuGet archives; packaging/nix/deps.json is the fixed-output build lock.
             dotnet restore src/Viset.Cli/Viset.Cli.fsproj \
               -p:ContinuousIntegrationBuild=true \
               -p:Deterministic=true \
@@ -115,10 +128,14 @@
           dotnetBuildFlags = [
             "-p:PublishAot=true"
             "-p:PublishTrimmed=true"
+            "-p:SourceRevisionId=${imageRevision}"
+            "-p:Version=${releaseVersion}"
           ];
           dotnetInstallFlags = [
             "-p:PublishAot=true"
             "-p:PublishTrimmed=true"
+            "-p:SourceRevisionId=${imageRevision}"
+            "-p:Version=${releaseVersion}"
           ];
 
           nativeBuildInputs = [ pkgs.clang ];
@@ -154,7 +171,7 @@
           viset = self.packages.${system}.default;
         in
         pkgs.runCommand "viset-cli-check" { } ''
-          test "$(${viset}/bin/viset --version)" = "viset 0.1.0"
+          test "$(${viset}/bin/viset --version)" = "viset ${releaseVersion}"
           ${viset}/bin/viset --help > help.txt
           grep -F "viset capture" help.txt
           test -x "${viset}/lib/viset/viset"
@@ -195,24 +212,31 @@
         in
         pkgs.dockerTools.buildLayeredImage {
           name = "ghcr.io/getviset/viset";
-          tag = "v0.1.0-${architecture}";
+          tag = "${releaseVersion}-${architecture}";
+          inherit architecture;
           contents = [
             viset
             browser.package
             containerBrowser
           ];
-          extraCommands = ''
-            mkdir -p tmp work
-            chmod 1777 tmp
+          fakeRootCommands = ''
+            mkdir -p ./tmp ./work
+            chown 65532:65532 ./tmp ./work
+            chmod 0700 ./tmp ./work
           '';
           config = {
+            User = "65532:65532";
             Entrypoint = [ "${viset}/bin/viset" ];
-            Env = [ "VISET_BROWSER=${containerBrowser}/bin/viset-container-browser" ];
+            Env = [
+              "HOME=/work"
+              "VISET_BROWSER=${containerBrowser}/bin/viset-container-browser"
+            ];
             WorkingDir = "/work";
             Labels = {
-              "org.opencontainers.image.source" = "https://github.com/getviset/Viset";
+              "org.opencontainers.image.source" = imageSource;
               "org.opencontainers.image.title" = "Viset";
-              "org.opencontainers.image.version" = "0.1.0";
+              "org.opencontainers.image.version" = releaseVersion;
+              "org.opencontainers.image.revision" = imageRevision;
             };
           };
         };

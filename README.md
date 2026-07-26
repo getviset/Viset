@@ -3,10 +3,6 @@
   <h1>Viset</h1>
   <p><strong>Write browser screenshots and animations as code for testing and demoing your web apps.</strong></p>
   <p>
-    <a href="https://github.com/getviset/Viset/actions/workflows/nix.yml"><img src="https://github.com/getviset/Viset/actions/workflows/nix.yml/badge.svg?branch=main" alt="Nix build"></a>
-    <a href="https://github.com/getviset/Viset/actions/workflows/portability.yml"><img src="https://github.com/getviset/Viset/actions/workflows/portability.yml/badge.svg?branch=main" alt="Native AOT portability"></a>
-  </p>
-  <p>
     <a href="https://github.com/getviset/Viset/wiki">Documentation</a>
     &nbsp;&middot;&nbsp;
     <a href="examples">Examples</a>
