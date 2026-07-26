@@ -47,12 +47,53 @@ module internal BrowserValidation =
                     )
         }
 
+    let private readWindowsBrowserVersion
+        (executablePath: string)
+        (cancellationToken: CancellationToken)
+        =
+        if cancellationToken.IsCancellationRequested then
+            Error "Browser version validation was cancelled."
+        else
+            try
+                let versionInfo = FileVersionInfo.GetVersionInfo(Path.GetFullPath executablePath)
+
+                if cancellationToken.IsCancellationRequested then
+                    Error "Browser version validation was cancelled."
+                else
+                    let metadata =
+                        String.Concat(
+                            versionInfo.FileVersion,
+                            Environment.NewLine,
+                            versionInfo.ProductVersion
+                        )
+
+                    match tryParseVersionToken metadata with
+                    | Some version -> Ok version
+                    | None ->
+                        Error(
+                            String.Concat(
+                                "Browser executable returned no four-part version from Windows version metadata: ",
+                                executablePath
+                            )
+                        )
+            with error ->
+                Error(
+                    String.Concat(
+                        "Browser executable Windows version metadata could not be read: ",
+                        executablePath,
+                        ": ",
+                        error.Message
+                    )
+                )
+
     let readBrowserVersionAsync (executablePath: string) (cancellationToken: CancellationToken) =
         task {
             if String.IsNullOrWhiteSpace executablePath then
                 return Error "Browser executable path must not be empty."
             elif not (File.Exists executablePath) then
                 return Error(String.Concat("Browser executable does not exist: ", executablePath))
+            elif OperatingSystem.IsWindows() then
+                return readWindowsBrowserVersion executablePath cancellationToken
             else
                 try
                     let startInfo = ProcessStartInfo(Path.GetFullPath executablePath)
