@@ -16,10 +16,13 @@ module internal LuaJavascript =
         let argumentExpression = LuaJavascriptArguments.expression arguments
 
         $"""
-        {evaluateRunner}(
-          ({script}),
-          {argumentExpression}
-        )
+        (async () => {{
+          const evaluate = {evaluateRunner}
+          return await evaluate(
+            ({script}),
+            {argumentExpression}
+          );
+        }})()
         """
 
     let animationExpression (duration: double) (update: string) (easing: string) =
@@ -38,9 +41,12 @@ module internal LuaJavascript =
         let durationText = duration.ToString("R", CultureInfo.InvariantCulture)
 
         $"""
-        {animationRunner}(
-          {durationText},
-          ({update}),
-          ({easingExpression})
-        )
+        (async () => {{
+          const animate = {animationRunner}
+          return await animate(
+            {durationText},
+            ({update}),
+            ({easingExpression})
+          );
+        }})()
         """
